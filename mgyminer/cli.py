@@ -127,6 +127,17 @@ def create_parser():
     )
     residue_checker_parser.set_defaults(func=plot_residue_histogram)
 
+    phylogenetic_tree_parser = subparsers.add_parser(
+        "tree",
+        help="build a phylogenetic tree",
+    )
+    phylogenetic_tree_parser.add_argument(
+        "--input",
+        type=Path,
+        required=True,
+        help="Path to filter output with sequences for tree building",
+    )
+
     return parser
 
 
