@@ -376,3 +376,78 @@ def plot_residue_histogram(args):
             bar += chr(ord("█") + (8 - remainder))
         bar = bar or "▏"
         print(f"{label.rjust(longest_label_length)} ▏ {count:#4d} {bar}")
+
+
+class hmmerResults:
+    """Class to hold HMMER search results"""
+
+    def __init__(self, file=None, df=None):
+        if file is not None:
+            self._resultsFile = file
+            self._read_domTbl()
+
+    def _read_domTbl(self) -> pd.DataFrame:
+        """read the HMMER Dom Table file into a Pandas dataframe"""
+        self.df = pd.read_csv(
+            self._resultsFile,
+            sep=r"\s+",
+            comment="#",
+            index_col=False,
+            names=[
+                "target_name",
+                "target_accession",
+                "tlen",
+                "query_name",
+                "query_accession",
+                "qlen",
+                "e-value",
+                "score",
+                "bias",
+                "ndom",
+                "ndom_of",
+                "c-value",
+                "i-value",
+                "dom_score",
+                "dom_bias",
+                "hmm_from",
+                "hmm_to",
+                "ali_from",
+                "ali_to",
+                "env_from",
+                "env_to",
+                "acc",
+                "PL",
+                "UP",
+                "biome",
+                "LEN",
+                "CR",
+            ],
+            dtype={
+                "target_name": str,
+                "target_accession": str,
+                "tlen": int,
+                "query_name": str,
+                "query_accession": str,
+                "qlen": int,
+                "e-value": float,
+                "score": float,
+                "bias": float,
+                "ndom": int,
+                "ndom_of": int,
+                "c-value": float,
+                "i-value": float,
+                "dom_score": float,
+                "dom_bias": float,
+                "hmm_from": int,
+                "hmm_to": int,
+                "ali_from": int,
+                "ali_to": int,
+                "env_from": int,
+                "env_to": int,
+                "acc": float,
+                "description": str,
+            },
+        )
+        self.df.drop("LEN", axis=1, inplace=True)
+        for column in ["PL", "UP", "biome", "CR"]:
+            self.df[column] = self.df[column].apply(lambda x: x.split("=")[1])
