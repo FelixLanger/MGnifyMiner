@@ -5,6 +5,7 @@ from pathlib import Path
 
 from mgyminer.filter import filter, plot_residue_histogram, residue_filter
 from mgyminer.phmmer import phmmer
+from mgyminer.phyltree import tree
 
 
 def main():
@@ -137,6 +138,28 @@ def create_parser():
         required=True,
         help="Path to filter output with sequences for tree building",
     )
+
+    phylogenetic_tree_parser.add_argument(
+        "--query",
+        type=Path,
+        required=True,
+        help="Path to query seq",
+    )
+
+    phylogenetic_tree_parser.add_argument(
+        "--alignment",
+        type=Path,
+        required=False,
+        help="Path to alignment output if desired",
+    )
+    phylogenetic_tree_parser.add_argument(
+        "--output",
+        type=Path,
+        required=False,
+        help="Path/Filename of output tree",
+    )
+
+    phylogenetic_tree_parser.set_defaults(func=tree)
 
     return parser
 
