@@ -259,7 +259,7 @@ class treebuilder:
         ft.run(self.alignment, self.tree)
 
 
-def tree(args):
+def build_tree(args):
     t = treebuilder(args)
     t.make_alignment()
     t.build_tree()

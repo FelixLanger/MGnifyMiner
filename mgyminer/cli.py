@@ -5,7 +5,8 @@ from pathlib import Path
 
 from mgyminer.filter import filter, plot_residue_histogram, residue_filter
 from mgyminer.phmmer import phmmer
-from mgyminer.phyltree import tree
+from mgyminer.phylplot import plot_tree
+from mgyminer.phyltree import build_tree
 
 
 def main():
@@ -159,7 +160,50 @@ def create_parser():
         help="Path/Filename of output tree",
     )
 
-    phylogenetic_tree_parser.set_defaults(func=tree)
+    phylogenetic_tree_parser.set_defaults(func=build_tree)
+
+    tree_vis_parser = subparsers.add_parser(
+        "tree_vis",
+        help="visualise phylogenetic tree",
+    )
+    tree_vis_parser.add_argument(
+        "--tree",
+        type=Path,
+        required=True,
+        help="Path to filter output with sequences for tree building",
+    )
+    tree_vis_parser.add_argument(
+        "--query",
+        type=str,
+        required=True,
+        help="Path to filter output with sequences for tree building",
+    )
+    tree_vis_parser.add_argument(
+        "--filter",
+        type=Path,
+        required=True,
+        help="Path to filter output with sequences for tree building",
+    )
+    tree_vis_parser.add_argument(
+        "--min",
+        type=int,
+        required=False,
+        help="Path to filter output with sequences for tree building",
+    )
+    tree_vis_parser.add_argument(
+        "--max",
+        type=int,
+        required=False,
+        help="Path to filter output with sequences for tree building",
+    )
+    tree_vis_parser.add_argument(
+        "--param",
+        type=str,
+        required=False,
+        help="Path to filter output with sequences for tree building",
+    )
+
+    tree_vis_parser.set_defaults(func=plot_tree)
 
     return parser
 
