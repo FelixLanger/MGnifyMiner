@@ -167,7 +167,7 @@ def plot_tree(args):
     min = 0 if args.min is None else args.min
     max = math.inf if args.max is None else args.max
 
-    if "param" in dir(args):
+    if args.param is not None:
         # if parameter is specified find proteins that match filter for parameter
         filter_dict = _filter_dict(metadata, args.param)
         of_interest = _in_thresholds(filter_dict, min, max)

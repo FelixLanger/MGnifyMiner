@@ -186,13 +186,13 @@ def create_parser():
     )
     tree_vis_parser.add_argument(
         "--min",
-        type=int,
+        type=float,
         required=False,
         help="Path to filter output with sequences for tree building",
     )
     tree_vis_parser.add_argument(
         "--max",
-        type=int,
+        type=float,
         required=False,
         help="Path to filter output with sequences for tree building",
     )
