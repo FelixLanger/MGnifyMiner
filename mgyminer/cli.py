@@ -98,6 +98,12 @@ def create_parser():
         " 2nd: set the filter to include or exclude the aminoacids. "
         " 3rd and following: Aminoacids in single letter code to filter for",
     )
+    residue_parser.add_argument(
+        "--output",
+        type=Path,
+        metavar="path/to/filter_output.csv",
+        help="Path to the desired output file",
+    )
     residue_parser.set_defaults(func=residue_filter)
 
     residue_checker_parser = subparsers.add_parser(

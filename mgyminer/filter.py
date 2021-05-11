@@ -82,7 +82,10 @@ def residue_filter(args):
         results_table[filter_name] = results_table["target_name"].map(hits)
         results_table.dropna(inplace=True)
 
-    print(results_table.to_string())
+    if args.output:
+        results_table.to_csv(args.output, index=False, sep=",")
+    else:
+        print(results_table.to_string())
 
 
 def overlapping_targets(args, results_table):
