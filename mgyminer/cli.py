@@ -7,6 +7,7 @@ from mgyminer.filter import filter, plot_residue_histogram, residue_filter
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
+from mgyminer.utils import export_sequences
 
 
 def main():
@@ -210,6 +211,24 @@ def create_parser():
     )
 
     tree_vis_parser.set_defaults(func=plot_tree)
+
+    export_parser = subparsers.add_parser(
+        "export",
+        help="export Protein sequences from filter results to FASTA file",
+    )
+    export_parser.add_argument(
+        "--filter",
+        type=Path,
+        required=True,
+        help="Path to filter output of which fasta sequences should be acquired",
+    )
+    export_parser.add_argument(
+        "--output",
+        type=Path,
+        required=True,
+        help="Output location for protein sequences FASTA",
+    )
+    export_parser.set_defaults(func=export_sequences)
 
     return parser
 
