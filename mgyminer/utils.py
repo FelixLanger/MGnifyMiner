@@ -14,5 +14,7 @@ def export_sequences(args):
     fetcher = esl_sfetcher()
     results = pd.read_csv(args.filter)
     with tempfile.NamedTemporaryFile() as temp:
-        results["target_name"].to_csv(temp.name, index=False, header=False)
+        results["target_name"].drop_duplicates().to_csv(
+            temp.name, index=False, header=False
+        )
         fetcher.run("testSeqDB.fa", temp.name, args.output, args=["-f"])
