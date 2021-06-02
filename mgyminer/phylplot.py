@@ -144,7 +144,7 @@ def _in_thresholds(paramdict, threshold_min=0, threshold_max=math.inf):
 
 
 def _filter_dict(metadata, parameter):
-    """ Efficient way to make a dict from two dataframe columns https://stackoverflow.com/questions/17426292/"""
+    """Efficient way to make a dict from two dataframe columns https://stackoverflow.com/questions/17426292/"""
     return pd.Series(list(metadata[parameter]), index=metadata["dom_acc"]).to_dict()
 
 
@@ -162,7 +162,7 @@ def plot_tree(args):
     metadata["dom_acc"] = metadata.apply(lambda row: _idpluscoords(row), axis=1)
     # TODO find way to get the name of the query sequence not from arguments but somewhere else to reduce number
     #  of flags
-    query = args.query
+    query = metadata["query_name"][0]
 
     min = 0 if args.min is None else args.min
     max = math.inf if args.max is None else args.max

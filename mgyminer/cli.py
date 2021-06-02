@@ -178,12 +178,6 @@ def create_parser():
         help="Path to filter output with sequences for tree building",
     )
     tree_vis_parser.add_argument(
-        "--query",
-        type=str,
-        required=True,
-        help="Path to filter output with sequences for tree building",
-    )
-    tree_vis_parser.add_argument(
         "--filter",
         type=Path,
         required=True,
