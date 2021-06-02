@@ -4,7 +4,10 @@ import re
 from collections import Counter
 from pathlib import Path
 
+import mysql.connector
+import numpy as np
 import pandas as pd
+import yaml
 
 
 def filter(args):
@@ -483,3 +486,76 @@ class hmmerResults:
 
     def save(self, outfile, sep=";", index=False, **kwargs):
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
+
+
+def domain_filter(args):
+    hits = pd.read_csv(args.input)
+    if args.strict:
+        matches = strict_select(args.arch)
+    else:
+        matches = loose_select(args.arch)
+    results = pd.merge(matches, hits, left_on="MGYP", right_on="target_name")
+    results = results[
+        [column for column in results if column not in ["Pfams", "domain_names"]]
+        + ["Pfams", "domain_names"]
+    ]
+    del results["MGYP"]
+    if args.output:
+        results.to_csv(args.output, index=False, sep=",")
+    else:
+        print(results.to_string())
+
+
+def connect_database():
+    config_root = Path(__file__).parents[1]
+    with open(config_root / "config.yaml") as configfile:
+        cfg = yaml.load(configfile, Loader=yaml.CLoader)
+    proteindb = mysql.connector.connect(**cfg["mysql"])
+    return proteindb
+
+
+def strict_select(pfams):
+    config_root = Path(__file__).parents[1]
+    with open(config_root / "config.yaml") as configfile:
+        cfg = yaml.load(configfile, Loader=yaml.CLoader)
+    proteindb = mysql.connector.connect(**cfg["mysql"])
+    cursor = proteindb.cursor()
+    conditions = f"pfams LIKE '%{pfams[0]}%'"
+    for pfam in pfams[1:]:
+        conditions += f" AND pfams LIKE '%{pfam}%'"
+    statement = (
+        f"SELECT pa.id, ar.pfams, ar.names FROM architecture ar LEFT JOIN protein_arch pa ON"
+        f" ar.id = pa.arch_id WHERE {conditions}"
+    )
+    cursor.execute(statement)
+    hits = pd.DataFrame(cursor.fetchall(), columns=["MGYP", "Pfams", "domain_names"])
+    hits = hits.dropna()
+    hits["MGYP"] = hits["MGYP"].astype(np.int64)
+    if hits.empty:
+        return hits
+    hits["MGYP"] = hits["MGYP"].astype(int).apply(lambda x: f"MGYP{x:012d}")
+    cursor.close()
+    return hits
+
+
+def loose_select(pfams):
+    config_root = Path(__file__).parents[1]
+    with open(config_root / "config.yaml") as configfile:
+        cfg = yaml.load(configfile, Loader=yaml.CLoader)
+    proteindb = mysql.connector.connect(**cfg["mysql"])
+    cursor = proteindb.cursor()
+    regex = "|".join(pfams)
+    statement = (
+        f"SELECT pa.id, ar.pfams, ar.names FROM architecture ar LEFT JOIN protein_arch pa ON"
+        f" ar.id = pa.arch_id WHERE pfams REGEXP '{regex}'"
+    )
+    cursor.execute(statement)
+    hits = pd.DataFrame(cursor.fetchall(), columns=["MGYP", "Pfams", "domain_names"])
+    hits = hits.dropna()
+    hits["MGYP"] = hits["MGYP"].astype(np.int64)
+    cursor.close()
+    if hits.empty:
+        return hits
+    else:
+        hits["MGYP"] = hits["MGYP"].astype(int).apply(lambda x: f"MGYP{x:012d}")
+        return hits

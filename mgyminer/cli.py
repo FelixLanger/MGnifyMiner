@@ -3,11 +3,17 @@
 import argparse
 from pathlib import Path
 
-from mgyminer.filter import filter, plot_residue_histogram, residue_filter
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
 from mgyminer.utils import export_sequences
+
+from mgyminer.filter import (  # isort:skip
+    domain_filter,
+    filter,
+    plot_residue_histogram,
+    residue_filter,
+)
 
 
 def main():
@@ -137,8 +143,7 @@ def create_parser():
     residue_checker_parser.set_defaults(func=plot_residue_histogram)
 
     phylogenetic_tree_parser = subparsers.add_parser(
-        "tree",
-        help="build a phylogenetic tree",
+        "tree", help="build a phylogenetic tree"
     )
     phylogenetic_tree_parser.add_argument(
         "--input",
@@ -148,10 +153,7 @@ def create_parser():
     )
 
     phylogenetic_tree_parser.add_argument(
-        "--query",
-        type=Path,
-        required=True,
-        help="Path to query seq",
+        "--query", type=Path, required=True, help="Path to query seq"
     )
 
     phylogenetic_tree_parser.add_argument(
@@ -161,17 +163,13 @@ def create_parser():
         help="Path to alignment output if desired",
     )
     phylogenetic_tree_parser.add_argument(
-        "--output",
-        type=Path,
-        required=False,
-        help="Path/Filename of output tree",
+        "--output", type=Path, required=False, help="Path/Filename of output tree"
     )
 
     phylogenetic_tree_parser.set_defaults(func=build_tree)
 
     tree_vis_parser = subparsers.add_parser(
-        "tree_vis",
-        help="visualise phylogenetic tree",
+        "tree_vis", help="visualise phylogenetic tree"
     )
     tree_vis_parser.add_argument(
         "--tree",
@@ -213,8 +211,7 @@ def create_parser():
     tree_vis_parser.set_defaults(func=plot_tree)
 
     export_parser = subparsers.add_parser(
-        "export",
-        help="export Protein sequences from filter results to FASTA file",
+        "export", help="export Protein sequences from filter results to FASTA file"
     )
     export_parser.add_argument(
         "--filter",
@@ -229,6 +226,35 @@ def create_parser():
         help="Output location for protein sequences FASTA",
     )
     export_parser.set_defaults(func=export_sequences)
+
+    domain_parser = subparsers.add_parser(
+        "domain", help="filter target proteins by PFAM domains"
+    )
+    domain_parser.add_argument(
+        "--input",
+        type=Path,
+        required=True,
+        metavar="path/to/filter_output.csv",
+        help="Path to sequence search output file",
+    )
+    domain_parser.add_argument(
+        "--arch", "-a", nargs="+", help="Pfams that should be filtered for"
+    )
+    domain_parser.add_argument(
+        "--strict",
+        "-s",
+        default=False,
+        action="store_true",
+        help="If strict is set all Pfam domains need to be present, else any of the given domains need to be present",
+    )
+    domain_parser.add_argument(
+        "--output",
+        type=Path,
+        metavar="path/to/filter_output.csv",
+        help="Path to the desired output file",
+    )
+
+    domain_parser.set_defaults(func=domain_filter)
 
     return parser
 
