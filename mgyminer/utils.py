@@ -1,4 +1,5 @@
 import tempfile
+from typing import Union
 
 import pandas as pd
 
@@ -18,3 +19,25 @@ def export_sequences(args):
             temp.name, index=False, header=False
         )
         fetcher.run("testSeqDB.fa", temp.name, args.output, args=["-f"])
+
+
+def mgyp_to_id(mgyp: Union[str, int]) -> str:
+    """
+    Strip MGYP beginning and leading zeroes from a MGYP accession
+
+    :param mgyps: Standard MGnify MGYP protein accession
+    :return: Plain protein ID without leading MGYP and zeroes
+    """
+    return mgyp.lstrip("MGYP0")
+
+
+def proteinID_to_mgyp(id: str) -> str:
+    """
+    Convert a protein ID into MGnigy protein accession
+
+    :param id: numeric protein ID
+    :return: MGnify MGYP accession
+    """
+    if isinstance(id, str):
+        id = int(id)
+    return "MGYP%012d" % int(id)
