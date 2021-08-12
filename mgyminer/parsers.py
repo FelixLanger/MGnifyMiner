@@ -2,6 +2,10 @@ import re
 from pathlib import Path
 from typing import Tuple, Union
 
+import numpy as np
+import pandas as pd
+from pandas import DataFrame
+
 
 def extract_alignments(hmmer_out: Union[Path, str]) -> dict:
     """
@@ -107,3 +111,96 @@ def decomment(rows):
         if row.startswith("#"):
             continue
         yield row
+
+
+def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
+    """
+    Parse HMMER domain Table to pandas DataFrame
+    :param domtable: Path to domain table file
+    :return: domain table pandas DataFrame
+    """
+    proteinTable = pd.read_csv(
+        domtable,
+        sep=r"\s+",
+        comment="#",
+        index_col=False,
+        names=[
+            "target_name",
+            "target_accession",
+            "tlen",
+            "query_name",
+            "query_accession",
+            "qlen",
+            "e-value",
+            "score",
+            "bias",
+            "ndom",
+            "ndom_of",
+            "c-value",
+            "i-value",
+            "dom_score",
+            "dom_bias",
+            "hmm_from",
+            "hmm_to",
+            "ali_from",
+            "ali_to",
+            "env_from",
+            "env_to",
+            "acc",
+            "PL",
+            "UP",
+            "biome",
+            "LEN",
+            "CR",
+        ],
+        dtype={
+            "target_name": str,
+            "target_accession": str,
+            "tlen": int,
+            "query_name": str,
+            "query_accession": str,
+            "qlen": int,
+            "e-value": np.object_,
+            "score": np.object_,
+            "bias": np.object_,
+            "ndom": int,
+            "ndom_of": int,
+            "c-value": np.object_,
+            "i-value": np.object_,
+            "dom_score": np.object_,
+            "dom_bias": np.object_,
+            "hmm_from": int,
+            "hmm_to": int,
+            "ali_from": int,
+            "ali_to": int,
+            "env_from": int,
+            "env_to": int,
+            "acc": np.object_,
+            "UP": str,
+            "biome": str,
+            "LEN": str,
+            "CR": str,
+        },
+    )
+
+    # Split description field
+    proteinTable.drop("LEN", axis=1, inplace=True)
+    for column in ["PL", "UP", "biome", "CR"]:
+        proteinTable[column] = proteinTable[column].apply(lambda x: x.split("=")[1])
+
+    # Calculate coverages
+    proteinTable["coverage_hit"] = round(
+        (proteinTable["ali_to"] - proteinTable["ali_from"])
+        / proteinTable["tlen"]
+        * 100,
+        2,
+    )
+
+    proteinTable["coverage_query"] = round(
+        (proteinTable["ali_to"] - proteinTable["ali_from"])
+        / proteinTable["qlen"]
+        * 100,
+        2,
+    )
+
+    return proteinTable
