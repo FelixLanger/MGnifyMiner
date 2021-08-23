@@ -36,7 +36,9 @@ def extract_alignments(hmmer_out: Union[Path, str]) -> dict:
     return alignments_dict
 
 
-def calculate_identity_similarity(consensus, round_to=1) -> Tuple[float, float]:
+def calculate_identity_similarity(
+    consensus: str, round_to: int = 1
+) -> Tuple[float, float]:
     """
     Calculate sequence similarity and identity values from a hmmer alignment consensus string
     :param consensus: hmmer consensus sequence
@@ -54,7 +56,7 @@ def calculate_identity_similarity(consensus, round_to=1) -> Tuple[float, float]:
     return percent_identity, percent_similarity
 
 
-def _start_end_coordinates(alignment) -> Tuple[int, int]:
+def _start_end_coordinates(alignment: str) -> Tuple[int, int]:
     """
     Extract the start and end coordinates of the third hmmer alignment string.
     The alignment string needs to be the target section of the alignment with MGYP ID.
@@ -63,7 +65,7 @@ def _start_end_coordinates(alignment) -> Tuple[int, int]:
     :return: (start, end) coordinates of alignment string
     """
     start_pattern = re.compile(r"\s*MGYP\d*\s+\d+\s{1}")
-    end_pattern = re.compile(r"\s\d+$")
+    end_pattern = re.compile(r"\s\d+\s*$")
     alignment_start = start_pattern.match(alignment).end()
     alignment_end = end_pattern.search(alignment).start()
     return alignment_start, alignment_end
