@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Union
 
@@ -20,7 +21,7 @@ class proteinTable:
         return self._df
 
     @df.setter
-    def df(self, results: Union[DataFrame, str, Path]) -> DataFrame:
+    def df(self, results: Union[DataFrame, str, Path]) -> None:
         """read the HMMER Domain Table file into a Pandas dataframe"""
         if isinstance(results, str):
             results = Path(results)
@@ -96,6 +97,23 @@ class proteinTable:
         addins = {"eval": "score", "e-value": "score", "evalue": "score"}
         mapping = {**mapping, **addins}
         return list(map(mapping.get, names))
+
+    def filter(self, by, value):
+        span = re.match(r"(\d+)-(\d+)", value)
+        thresh = re.match(r"(\d+)-(\d+)", value)
+        if thresh:
+            mod, v = thresh.groups()
+            if mod == "<":
+                self.df = self.df[self.df["e-value"] <= int(v)]
+            elif mod == ">":
+                self.df = self.df[self.df["e-value"] >= int(v)]
+
+        elif span:
+            x, y = span.groups()
+            self.df = self.df[self.df[by].between(int(x), int(y))]
+
+        else:
+            self.df = self.df[self.df["e-value"] <= int(value)]
 
     def save(self, outfile, sep=",", index=False, **kwargs):
         """
