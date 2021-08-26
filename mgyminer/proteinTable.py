@@ -14,26 +14,20 @@ class proteinTable:
     """
 
     def __init__(self, results: Union[Path, str]):
-        self.df = results
+        self.df = self._valid_dataframe(results)
+        self._set_columntypes()
 
-    @property
-    def df(self):
-        return self._df
+    def _valid_dataframe(self, data):
+        if isinstance(data, str):
+            data = Path(data)
 
-    @df.setter
-    def df(self, results: Union[DataFrame, str, Path]) -> None:
-        """read the HMMER Domain Table file into a Pandas dataframe"""
-        if isinstance(results, str):
-            results = Path(results)
-
-        if isinstance(results, DataFrame):
-            self._df = results
-        elif isinstance(results, Path):
-            self._df = pd.read_csv(results)
+        if isinstance(data, DataFrame):
+            return data
+        elif isinstance(data, Path):
+            return pd.read_csv(data)
         else:
             # TODO Think about if empty protein tables are allowed
             raise NotImplementedError
-        self._set_columntypes()
 
     def _set_columntypes(self):
         self.df.astype(
@@ -100,20 +94,20 @@ class proteinTable:
 
     def filter(self, by, value):
         span = re.match(r"(\d+)-(\d+)", value)
-        thresh = re.match(r"(\d+)-(\d+)", value)
+        thresh = re.match(r"([><])(\d+)", value)
         if thresh:
             mod, v = thresh.groups()
             if mod == "<":
-                self.df = self.df[self.df["e-value"] <= int(v)]
+                self.df = self.df[self.df[by] <= int(v)]
             elif mod == ">":
-                self.df = self.df[self.df["e-value"] >= int(v)]
+                self.df = self.df[self.df[by] >= int(v)]
 
         elif span:
             x, y = span.groups()
             self.df = self.df[self.df[by].between(int(x), int(y))]
 
         else:
-            self.df = self.df[self.df["e-value"] <= int(value)]
+            self.df = self.df[self.df[by] <= int(value)]
 
     def save(self, outfile, sep=",", index=False, **kwargs):
         """
@@ -125,3 +119,8 @@ class proteinTable:
         :return:
         """
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
+
+
+pt = proteinTable("../playground/testfiles/phmmer_out.txt")
+pt.filter("score", "<700")
+print("asdf")
