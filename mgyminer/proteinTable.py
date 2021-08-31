@@ -14,20 +14,18 @@ class proteinTable:
     """
 
     def __init__(self, results: Union[Path, str]):
-        self.df = self._valid_dataframe(results)
-        self._set_columntypes()
+        if isinstance(results, str):
+            results = Path(results)
 
-    def _valid_dataframe(self, data):
-        if isinstance(data, str):
-            data = Path(data)
-
-        if isinstance(data, DataFrame):
-            return data
-        elif isinstance(data, Path):
-            return pd.read_csv(data)
+        if isinstance(results, DataFrame):
+            self.df = results
+        elif isinstance(results, Path):
+            self.df = pd.read_csv(results)
         else:
-            # TODO Think about if empty protein tables are allowed
-            raise NotImplementedError
+            raise TypeError(
+                "proteinTable must be initialised with DataFrame or path to csv"
+            )
+        self._set_columntypes()
 
     def _set_columntypes(self):
         self.df.astype(
@@ -77,7 +75,7 @@ class proteinTable:
         by.extend(["target_name", "ndom"])
         # Set orientation according to setting, but always sort ndom ascending to keep domain order
         orientation = [ascending if _ != "ndom" else True for _ in by]
-        self.df = self.df.sort_values(by=by, ascending=orientation)
+        return proteinTable(self.df.sort_values(by=by, ascending=orientation))
 
     def _to_columnNames(self, names: Union[str, list]) -> list:
         """
@@ -93,21 +91,28 @@ class proteinTable:
         return list(map(mapping.get, names))
 
     def filter(self, by, value):
+        """
+        Filter proteinTable by any column value
+        :param by: column name
+        :param value: value to filter for (threshold with <,> or range with x-y)
+        :return: filtered Dataframe
+        """
         span = re.match(r"(\d+)-(\d+)", value)
         thresh = re.match(r"([><])(\d+)", value)
         if thresh:
             mod, v = thresh.groups()
             if mod == "<":
-                self.df = self.df[self.df[by] <= int(v)]
+                filtered = self.df[self.df["e-value"] <= int(v)]
             elif mod == ">":
-                self.df = self.df[self.df[by] >= int(v)]
+                filtered = self.df[self.df["e-value"] >= int(v)]
 
         elif span:
             x, y = span.groups()
-            self.df = self.df[self.df[by].between(int(x), int(y))]
+            filtered = self.df[self.df[by].between(int(x), int(y))]
 
         else:
-            self.df = self.df[self.df[by] <= int(value)]
+            filtered = self.df[self.df["e-value"] <= int(value)]
+        return proteinTable(filtered)
 
     def save(self, outfile, sep=",", index=False, **kwargs):
         """
@@ -119,8 +124,3 @@ class proteinTable:
         :return:
         """
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
-
-
-pt = proteinTable("../playground/testfiles/phmmer_out.txt")
-pt.filter("score", "<700")
-print("asdf")
