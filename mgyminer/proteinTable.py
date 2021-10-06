@@ -80,7 +80,7 @@ class proteinTable:
 
         elif span:
             x, y = span.groups()
-            return self.df[self.df[by].between(np.float(x), np.float(y))]
+            return proteinTable(self.df[self.df[by].between(np.float(x), np.float(y))])
 
         else:
             return proteinTable(self.df[self.df["e-value"] <= np.float(value)])
