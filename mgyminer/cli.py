@@ -54,25 +54,21 @@ def create_parser():
         help="Path to sequence search output file",
     )
     filter_parser.add_argument(
-        "--coverage",
+        "--feature",
         type=str,
         required=False,
-        metavar="[0-100]",
-        help="Filter results by coverage of query sequence. "
-        "Threshold range (0-100) percent coverage of query sequence",
+        metavar="",
+        nargs=2,
+        help="Filter by any feature e.g. e-value, coverage similarity,..\n"
+        "Ranges can be defined like: 1-100\n"
+        "Cutoffs can be defined like: <0.5 or >1e-15",
     )
-    filter_parser.add_argument(
-        "--eval",
-        type=float,
-        required=False,
-        metavar="0.001",
-        help="Filter by e-value. Threshold for highest e-value displayed",
-    )
+
     filter_parser.add_argument(
         "--sort",
         required=False,
         nargs="+",
-        metavar="eval, coverage, similarity, identity",
+        metavar="e-value, coverage_hit,coverage_query, similarity, identity",
         help="Sort the output by one or multiple columns.",
     )
     filter_parser.add_argument(

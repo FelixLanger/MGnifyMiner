@@ -9,66 +9,30 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from mgyminer.proteinTable import proteinTable
+
 
 def filter(args):
-    # manage arguments
-    hmmer_output_file = args.input
-    results_basepath = hmmer_output_file.parents[0]
-    dom_tbl_file = results_basepath / "dom_tbl.txt"
-    # tbl_file = results_basepath / "tbl.txt"
-    alignments = results_basepath / "alignments.json"
+    pt = proteinTable(args.input)
 
-    # get table
-    dom_tbl = parse_domtable(dom_tbl_file)
-    calculate_coverage(dom_tbl)
-    if alignments.is_file():
-        with open(alignments, "r") as fin:
-            aligmnent_dict = json.load(fin)
-
-    else:
-        aligmnent_dict = get_alignment_consensus(hmmer_output_file)
-        with open(alignments, "w") as fout:
-            json.dump(aligmnent_dict, fout)
-    add_sim_ident(dom_tbl, aligmnent_dict)
-
-    if args.eval:
-        dom_tbl = dom_tbl[dom_tbl["e-value"] <= args.eval]
-
-    if args.coverage:
-        coverage_range = _extract_range(args.coverage)
-        dom_tbl = dom_tbl[
-            dom_tbl["coverage_query"].between(coverage_range[0], coverage_range[1])
-        ]
+    if args.feature:
+        by, value = args.feature
+        pt = pt.filter(by, value)
 
     if args.sort:
-        map = {
-            "eval": "score",
-            "coverage": "coverage_query",
-            "similarity": "similarity",
-            "identity": "identity",
-        }
-        if all(filters in map.keys() for filters in args.sort):
-            columns = [map[v] for v in args.sort]
-            columns.extend(
-                ["target_name", "ndom"]
-            )  # additionally sort by name and ndom to keep entries from one
-            orientation = [
-                False for column in columns
-            ]  # protein together, ndom sort needs to be ascending to keep
-            orientation[-1] = True  # domain order
-            dom_tbl = dom_tbl.sort_values(by=columns, ascending=orientation)
+        pt = pt.sort(args.sort)
 
     if args.output:
-        dom_tbl.to_csv(args.output, index=False, sep=",")
+        pt.save(args.output)
     else:
-        print(dom_tbl.to_string())
+        print(pt.df.to_string())
 
 
 def residue_filter(args):
     # get input files
     results_file = args.input
     results_basepath = results_file.parents[0]
-    alignments = results_basepath / "alignments.json"
+    alignments = results_basepath / "alignment.json"
 
     # read input files
     results_table = pd.read_csv(results_file)
@@ -344,7 +308,7 @@ def add_sim_ident(df, alignment_dict):
 def plot_residue_histogram(args):
     results_file = args.input
     results_basepath = results_file.parents[0]
-    alignments = results_basepath / "alignments.json"
+    alignments = results_basepath / "alignment.json"
     residue = int(args.residue)
     plotwidth = args.plotwidth
 

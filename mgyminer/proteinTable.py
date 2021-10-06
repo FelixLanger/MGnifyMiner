@@ -23,44 +23,8 @@ class proteinTable:
             self.df = pd.read_csv(results)
         else:
             raise TypeError(
-                "proteinTable must be initialised with DataFrame or path to csv"
+                "proteinTable must be initialised with DataFrame or Path to csv file"
             )
-        self._set_columntypes()
-
-    def _set_columntypes(self):
-        self.df.astype(
-            dtype={
-                "target_name": str,
-                "target_accession": str,
-                "tlen": int,
-                "query_name": str,
-                "query_accession": str,
-                "qlen": int,
-                "e-value": np.object_,
-                "score": np.object_,
-                "bias": np.object_,
-                "ndom": int,
-                "ndom_of": int,
-                "c-value": np.object_,
-                "i-value": np.object_,
-                "dom_score": np.object_,
-                "dom_bias": np.object_,
-                "hmm_from": int,
-                "hmm_to": int,
-                "ali_from": int,
-                "ali_to": int,
-                "env_from": int,
-                "env_to": int,
-                "acc": np.object_,
-                "UP": int,
-                "biome": str,
-                "CR": int,
-                "coverage_hit": np.object_,
-                "coverage_query": np.object_,
-                "similarity": np.object_,
-                "identity": np.object_,
-            }
-        )
 
     def sort(self, by: Union[str, list], ascending: bool = False):
         """
@@ -71,7 +35,14 @@ class proteinTable:
         """
         if not isinstance(by, list):
             by = [by]
-        by = self._to_columnNames(by)
+        # TODO remove conversion feature, or redo it in a way that we first check if input is in mapping or column
+        # and if not then raise Error
+        # by = self._to_columnNames(by)
+
+        if not set(by).issubset(set(self.df.columns)):
+            not_in_df = set(by) - set(set(self.df.columns))
+            raise KeyError(f"{not_in_df} not found in results table")
+
         by.extend(["target_name", "ndom"])
         # Set orientation according to setting, but always sort ndom ascending to keep domain order
         orientation = [ascending if _ != "ndom" else True for _ in by]
@@ -98,21 +69,21 @@ class proteinTable:
         :return: filtered Dataframe
         """
         span = re.match(r"(\d+)-(\d+)", value)
-        thresh = re.match(r"([><])(\d+)", value)
+        thresh = re.match(r"([><])(.+)", value)
         if thresh:
             mod, v = thresh.groups()
+            v = np.float(v)
             if mod == "<":
-                filtered = self.df[self.df["e-value"] <= int(v)]
+                return proteinTable(self.df[self.df[by] <= v])
             elif mod == ">":
-                filtered = self.df[self.df["e-value"] >= int(v)]
+                return proteinTable(self.df[self.df[by] >= v])
 
         elif span:
             x, y = span.groups()
-            filtered = self.df[self.df[by].between(int(x), int(y))]
+            return self.df[self.df[by].between(np.float(x), np.float(y))]
 
         else:
-            filtered = self.df[self.df["e-value"] <= int(value)]
-        return proteinTable(filtered)
+            return proteinTable(self.df[self.df["e-value"] <= np.float(value)])
 
     def save(self, outfile, sep=",", index=False, **kwargs):
         """
