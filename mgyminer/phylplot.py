@@ -302,7 +302,6 @@ def plot_tree(args):
         # Dict with protein and its domains
         pfams = _filter_dict(metadata, "Pfams")
         pfams = {k: v.split("-") for k, v in pfams.items()}
-
         # Get unique pfam domains in all hits
         unique_domains = set(
             [domain for domains in list(pfams.values()) for domain in domains]

@@ -10,7 +10,8 @@ import mysql.connector
 import pandas as pd
 import yaml
 from aiohttp_client_cache import CachedSession, SQLiteBackend
-from utils import mgyp_to_id, proteinID_to_mgyp
+
+from mgyminer.utils import mgyp_to_id, proteinID_to_mgyp
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)s:%(name)s: %(message)s",
@@ -220,9 +221,12 @@ def make_min_max(values):
         return (min(values), max(values))
 
 
-def main():
-    test = pd.read_csv("../playground/test")
-    accessions = list(test.target_name)
+def get_metadata(args):
+
+    filename = args.input.stem
+    file_dir = args.input.parents[0]
+    df = pd.read_csv(args.input)
+    accessions = list(df.target_name)
     assemblies_mapping = find_origin_assemblies(accessions)
     all_assemblies = [
         assembly
@@ -231,17 +235,12 @@ def main():
     ]
     metadata = asyncio.run(sample_metadata(all_assemblies))
     meta_df = add_metadata(
-        test, ["location", "ph", "temperature"], metadata, assemblies_mapping
+        df, ["location", "ph", "temperature"], metadata, assemblies_mapping
     )
     meta_df["temperature"] = meta_df["temperature"].apply(
         lambda x: make_min_max(only_numeric(x))
     )
-    result = test.merge(
+    result = df.merge(
         meta_df, left_on="target_name", right_on="target_name", how="left"
     )
-    result.to_csv("meta.csv")
-    print(len(meta_df))
-    print(len(test))
-
-
-main()
+    result.to_csv(file_dir / f"{filename}_meta.csv", index=False)
