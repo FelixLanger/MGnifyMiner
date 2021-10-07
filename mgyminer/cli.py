@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 
+from mgyminer.metadata import get_metadata
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
@@ -71,6 +72,28 @@ def create_parser():
         metavar="e-value, coverage_hit,coverage_query, similarity, identity",
         help="Sort the output by one or multiple columns.",
     )
+
+    filter_parser.add_argument(
+        "--biome",
+        required=False,
+        metavar=[
+            "engineered",
+            "aquatic",
+            "marine",
+            "freshwater",
+            "soil",
+            "clay",
+            "shrubland",
+            "plants",
+            "human",
+            "human_digestive_system",
+            "human_not_digestive_system",
+            "animal",
+            "other",
+        ],
+        help="Filter proteins by biome of origin",
+    )
+
     filter_parser.add_argument(
         "--output",
         type=Path,
@@ -245,6 +268,17 @@ def create_parser():
     )
 
     domain_parser.set_defaults(func=domain_filter)
+
+    matedata_parser = subparsers.add_parser(
+        "metadata", help="fetch metadata from ENA API"
+    )
+    matedata_parser.add_argument(
+        "--input",
+        type=Path,
+        metavar="path/to/input.csv",
+        help="Path to the protein search or filter result file",
+    )
+    matedata_parser.set_defaults(func=get_metadata)
 
     return parser
 

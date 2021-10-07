@@ -14,10 +14,12 @@ from mgyminer.proteinTable import proteinTable
 
 def filter(args):
     pt = proteinTable(args.input)
-
     if args.feature:
         by, value = args.feature
         pt = pt.filter(by, value)
+
+    if args.biome:
+        pt = pt.biome(args.biome)
 
     if args.sort:
         pt = pt.sort(args.sort)
@@ -35,7 +37,9 @@ def residue_filter(args):
     alignments = results_basepath / "alignment.json"
 
     # read input files
-    results_table = pd.read_csv(results_file)
+    results_table = pd.read_csv(
+        results_file, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
+    )
     results_table["hmm_from"].astype(int)
     results_table["hmm_to"].astype(int)
     with open(alignments, "r") as fin:
@@ -349,7 +353,9 @@ def plot_residue_histogram(args):
 
 
 def domain_filter(args):
-    hits = pd.read_csv(args.input)
+    hits = pd.read_csv(
+        args.input, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
+    )
     if args.strict:
         matches = strict_select(args.arch)
     else:
@@ -370,7 +376,7 @@ def connect_database():
     config_root = Path(__file__).parents[1]
     with open(config_root / "config.yaml") as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql"])
+    proteindb = mysql.connector.connect(**cfg["mysql_test"])
     return proteindb
 
 
@@ -378,7 +384,7 @@ def strict_select(pfams):
     config_root = Path(__file__).parents[1]
     with open(config_root / "config.yaml") as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql"])
+    proteindb = mysql.connector.connect(**cfg["mysql_test"])
     cursor = proteindb.cursor()
     conditions = f"pfams LIKE '%{pfams[0]}%'"
     for pfam in pfams[1:]:
@@ -402,7 +408,7 @@ def loose_select(pfams):
     config_root = Path(__file__).parents[1]
     with open(config_root / "config.yaml") as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql"])
+    proteindb = mysql.connector.connect(**cfg["mysql_test"])
     cursor = proteindb.cursor()
     regex = "|".join(pfams)
     statement = (

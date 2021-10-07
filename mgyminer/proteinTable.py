@@ -20,7 +20,9 @@ class proteinTable:
         if isinstance(results, DataFrame):
             self.df = results
         elif isinstance(results, Path):
-            self.df = pd.read_csv(results)
+            self.df = pd.read_csv(
+                results, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
+            )
         else:
             raise TypeError(
                 "proteinTable must be initialised with DataFrame or Path to csv file"
@@ -68,22 +70,61 @@ class proteinTable:
         :param value: value to filter for (threshold with <,> or range with x-y)
         :return: filtered Dataframe
         """
-        span = re.match(r"(\d+)-(\d+)", value)
-        thresh = re.match(r"([><])(.+)", value)
-        if thresh:
-            mod, v = thresh.groups()
-            v = np.float(v)
-            if mod == "<":
-                return proteinTable(self.df[self.df[by] <= v])
-            elif mod == ">":
-                return proteinTable(self.df[self.df[by] >= v])
+        if by not in self.df.columns:
+            raise ValueError(
+                f"{by} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
+            )
 
-        elif span:
-            x, y = span.groups()
-            return proteinTable(self.df[self.df[by].between(np.float(x), np.float(y))])
+        if np.issubdtype(self.df[by].dtype, np.number):
+            span = re.match(r"(\d+)-(\d+)", value)
+            thresh = re.match(r"([><])(.+)", value)
+            if thresh:
+                mod, v = thresh.groups()
+                v = np.float(v)
+                if mod == "<":
+                    return proteinTable(self.df[self.df[by] <= v])
+                elif mod == ">":
+                    return proteinTable(self.df[self.df[by] >= v])
 
+            elif span:
+                x, y = span.groups()
+                return proteinTable(
+                    self.df[self.df[by].between(np.float(x), np.float(y))]
+                )
+
+            else:
+                return proteinTable(self.df[self.df[by] <= np.float(value)])
         else:
-            return proteinTable(self.df[self.df["e-value"] <= np.float(value)])
+            return proteinTable(self.df[self.df[by] == value])
+
+    def biome(self, biome):
+        """
+        Filter proteins by biome
+        :param biome:
+        :return:
+        """
+        biomes = [
+            "engineered",
+            "aquatic",
+            "marine",
+            "freshwater",
+            "soil",
+            "clay",
+            "shrubland",
+            "plants",
+            "human",
+            "human_digestive_system",
+            "human_not_digestive_system",
+            "animal",
+            "other",
+        ]
+        if biome not in biomes:
+            raise ValueError(f"{biome} not in available biomes. Select one of {biomes}")
+        temp = pd.DataFrame(
+            self.df["biome"].apply(lambda x: list(x)).to_list(), columns=biomes
+        )
+        index = temp[temp[biome] == "1"].index
+        return proteinTable(self.df[self.df.index.isin(index)])
 
     def save(self, outfile, sep=",", index=False, **kwargs):
         """
