@@ -9,69 +9,37 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from mgyminer.proteinTable import proteinTable
+
 
 def filter(args):
-    # manage arguments
-    hmmer_output_file = args.input
-    results_basepath = hmmer_output_file.parents[0]
-    dom_tbl_file = results_basepath / "dom_tbl.txt"
-    # tbl_file = results_basepath / "tbl.txt"
-    alignments = results_basepath / "alignments.json"
+    pt = proteinTable(args.input)
+    if args.feature:
+        by, value = args.feature
+        pt = pt.filter(by, value)
 
-    # get table
-    dom_tbl = parse_domtable(dom_tbl_file)
-    calculate_coverage(dom_tbl)
-    if alignments.is_file():
-        with open(alignments, "r") as fin:
-            aligmnent_dict = json.load(fin)
-
-    else:
-        aligmnent_dict = get_alignment_consensus(hmmer_output_file)
-        with open(alignments, "w") as fout:
-            json.dump(aligmnent_dict, fout)
-    add_sim_ident(dom_tbl, aligmnent_dict)
-
-    if args.eval:
-        dom_tbl = dom_tbl[dom_tbl["e-value"] <= args.eval]
-
-    if args.coverage:
-        coverage_range = _extract_range(args.coverage)
-        dom_tbl = dom_tbl[
-            dom_tbl["coverage_query"].between(coverage_range[0], coverage_range[1])
-        ]
+    if args.biome:
+        pt = pt.biome(args.biome)
 
     if args.sort:
-        map = {
-            "eval": "score",
-            "coverage": "coverage_query",
-            "similarity": "similarity",
-            "identity": "identity",
-        }
-        if all(filters in map.keys() for filters in args.sort):
-            columns = [map[v] for v in args.sort]
-            columns.extend(
-                ["target_name", "ndom"]
-            )  # additionally sort by name and ndom to keep entries from one
-            orientation = [
-                False for column in columns
-            ]  # protein together, ndom sort needs to be ascending to keep
-            orientation[-1] = True  # domain order
-            dom_tbl = dom_tbl.sort_values(by=columns, ascending=orientation)
+        pt = pt.sort(args.sort)
 
     if args.output:
-        dom_tbl.to_csv(args.output, index=False, sep=",")
+        pt.save(args.output)
     else:
-        print(dom_tbl.to_string())
+        print(pt.df.to_string())
 
 
 def residue_filter(args):
     # get input files
     results_file = args.input
     results_basepath = results_file.parents[0]
-    alignments = results_basepath / "alignments.json"
+    alignments = results_basepath / "alignment.json"
 
     # read input files
-    results_table = pd.read_csv(results_file)
+    results_table = pd.read_csv(
+        results_file, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
+    )
     results_table["hmm_from"].astype(int)
     results_table["hmm_to"].astype(int)
     with open(alignments, "r") as fin:
@@ -285,8 +253,8 @@ def end_of_column(string):
 def get_alignment_consensus(file):
     alignments_dict = {}
     for alignment in alignments(file):
-        # get the start index of the comsensus sequence.
-        # problem: amount of leading whitespaces is dependend on the length of query or target sequence but needs to
+        # get the start index of the consensus sequence.
+        # problem: amount of leading witespaces is dependend on the length of query or target sequence but needs to
         # be exactly calculated because whitespaces in the consensus stand for mismatches of the two aligned sequences
         # Solution: count characters until you hit the first whitespace after hitting letters. Doing it once to get
         # lenght until the name. doing it twice to get characters until the end of the start coordinates.
@@ -344,7 +312,7 @@ def add_sim_ident(df, alignment_dict):
 def plot_residue_histogram(args):
     results_file = args.input
     results_basepath = results_file.parents[0]
-    alignments = results_basepath / "alignments.json"
+    alignments = results_basepath / "alignment.json"
     residue = int(args.residue)
     plotwidth = args.plotwidth
 
@@ -384,112 +352,10 @@ def plot_residue_histogram(args):
         print(f"{label.rjust(longest_label_length)} ▏ {count:#4d} {bar}")
 
 
-class hmmerResults:
-    """Class to hold HMMER search results in a pandas dataframe"""
-
-    def __init__(self, results):
-        self.df = results
-
-    @property
-    def df(self):
-        return self._df
-
-    @df.setter
-    def df(self, results) -> pd.DataFrame:
-        """read the HMMER Domain Table file into a Pandas dataframe"""
-        if results.suffix == ".csv":
-            self._df = pd.read_csv(results)
-        else:
-            self._df = pd.read_csv(
-                results,
-                sep=r"\s+",
-                comment="#",
-                index_col=False,
-                names=[
-                    "target_name",
-                    "target_accession",
-                    "tlen",
-                    "query_name",
-                    "query_accession",
-                    "qlen",
-                    "e-value",
-                    "score",
-                    "bias",
-                    "ndom",
-                    "ndom_of",
-                    "c-value",
-                    "i-value",
-                    "dom_score",
-                    "dom_bias",
-                    "hmm_from",
-                    "hmm_to",
-                    "ali_from",
-                    "ali_to",
-                    "env_from",
-                    "env_to",
-                    "acc",
-                    "PL",
-                    "UP",
-                    "biome",
-                    "LEN",
-                    "CR",
-                ],
-                dtype={
-                    "target_name": str,
-                    "target_accession": str,
-                    "tlen": int,
-                    "query_name": str,
-                    "query_accession": str,
-                    "qlen": int,
-                    "e-value": float,
-                    "score": float,
-                    "bias": float,
-                    "ndom": int,
-                    "ndom_of": int,
-                    "c-value": float,
-                    "i-value": float,
-                    "dom_score": float,
-                    "dom_bias": float,
-                    "hmm_from": int,
-                    "hmm_to": int,
-                    "ali_from": int,
-                    "ali_to": int,
-                    "env_from": int,
-                    "env_to": int,
-                    "acc": float,
-                    "description": str,
-                },
-            )
-
-            def split_description():
-                self._df.drop("LEN", axis=1, inplace=True)
-                for column in ["PL", "UP", "biome", "CR"]:
-                    self._df[column] = self._df[column].apply(lambda x: x.split("=")[1])
-
-            split_description()
-
-            def calculate_coverage():
-                self._df["coverage_hit"] = round(
-                    (self._df["ali_to"] - self._df["ali_from"])
-                    / self._df["tlen"]
-                    * 100,
-                    2,
-                )
-                self._df["coverage_query"] = round(
-                    (self._df["ali_to"] - self._df["ali_from"])
-                    / self._df["qlen"]
-                    * 100,
-                    2,
-                )
-
-            calculate_coverage()
-
-    def save(self, outfile, sep=";", index=False, **kwargs):
-        self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
-
-
 def domain_filter(args):
-    hits = pd.read_csv(args.input)
+    hits = pd.read_csv(
+        args.input, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
+    )
     if args.strict:
         matches = strict_select(args.arch)
     else:
@@ -510,7 +376,7 @@ def connect_database():
     config_root = Path(__file__).parents[1]
     with open(config_root / "config.yaml") as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql"])
+    proteindb = mysql.connector.connect(**cfg["mysql_test"])
     return proteindb
 
 
@@ -518,7 +384,7 @@ def strict_select(pfams):
     config_root = Path(__file__).parents[1]
     with open(config_root / "config.yaml") as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql"])
+    proteindb = mysql.connector.connect(**cfg["mysql_test"])
     cursor = proteindb.cursor()
     conditions = f"pfams LIKE '%{pfams[0]}%'"
     for pfam in pfams[1:]:
@@ -542,7 +408,7 @@ def loose_select(pfams):
     config_root = Path(__file__).parents[1]
     with open(config_root / "config.yaml") as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql"])
+    proteindb = mysql.connector.connect(**cfg["mysql_test"])
     cursor = proteindb.cursor()
     regex = "|".join(pfams)
     statement = (

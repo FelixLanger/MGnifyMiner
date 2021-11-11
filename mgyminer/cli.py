@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 
+from mgyminer.metadata import get_metadata
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
@@ -54,27 +55,45 @@ def create_parser():
         help="Path to sequence search output file",
     )
     filter_parser.add_argument(
-        "--coverage",
+        "--feature",
         type=str,
         required=False,
-        metavar="[0-100]",
-        help="Filter results by coverage of query sequence. "
-        "Threshold range (0-100) percent coverage of query sequence",
+        metavar="",
+        nargs=2,
+        help="Filter by any feature e.g. e-value, coverage similarity,..\n"
+        "Ranges can be defined like: 1-100\n"
+        "Cutoffs can be defined like: <0.5 or >1e-15",
     )
-    filter_parser.add_argument(
-        "--eval",
-        type=float,
-        required=False,
-        metavar="0.001",
-        help="Filter by e-value. Threshold for highest e-value displayed",
-    )
+
     filter_parser.add_argument(
         "--sort",
         required=False,
         nargs="+",
-        metavar="eval, coverage, similarity, identity",
+        metavar="e-value, coverage_hit,coverage_query, similarity, identity",
         help="Sort the output by one or multiple columns.",
     )
+
+    filter_parser.add_argument(
+        "--biome",
+        required=False,
+        metavar=[
+            "engineered",
+            "aquatic",
+            "marine",
+            "freshwater",
+            "soil",
+            "clay",
+            "shrubland",
+            "plants",
+            "human",
+            "human_digestive_system",
+            "human_not_digestive_system",
+            "animal",
+            "other",
+        ],
+        help="Filter proteins by biome of origin",
+    )
+
     filter_parser.add_argument(
         "--output",
         type=Path,
@@ -249,6 +268,17 @@ def create_parser():
     )
 
     domain_parser.set_defaults(func=domain_filter)
+
+    matedata_parser = subparsers.add_parser(
+        "metadata", help="fetch metadata from ENA API"
+    )
+    matedata_parser.add_argument(
+        "--input",
+        type=Path,
+        metavar="path/to/input.csv",
+        help="Path to the protein search or filter result file",
+    )
+    matedata_parser.set_defaults(func=get_metadata)
 
     return parser
 

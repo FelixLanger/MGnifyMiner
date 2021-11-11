@@ -1,105 +1,208 @@
+import re
+from pathlib import Path
+from typing import Tuple, Union
+
+import numpy as np
 import pandas as pd
+from pandas import DataFrame
 
 
-class hmmerResults:
-    """Class to hold HMMER search results in a pandas dataframe"""
+def extract_alignments(hmmer_out: Union[Path, str]) -> dict:
+    """
+    Takes hmmer standard output file (with notextwidth! option) and creates a dict with alignment
+    and similarity and identity metrics
+    :param hmmer_out: Path to hmmer output
+    :return: alignment dictionary
+    """
+    alignments_dict = {}
+    for alignment in alignments(hmmer_out):
+        start, end = _start_end_coordinates(alignment[2])
+        consensus = alignment[1][start:end]
+        query_id, query_start, query_seq, query_end = alignment[0].split()
+        target_id, target_start, target_seq, target_end = alignment[2].split()
+        key = f"{target_id}-{target_start}-{target_end}"
+        perc_ident, perc_sim = calculate_identity_similarity(consensus)
+        alignments_dict[key] = {
+            "consensus": consensus,
+            "target_start": target_start,
+            "target_end": target_end,
+            "target_seq": target_seq,
+            "query_start": query_start,
+            "query_end": query_end,
+            "query_seq": query_seq,
+            "perc_ident": perc_ident,
+            "perc_sim": perc_sim,
+        }
+    return alignments_dict
 
-    def __init__(self, results):
-        self.df = results
 
-    @property
-    def df(self):
-        return self._df
+def calculate_identity_similarity(
+    consensus: str, round_to: int = 1
+) -> Tuple[float, float]:
+    """
+    Calculate sequence similarity and identity values from a hmmer alignment consensus string
+    :param consensus: hmmer consensus sequence
+    :param round_to: integers after point to keep
+    :return: (identity_percentage, similarity_percentage)
+    """
+    length = len(consensus)
+    similar = consensus.count("+")
+    mismatch = consensus.count(" ")
+    identical = length - mismatch - similar
 
-    @df.setter
-    def df(self, results) -> pd.DataFrame:
-        """read the HMMER Domain Table file into a Pandas dataframe"""
-        if results.suffix == ".csv":
-            self._df = pd.read_csv(results)
+    percent_identity = round(identical / length * 100, round_to)
+    percent_similarity = round((identical + similar) / length * 100, 1)
+
+    return percent_identity, percent_similarity
+
+
+def _start_end_coordinates(alignment: str) -> Tuple[int, int]:
+    """
+    Extract the start and end coordinates of the third hmmer alignment string.
+    The alignment string needs to be the target section of the alignment with MGYP ID.
+    It removes starting whitespaces, sequence name and start, end coords of the protein.
+    :param alignment: alignment string
+    :return: (start, end) coordinates of alignment string
+    """
+    start_pattern = re.compile(r"\s*MGYP\d*\s+\d+\s{1}")
+    end_pattern = re.compile(r"\s\d+\s*$")
+    alignment_start = start_pattern.match(alignment).end()
+    alignment_end = end_pattern.search(alignment).start()
+    return alignment_start, alignment_end
+
+
+def alignments(file: Union[Path, str]):
+    """
+    Generator for going through the alignments in a HMMER output file with no textwidth
+    formatting.
+    :param file:
+    :return:
+    """
+    closeit = False
+    if isinstance(file, str):
+        file = Path(file)
+
+    if isinstance(file, Path):
+        file = open(file, "r")
+        closeit = True
+
+    alignment_upcomming = False
+    alignment = []
+    for line in decomment(file):
+        if alignment_upcomming is True:
+            alignment.append(line.strip("\n"))
+            if len(alignment) > 2:
+                alignment_upcomming = False
+                yield alignment
+        elif line.startswith("  =="):
+            alignment_upcomming = True
+            alignment = []
         else:
-            self._df = pd.read_csv(
-                results,
-                sep=r"\s+",
-                comment="#",
-                index_col=False,
-                names=[
-                    "target_name",
-                    "target_accession",
-                    "tlen",
-                    "query_name",
-                    "query_accession",
-                    "qlen",
-                    "e-value",
-                    "score",
-                    "bias",
-                    "ndom",
-                    "ndom_of",
-                    "c-value",
-                    "i-value",
-                    "dom_score",
-                    "dom_bias",
-                    "hmm_from",
-                    "hmm_to",
-                    "ali_from",
-                    "ali_to",
-                    "env_from",
-                    "env_to",
-                    "acc",
-                    "PL",
-                    "UP",
-                    "biome",
-                    "LEN",
-                    "CR",
-                ],
-                dtype={
-                    "target_name": str,
-                    "target_accession": str,
-                    "tlen": int,
-                    "query_name": str,
-                    "query_accession": str,
-                    "qlen": int,
-                    "e-value": float,
-                    "score": float,
-                    "bias": float,
-                    "ndom": int,
-                    "ndom_of": int,
-                    "c-value": float,
-                    "i-value": float,
-                    "dom_score": float,
-                    "dom_bias": float,
-                    "hmm_from": int,
-                    "hmm_to": int,
-                    "ali_from": int,
-                    "ali_to": int,
-                    "env_from": int,
-                    "env_to": int,
-                    "acc": float,
-                    "description": str,
-                },
-            )
+            continue
+    if closeit:
+        file.close()
 
-            def split_description():
-                self._df.drop("LEN", axis=1, inplace=True)
-                for column in ["PL", "UP", "biome", "CR"]:
-                    self._df[column] = self._df[column].apply(lambda x: x.split("=")[1])
 
-            split_description()
+def decomment(rows):
+    """
+    Generator to return a file row by row without # comments
+    :param rows:
+    :return:
+    """
+    for row in rows:
+        if row.startswith("#"):
+            continue
+        yield row
 
-            def calculate_coverage():
-                self._df["coverage_hit"] = round(
-                    (self._df["ali_to"] - self._df["ali_from"])
-                    / self._df["tlen"]
-                    * 100,
-                    2,
-                )
-                self._df["coverage_query"] = round(
-                    (self._df["ali_to"] - self._df["ali_from"])
-                    / self._df["qlen"]
-                    * 100,
-                    2,
-                )
 
-            calculate_coverage()
+def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
+    """
+    Parse HMMER domain Table to pandas DataFrame
+    :param domtable: Path to domain table file
+    :return: domain table pandas DataFrame
+    """
+    proteinTable = pd.read_csv(
+        domtable,
+        sep=r"\s+",
+        comment="#",
+        index_col=False,
+        names=[
+            "target_name",
+            "target_accession",
+            "tlen",
+            "query_name",
+            "query_accession",
+            "qlen",
+            "e-value",
+            "score",
+            "bias",
+            "ndom",
+            "ndom_of",
+            "c-value",
+            "i-value",
+            "dom_score",
+            "dom_bias",
+            "hmm_from",
+            "hmm_to",
+            "ali_from",
+            "ali_to",
+            "env_from",
+            "env_to",
+            "acc",
+            "PL",
+            "UP",
+            "biome",
+            "LEN",
+            "CR",
+        ],
+        dtype={
+            "target_name": str,
+            "target_accession": str,
+            "tlen": int,
+            "query_name": str,
+            "query_accession": str,
+            "qlen": int,
+            "e-value": np.object_,
+            "score": np.object_,
+            "bias": np.object_,
+            "ndom": int,
+            "ndom_of": int,
+            "c-value": np.object_,
+            "i-value": np.object_,
+            "dom_score": np.object_,
+            "dom_bias": np.object_,
+            "hmm_from": int,
+            "hmm_to": int,
+            "ali_from": int,
+            "ali_to": int,
+            "env_from": int,
+            "env_to": int,
+            "acc": np.object_,
+            "UP": str,
+            "biome": str,
+            "LEN": str,
+            "CR": str,
+        },
+    )
 
-    def save(self, outfile, sep=";", index=False, **kwargs):
-        self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
+    # Split description field
+    proteinTable.drop("LEN", axis=1, inplace=True)
+    for column in ["PL", "UP", "biome", "CR"]:
+        proteinTable[column] = proteinTable[column].apply(lambda x: x.split("=")[1])
+
+    # Calculate coverages
+    proteinTable["coverage_hit"] = round(
+        (proteinTable["ali_to"] - proteinTable["ali_from"])
+        / proteinTable["tlen"]
+        * 100,
+        2,
+    )
+
+    proteinTable["coverage_query"] = round(
+        (proteinTable["ali_to"] - proteinTable["ali_from"])
+        / proteinTable["qlen"]
+        * 100,
+        2,
+    )
+
+    return proteinTable
