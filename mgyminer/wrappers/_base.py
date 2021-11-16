@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 
-class Program:
+class Program(abc.ABC):
     def __init__(self, program: str, verbose: bool = False) -> None:
         self.program = program
         self.verbose = verbose
@@ -65,7 +65,11 @@ class Program:
                     return True
             else:
                 process = subprocess.Popen(
-                    command, stdout=None, stderr=subprocess.PIPE, text=True, **kwargs
+                    command,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    **kwargs
                 )
                 while True:
                     stderr_message = process.stderr.readline()
