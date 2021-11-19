@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from typing import Union
 
-from _base import Program
+from mgyminer.wrappers._base import Program
 
 
 class esl_sfetch(Program):
@@ -102,8 +102,8 @@ class PHmmer(Program):
             alignment = output_file.parent / (output_file.stem + ".sto")
 
         arguments = [
-            "-o",
-            str(output_file),
+            # "-o",
+            # str(output_file),
             "--tblout",
             str(tblout),
             "--domtblout",

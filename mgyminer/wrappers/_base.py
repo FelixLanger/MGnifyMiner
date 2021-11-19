@@ -45,45 +45,33 @@ class Program(abc.ABC):
         command.extend(arguments)
         try:
             if stdout_file:
-                with open(stdout_file, "w") as fout:
-                    process = subprocess.Popen(
-                        command,
-                        stdout=fout,
-                        stderr=subprocess.PIPE,
-                        text=True,
-                        **kwargs
-                    )
-                    while True:
-                        stderr_message = process.stderr.readline().strip()
-                        if not stderr_message:
-                            break
-                        logging.warning(
-                            "%s raised an error while running: %s",
-                            self.program,
-                            stderr_message,
-                        )
-                    return True
+                stdout = open(stdout_file, "wt")
+            elif self.verbose is True:
+                stdout = subprocess.PIPE
             else:
-                process = subprocess.Popen(
-                    command,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    **kwargs
+                stdout_file = subprocess.DEVNULL
+            with subprocess.Popen(
+                command,
+                stdout=stdout,
+                stderr=subprocess.PIPE,
+                bufsize=1,
+                universal_newlines=True,
+            ) as process:
+                stderr_message = process.stderr.read()
+                logging.warning(
+                    "%s raised some errors but still finished: %s",
+                    self.program,
+                    stderr_message,
                 )
-                while True:
-                    stderr_message = process.stderr.readline()
-                    if not stderr_message:
-                        break
-                    logging.warning(
-                        "%s raised an error while running: %s",
-                        self.program,
-                        stderr_message,
-                    )
-                return True
+                stdout_message = process.stdout.read()
+                logging.debug("%s stdout: %s", self.program, stdout_message)
+
+            if stdout_file != subprocess.DEVNULL:
+                stdout_file.close()
 
         except subprocess.CalledProcessError as error:
             logging.error("%s failed with message: %s", self.program, error)
+            exit()
 
     @abc.abstractmethod
     def run(self):

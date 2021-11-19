@@ -42,6 +42,20 @@ def create_parser():
         "--target", "-t", type=Path, help="target sequence database to search against"
     )
     phmmer_parser.add_argument("--output", "-o", type=Path, help="output path")
+    phmmer_parser.add_argument(
+        "--keep",
+        "-k",
+        default=False,
+        action="store_true",
+        help="keep the original phmmer output files",
+    )
+    phmmer_parser.add_argument(
+        "--cpu",
+        "-c",
+        type=int,
+        default=4,
+        help="number of cpu cores to use for hmmer search [default = 4]",
+    )
     phmmer_parser.set_defaults(func=phmmer)
 
     # Arguments for filter step

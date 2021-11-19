@@ -1,36 +1,37 @@
 import json
-
-from hmmer import SeqDB
+import logging
+import tempfile
+from pathlib import Path
 
 from mgyminer.parsers import extract_alignments, parse_hmmer_domtable
 from mgyminer.proteinTable import proteinTable
+from mgyminer.wrappers.hmmer import PHmmer
 
 
 def phmmer(args) -> None:
-    """
-    run phmmer search of query sequence(s) against sequence database
-    :return:
-    """
-    # manage arguments
+    phmmer = PHmmer(args.cpu)
+    phmmer.verbose = True
     query_name = args.query.stem
     output_file = args.output
-    save_dir = args.output.parents[0]
+    if args.keep is True:
+        save_dir = args.output.parents[0]
+    else:
+        tempdir = tempfile.TemporaryDirectory()
+        save_dir = Path(tempdir.name)
+
     hmmer_out = save_dir / f"{query_name}_hmmer.out"
     dom_tbl = save_dir / f"{query_name}_dom_tbl.txt"
     tbl = save_dir / f"{query_name}_tbl.txt"
     alignment = save_dir / f"{query_name}_alignment.sto"
-
-    targetDB = SeqDB(args.target)
-    targetDB.phmmer(
-        args.query,
-        output=hmmer_out,
-        tblout=tbl,
+    phmmer.run(
+        args.query.resolve(),
+        args.target.resolve(),
+        hmmer_out,
         domtblout=dom_tbl,
+        tblout=tbl,
         alignment=alignment,
-        notextw=True,
     )
-
-    # Generate proteinTable and alignment json
+    logging.info("running phmmer finished")
     results = parse_hmmer_domtable(dom_tbl)
     alignments = extract_alignments(hmmer_out)
     with open(save_dir / "alignment.json", "w") as fout:
