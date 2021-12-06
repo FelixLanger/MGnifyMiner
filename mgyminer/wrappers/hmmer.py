@@ -102,8 +102,8 @@ class PHmmer(Program):
             alignment = output_file.parent / (output_file.stem + ".sto")
 
         arguments = [
-            # "-o",
-            # str(output_file),
+            "-o",
+            str(output_file),
             "--tblout",
             str(tblout),
             "--domtblout",

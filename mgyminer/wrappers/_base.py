@@ -66,7 +66,7 @@ class Program(abc.ABC):
                 stdout_message = process.stdout.read()
                 logging.debug("%s stdout: %s", self.program, stdout_message)
 
-            if stdout_file != subprocess.DEVNULL:
+            if stdout_file:
                 stdout_file.close()
 
         except subprocess.CalledProcessError as error:
