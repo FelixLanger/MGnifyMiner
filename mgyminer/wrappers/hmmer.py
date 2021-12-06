@@ -112,7 +112,7 @@ class PHmmer(Program):
             str(alignment),
         ]
 
-        if heuristic:
+        if not heuristic:
             arguments.append("--max")
         if notextw:
             arguments.append("--notextw")

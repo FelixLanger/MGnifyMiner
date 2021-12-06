@@ -49,7 +49,7 @@ class Program(abc.ABC):
             elif self.verbose is True:
                 stdout = subprocess.PIPE
             else:
-                stdout_file = subprocess.DEVNULL
+                stdout = subprocess.DEVNULL
             with subprocess.Popen(
                 command,
                 stdout=stdout,
@@ -57,13 +57,14 @@ class Program(abc.ABC):
                 bufsize=1,
                 universal_newlines=True,
             ) as process:
-                stderr_message = process.stderr.read()
-                logging.warning(
-                    "%s raised some errors but still finished: %s",
-                    self.program,
-                    stderr_message,
-                )
-                stdout_message = process.stdout.read()
+                stderr_message = process.stderr.read().strip()
+                if stderr_message:
+                    logging.warning(
+                        "%s raised some errors but still finished: %s",
+                        self.program,
+                        stderr_message,
+                    )
+                stdout_message = process.stdout.read().strip()
                 logging.debug("%s stdout: %s", self.program, stdout_message)
 
             if stdout_file:
