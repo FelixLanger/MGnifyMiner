@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from mgyminer.proteinTable import proteinTable
+from mgyminer.proteinTable import ProteinTableVisualiser, proteinTable
 
 
 def filter(args):
@@ -26,6 +26,11 @@ def filter(args):
 
     if args.output:
         pt.save(args.output)
+    if args.dashboard:
+        outdir = args.output.parents[0]
+        name = args.output.name.split(".")[0]
+        ptvis = ProteinTableVisualiser(pt)
+        ptvis.save(outdir / f"{name}.html")
     else:
         print(pt.df.to_string())
 

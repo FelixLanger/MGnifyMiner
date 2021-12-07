@@ -1,9 +1,11 @@
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Union
 
 import numpy as np
 import pandas as pd
+import plotly.graph_objs as go
 from pandas import DataFrame
 
 
@@ -136,3 +138,257 @@ class proteinTable:
         :return:
         """
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
+
+
+class ProteinTableVisualiser:
+    def __init__(self, ProteinTable):
+        self.histogram_plot = self.histograms(ProteinTable.df)
+        self.biome_plot = self.biome_distribution(ProteinTable.df)
+        self.piechart_plot = self.piecharts(ProteinTable.df)
+
+    def biome_distribution(self, df):
+        biomes = [
+            "root:Engineered",
+            "root:Environmental:Aquatic",
+            "root:Environmental:Aquatic:Marine",
+            "root:Environmental:Aquatic:Freshwater",
+            "root:Environmental:Soil",
+            "root:Environmental:Soil:Clay",
+            "root:Environmental:Soil:Shrubland",
+            "root:Host-associated:Plants",
+            "root:Host-associated:Human",
+            "root:Host-associated:Human:Digestive system",
+            "root:Host-associated:Human:non Digestive system",
+            "root:Host-associated:Animal",
+            "root:other",
+        ]
+        biome_counts = (
+            pd.DataFrame(df["biome"].apply(lambda x: list(x)).to_list(), columns=biomes)
+            .astype(int)
+            .sum()
+        )
+        biome_counts.loc["root:Environmental"] = (
+            biome_counts.loc["root:Environmental:Aquatic"]
+            + biome_counts.loc["root:Environmental:Soil"]
+        )
+        biome_counts.loc["root:Host-associated:Human"] = (
+            biome_counts.loc["root:Host-associated:Human:Digestive system"]
+            + biome_counts.loc["root:Host-associated:Human:non Digestive system"]
+        )
+        biome_counts.loc["root:Host-associated"] = (
+            biome_counts.loc["root:Host-associated:Human"]
+            + biome_counts.loc["root:Host-associated:Plants"]
+            + biome_counts.loc["root:Host-associated:Animal"]
+        )
+        biome_counts = biome_counts.reset_index()
+
+        biome_counts["label"] = biome_counts["index"].apply(lambda x: x.split(":")[-1])
+        biome_counts["parent"] = biome_counts["index"].apply(lambda x: x.split(":")[-2])
+        biome_counts.loc[15] = [
+            "root",
+            biome_counts[biome_counts["parent"] == "root"][0].sum(),
+            "root",
+            "",
+        ]
+
+        fig = go.Figure(
+            go.Sunburst(
+                labels=biome_counts.label,
+                parents=biome_counts.parent,
+                values=biome_counts[0],
+                branchvalues="total",
+            )
+        )
+        fig.update_layout(autosize=True, title="Biome Distribution")
+        return fig
+
+    def piecharts(self, df):
+        # Setup for prettier plots
+        hole = 0.3
+        textinfo = "label+percent"
+        pretty_labels = {
+            "PL": {
+                "00": "full length",
+                "11": "fragment",
+                "01": "partial right",
+                "10": "partial left",
+            },
+            "UP": {"0": "not in Uniprot", "1": "in Uniprot"},
+            "CR": {"0": "Member", "1": "Representative"},
+        }
+
+        def _value_dist(column):
+            counts = Counter(column)
+            return {"labels": list(counts.keys()), "values": list(counts.values())}
+
+        # Prepare for each plot
+        fragments_data = _value_dist(df["PL"])
+        fragments_data["labels"] = [
+            pretty_labels["PL"][i] for i in fragments_data["labels"]
+        ]
+        fragments = go.Pie(**fragments_data, hole=hole, textinfo=textinfo, visible=True)
+
+        uniprot_data = _value_dist(df["UP"])
+        uniprot_data["labels"] = [
+            pretty_labels["UP"][i] for i in uniprot_data["labels"]
+        ]
+        uniprot = go.Pie(**uniprot_data, hole=hole, textinfo=textinfo, visible=False)
+
+        representative_data = _value_dist(df["CR"])
+        representative_data["labels"] = [
+            pretty_labels["CR"][i] for i in representative_data["labels"]
+        ]
+        reps = go.Pie(
+            **representative_data, hole=hole, textinfo=textinfo, visible=False
+        )
+
+        # Create Figure
+        fig = go.Figure()
+        fig.add_traces([fragments, uniprot, reps])
+        fig.update_layout(
+            updatemenus=[
+                dict(
+                    active=0,
+                    buttons=list(
+                        [
+                            dict(
+                                label="Completeness",
+                                method="update",
+                                args=[
+                                    {"visible": [True, False, False]},
+                                    {"title": "Protein Completeness"},
+                                ],
+                            ),
+                            dict(
+                                label="Uniprot",
+                                method="update",
+                                args=[
+                                    {"visible": [False, True, False]},
+                                    {"title": "Uniprot"},
+                                ],
+                            ),
+                            dict(
+                                label="Cluster",
+                                method="update",
+                                args=[
+                                    {"visible": [False, False, True]},
+                                    {"title": "Clustering"},
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(autosize=True, title="Completeness")
+        return fig
+
+    def histograms(self, df):
+        # Setup for prettier plots
+        percentage_bins = {"end": 100, "start": 0, "size": 1}
+
+        # Prepare for each plot
+        similarity = go.Histogram(
+            x=df["similarity"], name="Similarity", visible=True, xbins=percentage_bins
+        )
+        identity = go.Histogram(
+            x=df["identity"], name="Identity", visible=False, xbins=percentage_bins
+        )
+        q_coverage = go.Histogram(
+            x=df["coverage_query"],
+            name="Query coverage",
+            visible=False,
+            xbins=percentage_bins,
+        )
+        t_coverage = go.Histogram(
+            x=df["coverage_hit"],
+            name="Target coverage",
+            visible=False,
+            xbins=percentage_bins,
+        )
+        tlen = go.Histogram(x=df["tlen"], name="Target length", visible=False)
+
+        # Create Figure
+        fig = go.Figure()
+        fig.add_traces([similarity, identity, q_coverage, t_coverage, tlen])
+        fig.update_layout(
+            updatemenus=[
+                dict(
+                    active=0,
+                    buttons=list(
+                        [
+                            dict(
+                                label="Similarity",
+                                method="update",
+                                args=[
+                                    {"visible": [True, False, False, False, False]},
+                                    {
+                                        "title": "Similarity Distribution",
+                                        "xaxis": {"title": "% Similarity"},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Identity",
+                                method="update",
+                                args=[
+                                    {"visible": [False, True, False, False, False]},
+                                    {
+                                        "title": "Identity Distribution",
+                                        "xaxis": {"title": "% Identity"},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Query Coverage",
+                                method="update",
+                                args=[
+                                    {"visible": [False, False, True, False, False]},
+                                    {
+                                        "title": "Query Coverage Distribution",
+                                        "xaxis": {"title": "% Query Coverage"},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Target Coverage",
+                                method="update",
+                                args=[
+                                    {"visible": [False, False, False, True, False]},
+                                    {
+                                        "title": "Target Coverage Distribution",
+                                        "xaxis": {"title": "% Target Coverage"},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Length",
+                                method="update",
+                                args=[
+                                    {"visible": [False, False, False, False, True]},
+                                    {
+                                        "title": "Target Length Distribution",
+                                        "xaxis": {"title": "length (AA)"},
+                                    },
+                                ],
+                            ),
+                        ]
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(
+            autosize=True,
+            title="Similarity Distribution",
+            yaxis=dict(title_text="n proteins"),
+            xaxis=dict(title_text="% Similarity"),
+        )
+        return fig
+
+    def save(self, output_file: Union[str, Path]):
+        with open(output_file, "w") as dashboard:
+            dashboard.write("<html><head></head><body>" + "\n")
+            for fig in [self.histogram_plot, self.piechart_plot, self.biome_plot]:
+                inner_html = fig.to_html().split("<body>")[1].split("</body>")[0]
+                dashboard.write(inner_html)
+            dashboard.write("</body></html>" + "\n")

@@ -50,6 +50,12 @@ def create_parser():
         help="keep the original phmmer output files",
     )
     phmmer_parser.add_argument(
+        "--dashboard",
+        "-d",
+        action="store_true",
+        help="generate a dashboard with search result statistics",
+    )
+    phmmer_parser.add_argument(
         "--cpu",
         "-c",
         type=int,
@@ -114,6 +120,12 @@ def create_parser():
         metavar="path/to/filter_output.csv",
         help="Path to the desired output file",
     ),
+    filter_parser.add_argument(
+        "--dashboard",
+        "-d",
+        action="store_true",
+        help="generate a dashboard with filter results statistics",
+    )
     filter_parser.set_defaults(func=filter)
 
     residue_parser = subparsers.add_parser(

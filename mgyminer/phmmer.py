@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 from mgyminer.parsers import extract_alignments, parse_hmmer_domtable
-from mgyminer.proteinTable import proteinTable
+from mgyminer.proteinTable import ProteinTableVisualiser, proteinTable
 from mgyminer.wrappers.hmmer import PHmmer
 
 
@@ -51,3 +51,7 @@ def phmmer(args) -> None:
     )
     results = proteinTable(results)
     results.save(output_file)
+
+    if args.dashboard:
+        dashboard = ProteinTableVisualiser(results)
+        dashboard.save(save_dir / f"{query_name}_dashboard.html")
