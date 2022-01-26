@@ -121,3 +121,22 @@ class PHmmer(Program):
         arguments.extend([str(seqfile), str(seqdb)])
         logging.info("Running phmmer with %s as query and %s as DB.", seqfile, seqdb)
         return self._run(arguments)
+
+
+class Hmmbuild(Program):
+    def __init__(self, cores: int = 2) -> None:
+        super().__init__("hmmbuild")
+        self.cores = cores
+
+    def run(
+        self,
+        hmmfile: Union[str, Path],
+        msafile: Union[str, Path],
+        single_seq: bool = False,
+    ):
+        arguments = ["--cpu", str(self.cores)]
+        if single_seq:
+            arguments.append("--singlemx")
+        arguments.extend([hmmfile, msafile])
+        logging.info("Running hmmbuild to build HMM from %s", msafile)
+        return self._run(arguments)
