@@ -43,6 +43,7 @@ class Program(abc.ABC):
 
         command = [self.program]
         command.extend(arguments)
+        # TODO: Find a way to log stream of stdout and stderr and forward it to logging
         try:
             if stdout_file:
                 stdout = open(stdout_file, "wt")
@@ -64,8 +65,9 @@ class Program(abc.ABC):
                         self.program,
                         stderr_message,
                     )
-                stdout_message = process.stdout.read().strip()
-                logging.debug("%s stdout: %s", self.program, stdout_message)
+                if process.stdout:
+                    stdout_message = process.stdout.read().strip()
+                    logging.debug("%s stdout: %s", self.program, stdout_message)
 
             if stdout_file:
                 stdout_file.close()
