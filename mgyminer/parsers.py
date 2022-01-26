@@ -188,7 +188,8 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
     # Split description field
     proteinTable.drop("LEN", axis=1, inplace=True)
     for column in ["PL", "UP", "biome", "CR"]:
-        proteinTable[column] = proteinTable[column].apply(lambda x: x.split("=")[1])
+        if not proteinTable[column].isnull().values.any():
+            proteinTable[column] = proteinTable[column].apply(lambda x: x.split("=")[1])
 
     # Calculate coverages
     proteinTable["coverage_hit"] = round(
