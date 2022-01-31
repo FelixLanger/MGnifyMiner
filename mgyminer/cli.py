@@ -7,6 +7,7 @@ from mgyminer.metadata import get_metadata
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
+from mgyminer.structure import fetch_structure
 from mgyminer.utils import export_sequences
 
 from mgyminer.filter import (  # isort:skip
@@ -305,6 +306,42 @@ def create_parser():
         help="Path to the protein search or filter result file",
     )
     matedata_parser.set_defaults(func=get_metadata)
+
+    structure_parser = subparsers.add_parser(
+        "structure", help="try to fetch structure information from PDB"
+    )
+    structure_parser.add_argument(
+        "--input",
+        type=Path,
+        required=True,
+        metavar="path/to/filter_output.csv",
+        help="Path to sequence search output file",
+    )
+    structure_parser.add_argument(
+        "--msa",
+        "-m",
+        type=Path,
+        required=True,
+        metavar="./path/to/alignment.sto",
+        help="Path to alignment file from sequence search",
+    )
+    structure_parser.add_argument(
+        "--ntop",
+        "-n",
+        type=int,
+        required=False,
+        default=5,
+        metavar=5,
+        help="n top hits to fetch from PDB (5 default)",
+    )
+    structure_parser.add_argument(
+        "--keep",
+        "-k",
+        default=False,
+        action="store_true",
+        help="keep intermediate files",
+    )
+    structure_parser.set_defaults(func=fetch_structure)
 
     return parser
 
