@@ -207,3 +207,39 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
     )
 
     return proteinTable
+
+
+def parse_hmmer_table(domtable: Union[Path, str]) -> DataFrame:
+    """
+    Parse HMMER Table to pandas DataFrame
+    :param domtable: Path to domain table file
+    :return: domain table pandas DataFrame
+    """
+    table = pd.read_csv(
+        domtable,
+        sep=r"\s+",
+        comment="#",
+        index_col=False,
+        names=[
+            "target_name",
+            "target_accession",
+            "query_name",
+            "query_accession",
+            "e-value",
+            "score",
+            "bias",
+            "best1_e-value",
+            "best1_score",
+            "best1_bias",
+            "exp",
+            "reg",
+            "clu",
+            "ov",
+            "env",
+            "dom",
+            "rep",
+            "inc",
+            "description of target",
+        ],
+    )
+    return table
