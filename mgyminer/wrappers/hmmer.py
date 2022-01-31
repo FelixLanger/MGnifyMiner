@@ -78,10 +78,10 @@ class PHmmer(Program):
         seqfile: Union[str, Path],
         seqdb: Union[str, Path],
         output_file: Union[str, Path],
-        notextw=True,
-        heuristic=True,
+        notextw: bool = True,
+        heuristic: bool = True,
         **kwargs,
-    ):
+    ) -> bool:
         if isinstance(seqfile, str):
             seqfile = Path(seqfile)
         if isinstance(seqdb, str):
@@ -133,10 +133,56 @@ class Hmmbuild(Program):
         hmmfile: Union[str, Path],
         msafile: Union[str, Path],
         single_seq: bool = False,
-    ):
+    ) -> bool:
         arguments = ["--cpu", str(self.cores)]
         if single_seq:
             arguments.append("--singlemx")
         arguments.extend([hmmfile, msafile])
         logging.info("Running hmmbuild to build HMM from %s", msafile)
+        return self._run(arguments)
+
+
+class Hmmsearch(Program):
+    def __init__(self, cores: int = 2) -> None:
+        super().__init__("hmmsearch")
+        self.cores = cores
+
+    def run(
+        self,
+        hmmfile: Union[str, Path],
+        seqdb: Union[str, Path],
+        output_file: Union[str, Path],
+        tblout: Union[str, Path] = None,
+        domtblout: Union[str, Path] = None,
+        alignment: Union[str, Path] = None,
+        cut_ga: bool = False,
+        notextw: bool = True,
+        heuristic: bool = True,
+        **kwargs,
+    ) -> bool:
+
+        arguments = []
+
+        if output_file:
+            arguments.extend(["-o", output_file])
+        if tblout:
+            arguments.extend(["--tblout", tblout])
+        if domtblout:
+            arguments.extend(["--domtblout", domtblout])
+        if domtblout:
+            arguments.extend(["--domtblout", domtblout])
+        if alignment:
+            arguments.extend(["-A", alignment])
+        if cut_ga:
+            arguments.append("--cut_ga")
+        if not heuristic:
+            arguments.append("--max")
+        if notextw:
+            arguments.append("--notextw")
+
+        arguments.extend(["--cpu", str(self.cores)])
+        arguments.extend([str(hmmfile), str(seqdb)])
+        logging.info(
+            "Running hmmsearch with %s as query hmm and %s as DB.", hmmfile, seqdb
+        )
         return self._run(arguments)
