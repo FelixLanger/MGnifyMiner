@@ -7,9 +7,9 @@ from pathlib import Path
 import mysql.connector
 import numpy as np
 import pandas as pd
-import yaml
 
 from mgyminer.proteinTable import ProteinTableVisualiser, proteinTable
+from mgyminer.utils import config
 
 
 def filter(args):
@@ -377,18 +377,7 @@ def domain_filter(args):
         print(results.to_string())
 
 
-def connect_database():
-    config_root = Path(__file__).parents[1]
-    with open(config_root / "config.yaml") as configfile:
-        cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    proteindb = mysql.connector.connect(**cfg["mysql_test"])
-    return proteindb
-
-
 def strict_select(pfams):
-    config_root = Path(__file__).parents[1]
-    with open(config_root / "config.yaml") as configfile:
-        cfg = yaml.load(configfile, Loader=yaml.CLoader)
     proteindb = mysql.connector.connect(**cfg["mysql_test"])
     cursor = proteindb.cursor()
     conditions = f"pfams LIKE '%{pfams[0]}%'"
@@ -410,9 +399,6 @@ def strict_select(pfams):
 
 
 def loose_select(pfams):
-    config_root = Path(__file__).parents[1]
-    with open(config_root / "config.yaml") as configfile:
-        cfg = yaml.load(configfile, Loader=yaml.CLoader)
     proteindb = mysql.connector.connect(**cfg["mysql_test"])
     cursor = proteindb.cursor()
     regex = "|".join(pfams)
@@ -430,3 +416,6 @@ def loose_select(pfams):
     else:
         hits["MGYP"] = hits["MGYP"].astype(int).apply(lambda x: f"MGYP{x:012d}")
         return hits
+
+
+cfg = config()
