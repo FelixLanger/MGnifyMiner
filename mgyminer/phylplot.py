@@ -5,6 +5,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 from Bio import Phylo
 
+# TODO phylo plot has huge problems:
+# Data input is dependent on args object,
+# Pfam acc : Name mapping is stupid, gives false names and breaks when a protein does not have a pfam
+# Needs to be rewritten
+
 
 def get_x_coordinates(tree):
     # Associates to  each clade a x-coord.
@@ -194,7 +199,7 @@ def plot_tree(args):
         return f"{row['target_name']}{domain}/{row['env_from']}-{row['env_to']}"
 
     metadata["dom_acc"] = metadata.apply(lambda row: _idpluscoords(row), axis=1)
-    query = metadata["query_name"][0]
+    query = metadata["query_name"].iloc[0]
 
     minimum = 0 if args.min is None else args.min
     maximum = math.inf if args.max is None else args.max

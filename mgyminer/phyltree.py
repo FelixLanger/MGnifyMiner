@@ -246,7 +246,12 @@ class treebuilder:
             seq_df[["dom_acc", "env_from", "env_to", "target_name"]].to_csv(
                 keyfile, index=False, header=False, sep=" "
             )
-            self.fetcher.run("testSeqDB.fa", keyfile, sequences, args=["-Cf"])
+            self.fetcher.run(
+                "/home/felix/PycharmProjects/MGnifyMiner/playground/2022-03-02-antioxidant-peptides/hit_sequences.fa",
+                keyfile,
+                sequences,
+                args=["-Cf"],
+            )
             self.hmmbuilder.run(hmm, self.query)
             # Append query sequence to the alignment to add it to the tree
             with open(sequences, "at") as fout, open(self.query, "rt") as fin:
