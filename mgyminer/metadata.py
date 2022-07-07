@@ -95,10 +95,14 @@ async def fetch_api(session, url, format=None):
 def get_sample_accession(assembly_metadata):
     """Take assembly api response and parse out the corresponding sample accession"""
     if assembly_metadata:
-        sample_accession = assembly_metadata["data"]["relationships"]["samples"][
-            "data"
-        ][0]["id"]
-        return sample_accession
+        try:
+            sample_accession = assembly_metadata["data"]["relationships"]["samples"][
+                "data"
+            ][0]["id"]
+            return sample_accession
+        # do nothing in the cases where there is an assembly entry in the api that is not pointing to a sample
+        except IndexError:
+            return None
 
 
 def metadata_dict(meta_xml):
@@ -158,6 +162,7 @@ def add_metadata(df, interests, metadata, assemblies_mapping):
     meta_mapping = {
         "temperature": ["temperature", "temp"],
         "alkalinity": ["alkalinity"],
+        "biome": ["environment (biome)"],
         "depth": ["depth", "geographic location (depth)"],
         "location": [
             "geo_loc_name",
@@ -233,7 +238,7 @@ def get_metadata(args):
     ]
     metadata = asyncio.run(sample_metadata(all_assemblies))
     meta_df = add_metadata(
-        df, ["location", "ph", "temperature"], metadata, assemblies_mapping
+        df, ["location", "ph", "biome", "temperature"], metadata, assemblies_mapping
     )
     meta_df["temperature"] = meta_df["temperature"].apply(
         lambda x: make_min_max(only_numeric(x))
