@@ -5,16 +5,17 @@ from pathlib import Path
 import pytest
 
 from mgyminer.wrappers.hmmer import PHmmer, esl_sfetch
+from tests.fixtures import data_dir
 
 
 @pytest.fixture
 def seqdb():
-    return Path("data/sequence_files/seqdb.fa")
+    return data_dir / "sequence_files/seqdb.fa"
 
 
 @pytest.fixture
 def queryseq():
-    return Path("data/sequence_files/query.fa")
+    return data_dir / "sequence_files/query.fa"
 
 
 def get_file_hash(file):
