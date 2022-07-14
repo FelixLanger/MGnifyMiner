@@ -70,8 +70,8 @@ def test_sequence_fetch(tmp_path, seqdb):
         ids = [
             line.split()[0].strip(">") for line in sequence_file if line.startswith(">")
         ]
-
+    test_db = Path(shutil.copy(seqdb, tmp_path))
     sfetcher = esl_sfetch()
     out_file = tmp_path / "sfetch_out.fa"
-    sfetcher.run(sequence_file=seqdb, sequence_ids=ids, out_file=out_file)
-    assert get_file_hash(out_file) == get_file_hash(seqdb)
+    sfetcher.run(sequence_file=test_db, sequence_ids=ids, out_file=out_file)
+    assert get_file_hash(out_file) == get_file_hash(test_db)
