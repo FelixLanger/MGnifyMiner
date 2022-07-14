@@ -1,6 +1,19 @@
 import hashlib
+from pathlib import Path
+
+import pytest
 
 from mgyminer.wrappers.hmmer import PHmmer
+
+
+@pytest.fixture
+def seqdb():
+    return Path("data/sequence_files/seqdb.fa")
+
+
+@pytest.fixture
+def queryseq():
+    return Path("data/sequence_files/query.fa")
 
 
 def get_file_hash(file):
@@ -17,15 +30,15 @@ def get_file_hash(file):
     return md5.hexdigest()
 
 
-def test_phmmer_run(tmpdir):
+def test_phmmer_run(tmpdir, queryseq, seqdb):
     phmmer = PHmmer(1)
     hmmer_output = tmpdir.join("hmmer.out")
     tbl = tmpdir.join("tbl.txt")
     domtbl = tmpdir.join("domtbl.txt")
     alignment = tmpdir.join("alignment.sto")
     phmmer.run(
-        seqfile="data/sequence_files/query.fa",
-        seqdb="data/sequence_files/seqdb.fa",
+        seqfile=queryseq,
+        seqdb=seqdb,
         output_file=hmmer_output,
         tblout=tbl,
         domtblout=domtbl,
