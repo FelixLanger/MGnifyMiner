@@ -37,12 +37,12 @@ def extract_alignments(hmmer_out: Union[Path, str]) -> dict:
 
 
 def calculate_identity_similarity(
-    consensus: str, round_to: int = 1
+    consensus: str, digit: int = 1
 ) -> Tuple[float, float]:
     """
     Calculate sequence similarity and identity values from a hmmer alignment consensus string
     :param consensus: hmmer consensus sequence
-    :param round_to: integers after point to keep
+    :param digit: digits after point to keep
     :return: (identity_percentage, similarity_percentage)
     """
     length = len(consensus)
@@ -50,8 +50,8 @@ def calculate_identity_similarity(
     mismatch = consensus.count(" ")
     identical = length - mismatch - similar
 
-    percent_identity = round(identical / length * 100, round_to)
-    percent_similarity = round((identical + similar) / length * 100, 1)
+    percent_identity = round(identical / length * 100, digit)
+    percent_similarity = round((identical + similar) / length * 100, digit)
 
     return percent_identity, percent_similarity
 
