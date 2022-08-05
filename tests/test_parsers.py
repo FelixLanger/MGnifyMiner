@@ -4,7 +4,7 @@ import string
 from unittest import TestCase
 
 from mgyminer.parsers import calculate_identity_similarity, extract_alignments
-from tests.fixtures import data_dir
+from tests.conftest import data_dir
 
 
 def test_extract_alignments():
