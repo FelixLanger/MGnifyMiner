@@ -149,11 +149,8 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
             "env_from",
             "env_to",
             "acc",
-            "PL",
-            "UP",
-            "biome",
-            "LEN",
-            "CR",
+            "_FL",
+            "_CR",
         ],
         dtype={
             "target_name": str,
@@ -178,18 +175,25 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
             "env_from": int,
             "env_to": int,
             "acc": np.object_,
-            "UP": str,
-            "biome": str,
-            "LEN": str,
-            "CR": str,
+            "_CR": str,
+            "_FL": str,
         },
     )
 
-    # Split description field
-    proteinTable.drop("LEN", axis=1, inplace=True)
-    for column in ["PL", "UP", "biome", "CR"]:
-        if not proteinTable[column].isnull().values.any():
-            proteinTable[column] = proteinTable[column].apply(lambda x: x.split("=")[1])
+    # New MGnify fasta format removed the PL UP BIOMES LEN CR description
+    # in favor of only CR and FL which are not necessarily in order and with missing entries
+    # Following lines will put CR and FL in the correct columns
+    proteinTable.fillna("-", inplace=True)
+    proteinTable.loc[proteinTable["_CR"] == "CR=1", "CR"] = "1"
+    proteinTable.loc[proteinTable["_CR"] == "CR=0", "CR"] = "0"
+    proteinTable.loc[proteinTable["_CR"] == "FL=0", "FL"] = "0"
+    proteinTable.loc[proteinTable["_CR"] == "FL=1", "FL"] = "1"
+    proteinTable.loc[proteinTable["_FL"] == "CR=1", "CR"] = "1"
+    proteinTable.loc[proteinTable["_FL"] == "CR=0", "CR"] = "0"
+    proteinTable.loc[proteinTable["_FL"] == "FL=0", "FL"] = "0"
+    proteinTable.loc[proteinTable["_FL"] == "FL=1", "FL"] = "1"
+
+    proteinTable.drop(["_CR", "_FL"], axis=1, inplace=True)
 
     # Calculate coverages
     proteinTable["coverage_hit"] = round(
