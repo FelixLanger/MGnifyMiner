@@ -21,10 +21,10 @@ def get_file_hash(file):
 
 def test_phmmer_run(tmp_path, queryseq, seqdb):
     phmmer = PHmmer(1)
-    hmmer_output = tmp_path.join("hmmer.out")
-    tbl = tmp_path.join("tbl.txt")
-    domtbl = tmp_path.join("domtbl.txt")
-    alignment = tmp_path.join("alignment.sto")
+    hmmer_output = tmp_path / "hmmer.out"
+    tbl = tmp_path / "tbl.txt"
+    domtbl = tmp_path / "domtbl.txt"
+    alignment = tmp_path / "alignment.sto"
     phmmer.run(
         seqfile=queryseq,
         seqdb=seqdb,
