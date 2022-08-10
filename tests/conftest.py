@@ -13,3 +13,8 @@ def seqdb():
 @pytest.fixture
 def queryseq():
     return data_dir / "sequence_files/query.fa"
+
+
+@pytest.fixture
+def phmmer_out():
+    return data_dir / "phmmer_output.csv"
