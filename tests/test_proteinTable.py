@@ -1,3 +1,5 @@
+import filecmp
+
 import pandas as pd
 import pytest
 
@@ -11,25 +13,33 @@ def mockTable(phmmer_out):
 
 def test_sort(mockTable, phmmer_out):
     df = pd.read_csv(phmmer_out)
-    # Test if normal sorting works
-    columns = ["e-value", "similarity", "identity"]
+    columns = ["e-value", "identity"]
     for column in columns:
         ascending = mockTable.sort(column, ascending=True)
         descending = mockTable.sort(column, ascending=False)
-        assert ascending.df[column].iloc[0] == df[column].min()
-        assert descending.df[column].iloc[0] == df[column].max()
+        assert list(ascending.df[column]) == sorted(df[column])
+        assert list(descending.df[column]) == sorted(df[column], reverse=True)
     descending = mockTable.sort(columns)
     column = columns[0]
     assert descending.df[column].iloc[0] == df[column].max()
+    with pytest.raises(ValueError):
+        mockTable.sort("notacolumn")
 
 
-def test_filter():
-    assert False
+def test_threshold(mockTable):
+    lessthan = mockTable.threshold("tlen", less=202)
+    assert len(lessthan.df) == 4
+    greaterthan = mockTable.threshold("tlen", greater=290)
+    assert len(greaterthan.df) == 5
+    inrange = mockTable.threshold("e-value", 127, 320)
+    assert len(inrange.df) == 7
+    with pytest.raises(ValueError):
+        mockTable.threshold("target_name", 100)
+    with pytest.raises(ValueError):
+        mockTable.threshold("notacolumn", 100)
 
 
-def test_biome():
-    assert False
-
-
-def test_save():
-    assert False
+def test_save(tmp_path, mockTable, phmmer_out):
+    test_output = tmp_path / "test_save.txt"
+    mockTable.save(test_output)
+    assert filecmp.cmp(test_output, phmmer_out)
