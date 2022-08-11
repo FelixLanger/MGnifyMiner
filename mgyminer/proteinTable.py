@@ -1,4 +1,3 @@
-import re
 from collections import Counter
 from pathlib import Path
 from typing import Union
@@ -33,71 +32,54 @@ class proteinTable:
     def sort(self, by: Union[str, list], ascending: bool = False):
         """
         General method to sort protein table by column values
-        :param by:
-        :param ascending:
-        :return:
+        :param by: columnname or list of columns to sort proteinTable
+        :param ascending: bool if sort should be ascending, default False
+        :return: sorted proteinTable
         """
         if not isinstance(by, list):
             by = [by]
-        # TODO remove conversion feature, or redo it in a way that we first check if input is in mapping or column
-        # and if not then raise Error
-        # by = self._to_columnNames(by)
 
         if not set(by).issubset(set(self.df.columns)):
             not_in_df = set(by) - set(set(self.df.columns))
-            raise KeyError(f"{not_in_df} not found in results table")
+            raise KeyError(f"{not_in_df} not found in proteinTable columns")
 
         by.extend(["target_name", "ndom"])
-        # Set orientation according to setting, but always sort ndom ascending to keep domain order
+        # Set orientation according to arguments, but always sort ndom ascending to keep domain order
         orientation = [ascending if _ != "ndom" else True for _ in by]
         return proteinTable(self.df.sort_values(by=by, ascending=orientation))
 
-    def _to_columnNames(self, names: Union[str, list]) -> list:
+    def threshold(self, column, greater=np.NINF, less=np.PINF):
         """
-        method to remap inputs to the corresponding column names
-        :param names:
-        :return:
-        """
-        if not isinstance(names, list):
-            names = [names]
-        mapping = {colname: colname for colname in self.df.columns}
-        addins = {"eval": "score", "e-value": "score", "evalue": "score"}
-        mapping = {**mapping, **addins}
-        return list(map(mapping.get, names))
-
-    def filter(self, by, value):
-        """
-        Filter proteinTable by any column value
-        :param by: column name
-        :param value: value to filter for (threshold with <,> or range with x-y)
+        Filter proteinTable based on value or value range in column.
+        Set only one threshold or multiple to define range.
+        :param column: column name
+        :param less: threshold where column values should be less than (<)
+        :param greater: threshold where column values should be greater than (>)
         :return: filtered Dataframe
         """
-        if by not in self.df.columns:
+        if column not in self.df.columns:
             raise ValueError(
-                f"{by} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
+                f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
             )
+        elif not np.issubdtype(self.df[column].dtype, np.number):
+            raise ValueError(f"{column} column is not numeric")
 
-        if np.issubdtype(self.df[by].dtype, np.number):
-            span = re.match(r"(\d+)-(\d+)", value)
-            thresh = re.match(r"([><])(.+)", value)
-            if thresh:
-                mod, v = thresh.groups()
-                v = np.float(v)
-                if mod == "<":
-                    return proteinTable(self.df[self.df[by] <= v])
-                elif mod == ">":
-                    return proteinTable(self.df[self.df[by] >= v])
+        return proteinTable(
+            self.df[(self.df["tlen"] >= greater) & (self.df["tlen"] <= less)]
+        )
 
-            elif span:
-                x, y = span.groups()
-                return proteinTable(
-                    self.df[self.df[by].between(np.float(x), np.float(y))]
-                )
-
-            else:
-                return proteinTable(self.df[self.df[by] <= np.float(value)])
-        else:
-            return proteinTable(self.df[self.df[by] == value])
+    def match(self, column, value):
+        """
+        Filter rows in proteinTable that have value in column
+        :param column: column name
+        :param value: value to filter for in column
+        :return: filtered Dataframe
+        """
+        if column not in self.df.columns:
+            raise ValueError(
+                f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
+            )
+        return proteinTable(self.df[self.df[column] == value])
 
     def biome(self, biome):
         """
