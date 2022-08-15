@@ -12,8 +12,6 @@ from mgyminer.phyltree import esl_sfetcher
 def export_sequences(args):
     """
     Export sequences from filters to FASTA format
-    :param results:
-    :return:
     """
     fetcher = esl_sfetcher()
     results = pd.read_csv(args.filter)
@@ -28,7 +26,7 @@ def mgyp_to_id(mgyp: Union[str, int]) -> str:
     """
     Strip MGYP beginning and leading zeroes from a MGYP accession
 
-    :param mgyps: Standard MGnify MGYP protein accession
+    :param mgyp: Standard MGnify MGYP protein accession
     :return: Plain protein ID without leading MGYP and zeroes
     """
     return mgyp.lstrip("MGYP0")
@@ -78,3 +76,10 @@ def parse_config(config_file: Path) -> dict:
 
 def config():
     return parse_config(find_config_file())
+
+
+def tryfloat(value):
+    try:
+        return float(value)
+    except ValueError:
+        return value
