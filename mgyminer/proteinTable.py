@@ -41,7 +41,7 @@ class proteinTable:
 
         if not set(by).issubset(set(self.df.columns)):
             not_in_df = set(by) - set(set(self.df.columns))
-            raise KeyError(f"{not_in_df} not found in proteinTable columns")
+            raise ValueError(f"{not_in_df} not found in proteinTable columns")
 
         by.extend(["target_name", "ndom"])
         # Set orientation according to arguments, but always sort ndom ascending to keep domain order

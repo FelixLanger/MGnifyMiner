@@ -43,3 +43,14 @@ def test_save(tmp_path, mockTable, phmmer_out):
     test_output = tmp_path / "test_save.txt"
     mockTable.save(test_output)
     assert filecmp.cmp(test_output, phmmer_out)
+
+
+def test_match(mockTable):
+    subset = mockTable.match("target_name", "MGYP000062928162")
+    assert len(subset.df) == 2
+    subset = mockTable.match("tlen", 292)
+    assert len(subset.df) == 1
+    subset = mockTable.match("coverage_query", 99.66)
+    assert len(subset.df) == 2
+    with pytest.raises(ValueError):
+        mockTable.match("notacolumn", "something")
