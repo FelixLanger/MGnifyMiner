@@ -17,4 +17,4 @@ def queryseq():
 
 @pytest.fixture
 def phmmer_out():
-    return data_dir / "phmmer_output.csv"
+    return data_dir / "phmmer_results.csv"
