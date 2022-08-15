@@ -12,6 +12,7 @@ from mgyminer.utils import export_sequences
 
 from mgyminer.filter import (  # isort:skip
     domain_filter,
+    sort,
     filter,
     plot_residue_histogram,
     residue_filter,
@@ -65,6 +66,35 @@ def create_parser():
     )
     phmmer_parser.set_defaults(func=phmmer)
 
+    # Arguments for sorting
+    sort_parser = subparsers.add_parser("sort", help="sort search results by feature")
+    sort_parser.add_argument(
+        "--input",
+        type=Path,
+        metavar="path/to/search_output.txt",
+        help="Path to sequence search output file",
+    )
+    sort_parser.add_argument(
+        "--feature",
+        type=str,
+        metavar="e-value",
+        nargs="+",
+        help="Feature to sort results by. List multiple features to do hierarchical sorting",
+        required=True,
+    )
+    sort_parser.add_argument(
+        "--ascending",
+        action="store_true",
+        help="order results ascending. Default descending",
+    )
+    sort_parser.set_defaults(func=sort)
+
+    sort_parser.add_argument(
+        "--output",
+        type=Path,
+        metavar="path/to/filter_output.csv",
+        help="Path to the desired output file",
+    )
     # Arguments for filter step
     filter_parser = subparsers.add_parser(
         "filter", help="filter sequence search results"
@@ -72,6 +102,7 @@ def create_parser():
     filter_parser.add_argument(
         "--input",
         type=Path,
+        required=True,
         metavar="path/to/search_output.txt",
         help="Path to sequence search output file",
     )
@@ -79,54 +110,36 @@ def create_parser():
         "--feature",
         type=str,
         required=False,
-        metavar="",
-        nargs=2,
-        help="Filter by any feature e.g. e-value, coverage similarity,..\n"
-        "Ranges can be defined like: 1-100\n"
-        "Cutoffs can be defined like: <0.5 or >1e-15",
+        metavar="e-value",
+        help="Filter by any feature e.g. e-value, coverage similarity,..",
     )
-
     filter_parser.add_argument(
-        "--sort",
+        "--upper",
+        type=str,
         required=False,
-        nargs="+",
-        metavar="e-value, coverage_hit,coverage_query, similarity, identity",
-        help="Sort the output by one or multiple columns.",
+        metavar="100",
+        help="Upper limit of the desired values",
     )
-
     filter_parser.add_argument(
-        "--biome",
+        "--lower",
+        type=str,
         required=False,
-        metavar=[
-            "engineered",
-            "aquatic",
-            "marine",
-            "freshwater",
-            "soil",
-            "clay",
-            "shrubland",
-            "plants",
-            "human",
-            "human_digestive_system",
-            "human_not_digestive_system",
-            "animal",
-            "other",
-        ],
-        help="Filter proteins by biome of origin",
+        metavar="1E-40",
+        help="Lower limit of the desired values",
     )
-
+    filter_parser.add_argument(
+        "--match",
+        type=str,
+        required=False,
+        metavar="54.6",
+        help="Value that feature needs to match exactly",
+    )
     filter_parser.add_argument(
         "--output",
         type=Path,
         metavar="path/to/filter_output.csv",
         help="Path to the desired output file",
     ),
-    filter_parser.add_argument(
-        "--dashboard",
-        "-d",
-        action="store_true",
-        help="generate a dashboard with filter results statistics",
-    )
     filter_parser.set_defaults(func=filter)
 
     residue_parser = subparsers.add_parser(

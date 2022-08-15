@@ -1,36 +1,47 @@
-import csv
 import json
 import re
 from collections import Counter
-from pathlib import Path
 
 import mysql.connector
 import numpy as np
 import pandas as pd
 
-from mgyminer.proteinTable import ProteinTableVisualiser, proteinTable
-from mgyminer.utils import config
+from mgyminer.proteinTable import proteinTable
+from mgyminer.utils import config, tryfloat
 
 
 def filter(args):
+
+    if args.match and any([args.upper, args.lower]):
+        exit(
+            "Only use match or upper/lower. Not both. Use [MgnifyMiner filter --help] for more info"
+        )
+
     pt = proteinTable(args.input)
-    if args.feature:
-        by, value = args.feature
-        pt = pt.filter(by, value)
-
-    if args.biome:
-        pt = pt.biome(args.biome)
-
-    if args.sort:
-        pt = pt.sort(args.sort)
+    if args.match:
+        pt = pt.match(args.feature, tryfloat(args.match))
+    if any([args.upper, args.lower]):
+        if args.upper is None:
+            upper = np.PINF
+        else:
+            upper = tryfloat(args.upper)
+        if args.lower is None:
+            lower = np.NINF
+        else:
+            lower = tryfloat(args.lower)
+        pt = pt.threshold(args.feature, greater=lower, less=upper)
 
     if args.output:
         pt.save(args.output)
-    if args.dashboard:
-        outdir = args.output.parents[0]
-        name = args.output.name.split(".")[0]
-        ptvis = ProteinTableVisualiser(pt)
-        ptvis.save(outdir / f"{name}.html")
+    else:
+        print(pt.df.to_string())
+
+
+def sort(args):
+    pt = proteinTable(args.input)
+    pt = pt.sort(args.feature, ascending=args.ascending)
+    if args.output:
+        pt.save(args.output)
     else:
         print(pt.df.to_string())
 
@@ -120,93 +131,93 @@ def index_on_target(pos, query_seq):
     return index
 
 
-def parse_domtable(file):
+# def parse_domtable(file):
+#
+#     column_names = [
+#         "target_name",
+#         "target_accession",
+#         "tlen",
+#         "query_name",
+#         "query_accession",
+#         "qlen",
+#         "e-value",
+#         "score",
+#         "bias",
+#         "ndom",
+#         "ndom_of",
+#         "c-value",
+#         "i-value",
+#         "dom_score",
+#         "dom_bias",
+#         "hmm_from",
+#         "hmm_to",
+#         "ali_from",
+#         "ali_to",
+#         "env_from",
+#         "env_to",
+#         "acc",
+#         "description",
+#     ]
+#
+#     convert_dict = {
+#         "target_name": str,
+#         "target_accession": str,
+#         "tlen": int,
+#         "query_name": str,
+#         "query_accession": str,
+#         "qlen": int,
+#         "e-value": float,
+#         "score": float,
+#         "bias": float,
+#         "ndom": int,
+#         "ndom_of": int,
+#         "c-value": float,
+#         "i-value": float,
+#         "dom_score": float,
+#         "dom_bias": float,
+#         "hmm_from": int,
+#         "hmm_to": int,
+#         "ali_from": int,
+#         "ali_to": int,
+#         "env_from": int,
+#         "env_to": int,
+#         "acc": float,
+#         "description": str,
+#     }
+#
+#     closeit = False
+#     if isinstance(file, str):
+#         file = Path(file)
+#
+#     if isinstance(file, Path):
+#         file = open(file, "r")
+#         closeit = True
+#
+#     rows = []
+#     for line in csv.reader(decomment(file), delimiter=" ", skipinitialspace=True):
+#         row = [item for item in line]
+#         row[22] = " ".join(row[22:])
+#         del row[23:]
+#         rows.append(row)
+#
+#     if closeit:
+#         file.close()
+#
+#     dom_table_df = pd.DataFrame(rows, columns=column_names)
+#     dom_table_df = dom_table_df.astype(convert_dict)
+#     return dom_table_df
+#
+#
+# def decomment(rows):
+#     for row in rows:
+#         if row.startswith("#"):
+#             continue
+#         yield row
 
-    column_names = [
-        "target_name",
-        "target_accession",
-        "tlen",
-        "query_name",
-        "query_accession",
-        "qlen",
-        "e-value",
-        "score",
-        "bias",
-        "ndom",
-        "ndom_of",
-        "c-value",
-        "i-value",
-        "dom_score",
-        "dom_bias",
-        "hmm_from",
-        "hmm_to",
-        "ali_from",
-        "ali_to",
-        "env_from",
-        "env_to",
-        "acc",
-        "description",
-    ]
-
-    convert_dict = {
-        "target_name": str,
-        "target_accession": str,
-        "tlen": int,
-        "query_name": str,
-        "query_accession": str,
-        "qlen": int,
-        "e-value": float,
-        "score": float,
-        "bias": float,
-        "ndom": int,
-        "ndom_of": int,
-        "c-value": float,
-        "i-value": float,
-        "dom_score": float,
-        "dom_bias": float,
-        "hmm_from": int,
-        "hmm_to": int,
-        "ali_from": int,
-        "ali_to": int,
-        "env_from": int,
-        "env_to": int,
-        "acc": float,
-        "description": str,
-    }
-
-    closeit = False
-    if isinstance(file, str):
-        file = Path(file)
-
-    if isinstance(file, Path):
-        file = open(file, "r")
-        closeit = True
-
-    rows = []
-    for line in csv.reader(decomment(file), delimiter=" ", skipinitialspace=True):
-        row = [item for item in line]
-        row[22] = " ".join(row[22:])
-        del row[23:]
-        rows.append(row)
-
-    if closeit:
-        file.close()
-
-    dom_table_df = pd.DataFrame(rows, columns=column_names)
-    dom_table_df = dom_table_df.astype(convert_dict)
-    return dom_table_df
-
-
-def decomment(rows):
-    for row in rows:
-        if row.startswith("#"):
-            continue
-        yield row
-
-
-def calculate_coverage(df):
-    df["coverage_hit"] = round((df["ali_to"] - df["ali_from"]) / df["tlen"], 2)
-    df["coverage_query"] = round((df["ali_to"] - df["ali_from"]) / df["qlen"], 2)
+#
+# def calculate_coverage(df):
+#     df["coverage_hit"] = round((df["ali_to"] - df["ali_from"]) / df["tlen"], 2)
+#     df["coverage_query"] = round((df["ali_to"] - df["ali_from"]) / df["qlen"], 2)
 
 
 def _extract_range(threshold):
@@ -217,30 +228,30 @@ def _extract_range(threshold):
     return threshold_range
 
 
-def alignments(file):
-    closeit = False
-    if isinstance(file, str):
-        file = Path(file)
-
-    if isinstance(file, Path):
-        file = open(file, "r")
-        closeit = True
-
-    alignment_upcomming = False
-    alignment = []
-    for line in decomment(file):
-        if alignment_upcomming is True:
-            alignment.append(line)
-            if len(alignment) > 2:
-                alignment_upcomming = False
-                yield alignment
-        elif line.startswith("  =="):
-            alignment_upcomming = True
-            alignment = []
-        else:
-            continue
-    if closeit:
-        file.close()
+# def alignments(file):
+#     closeit = False
+#     if isinstance(file, str):
+#         file = Path(file)
+#
+#     if isinstance(file, Path):
+#         file = open(file, "r")
+#         closeit = True
+#
+#     alignment_upcomming = False
+#     alignment = []
+#     for line in decomment(file):
+#         if alignment_upcomming is True:
+#             alignment.append(line)
+#             if len(alignment) > 2:
+#                 alignment_upcomming = False
+#                 yield alignment
+#         elif line.startswith("  =="):
+#             alignment_upcomming = True
+#             alignment = []
+#         else:
+#             continue
+#     if closeit:
+#         file.close()
 
 
 def end_of_column(string):
@@ -255,33 +266,33 @@ def end_of_column(string):
             found_letter = True
 
 
-def get_alignment_consensus(file):
-    alignments_dict = {}
-    for alignment in alignments(file):
-        # get the start index of the consensus sequence.
-        # problem: amount of leading witespaces is dependend on the length of query or target sequence but needs to
-        # be exactly calculated because whitespaces in the consensus stand for mismatches of the two aligned sequences
-        # Solution: count characters until you hit the first whitespace after hitting letters. Doing it once to get
-        # lenght until the name. doing it twice to get characters until the end of the start coordinates.
-        temp_index = end_of_column(alignment[2])
-        start_index = temp_index + end_of_column(alignment[2][temp_index:]) + 1
-        consensus = alignment[1][start_index:].strip("\n")
-        query_id, query_start, query_seq, query_end = alignment[0].split()
-        target_id, target_start, target_seq, target_end = alignment[2].split()
-        key = f"{target_id}-{target_start}-{target_end}"
-        perc_ident, perc_sim = calculate_identity_similarity(consensus)
-        alignments_dict[key] = {
-            "consensus": consensus,
-            "target_start": target_start,
-            "target_end": target_end,
-            "target_seq": target_seq,
-            "query_start": query_start,
-            "query_end": query_end,
-            "query_seq": query_seq,
-            "perc_ident": perc_ident,
-            "perc_sim": perc_sim,
-        }
-    return alignments_dict
+# def get_alignment_consensus(file):
+#     alignments_dict = {}
+#     for alignment in alignments(file):
+#         # get the start index of the consensus sequence.
+#         # problem: amount of leading witespaces is dependend on the length of query or target sequence but needs to
+#         # be exactly calculated because whitespaces in the consensus stand for mismatches of the two aligned sequences
+#         # Solution: count characters until you hit the first whitespace after hitting letters. Doing it once to get
+#         # lenght until the name. doing it twice to get characters until the end of the start coordinates.
+#         temp_index = end_of_column(alignment[2])
+#         start_index = temp_index + end_of_column(alignment[2][temp_index:]) + 1
+#         consensus = alignment[1][start_index:].strip("\n")
+#         query_id, query_start, query_seq, query_end = alignment[0].split()
+#         target_id, target_start, target_seq, target_end = alignment[2].split()
+#         key = f"{target_id}-{target_start}-{target_end}"
+#         perc_ident, perc_sim = calculate_identity_similarity(consensus)
+#         alignments_dict[key] = {
+#             "consensus": consensus,
+#             "target_start": target_start,
+#             "target_end": target_end,
+#             "target_seq": target_seq,
+#             "query_start": query_start,
+#             "query_end": query_end,
+#             "query_seq": query_seq,
+#             "perc_ident": perc_ident,
+#             "perc_sim": perc_sim,
+#         }
+#     return alignments_dict
 
 
 def calculate_identity_similarity(consensus):
