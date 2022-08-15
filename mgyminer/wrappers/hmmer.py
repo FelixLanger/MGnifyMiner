@@ -14,7 +14,7 @@ class esl_sfetch(Program):
     def _is_indexed(seq_file: Path):
         """
         Check if sequence file has an esl-sfetch index
-        :return: bool depending if file has an index
+        :return: bool depending on if file has an index
         """
         index_file = seq_file.parent / (seq_file.name + ".ssi")
         return index_file.is_file()
