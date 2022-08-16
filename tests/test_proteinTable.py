@@ -31,8 +31,14 @@ def test_threshold(mockTable):
     assert len(lessthan.df) == 4
     greaterthan = mockTable.threshold("tlen", greater=290)
     assert len(greaterthan.df) == 5
-    inrange = mockTable.threshold("e-value", 127, 320)
-    assert len(inrange.df) == 7
+    inrange = mockTable.threshold("e-value", 1e-50, 1e-1)
+    assert list(inrange.df.target_name) == [
+        "MGYP000573421630",
+        "MGYP000604501205",
+        "MGYP001394579466",
+        "MGYP000062928162",
+        "MGYP000062928162",
+    ]
     with pytest.raises(ValueError):
         mockTable.threshold("target_name", 100)
     with pytest.raises(ValueError):

@@ -65,7 +65,7 @@ class proteinTable:
             raise ValueError(f"{column} column is not numeric")
 
         return proteinTable(
-            self.df[(self.df["tlen"] >= greater) & (self.df["tlen"] <= less)]
+            self.df[(self.df[column] >= greater) & (self.df[column] <= less)]
         )
 
     def match(self, column, value):
