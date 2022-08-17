@@ -158,7 +158,7 @@ def create_parser():
         "-r",
         nargs="+",
         action="append",
-        metavar="[residue in/exclute AminoAcid1 AA2 ...]",
+        metavar="[residue in/exclude AminoAcid1 AA2 ...]",
         help="Filter sequence search hits for specific residues corresponding to the query "
         "sequence. 1st: residue position on query sequence"
         " 2nd: set the filter to include or exclude the aminoacids. "
@@ -281,7 +281,7 @@ def create_parser():
     export_parser.set_defaults(func=export_sequences)
 
     domain_parser = subparsers.add_parser(
-        "domain", help="filter target proteins by PFAM domains"
+        "domain", help="filter target proteins by Pfam domains"
     )
     domain_parser.add_argument(
         "--input",
@@ -291,7 +291,7 @@ def create_parser():
         help="Path to sequence search output file",
     )
     domain_parser.add_argument(
-        "--arch", "-a", nargs="+", help="Pfams that should be filtered for"
+        "--arch", "-a", nargs="+", help="Pfam domains that should be filtered for"
     )
     domain_parser.add_argument(
         "--strict",
@@ -344,7 +344,7 @@ def create_parser():
         type=int,
         required=False,
         default=5,
-        metavar=5,
+        metavar="5",
         help="n top hits to fetch from PDB (5 default)",
     )
     structure_parser.add_argument(
