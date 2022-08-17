@@ -1,11 +1,9 @@
-import sys
 import tempfile
-from pathlib import Path
 from typing import Union
 
 import pandas as pd
-import yaml
 
+from mgyminer.config import config
 from mgyminer.phyltree import esl_sfetcher
 
 
@@ -15,14 +13,18 @@ def export_sequences(args):
     """
     fetcher = esl_sfetcher()
     results = pd.read_csv(args.filter)
+    if args.seqdb:
+        seqdb = args.seqdb
+    else:
+        seqdb = config["seqdb"]
     with tempfile.NamedTemporaryFile() as temp:
         results["target_name"].drop_duplicates().to_csv(
             temp.name, index=False, header=False
         )
-        fetcher.run("testSeqDB.fa", temp.name, args.output, args=["-f"])
+        fetcher.run(seqdb, temp.name, args.output, args=["-f"])
 
 
-def mgyp_to_id(mgyp: Union[str, int]) -> str:
+def mgyp_to_id(mgyp: str) -> str:
     """
     Strip MGYP beginning and leading zeroes from a MGYP accession
 
@@ -32,9 +34,9 @@ def mgyp_to_id(mgyp: Union[str, int]) -> str:
     return mgyp.lstrip("MGYP0")
 
 
-def proteinID_to_mgyp(id: str) -> str:
+def proteinID_to_mgyp(id: Union[str, int]) -> str:
     """
-    Convert a protein ID into MGnigy protein accession
+    Convert a protein ID into MGnify protein accession
 
     :param id: numeric protein ID
     :return: MGnify MGYP accession
@@ -44,41 +46,14 @@ def proteinID_to_mgyp(id: str) -> str:
     return "MGYP%012d" % int(id)
 
 
-def find_config_file() -> Path:
+def tryfloat(value: str) -> Union[str, float]:
     """
-    Search through directories for mgyminer config file.
-    Files are used by descending priority:
-        - mgyminer.yaml in current working directory
-        - .mgyminer.yaml in $HOME directory (dotfile)
-    :return: Path to config_file
+    Test if a string can be converted to a float and return that given float if possible
+    This is useful for scientific notations that are parsed from the command line as strings
+    such as 1E-15, 1e5, etc. so that they can be used as floats and used as such later on.
+    :param value: string that should be checked if it can be represented as float
+    :return: float of value if it can be represented as such, else return initial string
     """
-    paths = list(
-        filter(
-            lambda x: x.exists(),
-            [Path() / "mgyminer.yaml", Path.home() / ".mgyminer.yaml"],
-        )
-    )
-
-    if paths:
-        return paths[0]
-    else:
-        sys.exit("Exited\nCoun't find mgyminer.yaml config file")
-
-
-def parse_config(config_file: Path) -> dict:
-    """
-    Parse the yaml config_file into Python dirctionary
-    """
-    with open(config_file) as configfile:
-        cfg = yaml.load(configfile, Loader=yaml.CLoader)
-    return cfg
-
-
-def config():
-    return parse_config(find_config_file())
-
-
-def tryfloat(value):
     try:
         return float(value)
     except ValueError:
