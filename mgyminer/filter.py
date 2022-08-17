@@ -6,8 +6,9 @@ import mysql.connector
 import numpy as np
 import pandas as pd
 
+from mgyminer.config import config
 from mgyminer.proteinTable import proteinTable
-from mgyminer.utils import config, tryfloat
+from mgyminer.utils import tryfloat
 
 
 def filter(args):
@@ -429,4 +430,4 @@ def loose_select(pfams):
         return hits
 
 
-cfg = config()
+cfg = config

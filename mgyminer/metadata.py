@@ -9,7 +9,8 @@ import mysql.connector
 import pandas as pd
 from aiohttp_client_cache import CachedSession, SQLiteBackend
 
-from mgyminer.utils import config, mgyp_to_id, proteinID_to_mgyp
+from mgyminer.config import config
+from mgyminer.utils import mgyp_to_id, proteinID_to_mgyp
 
 logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)s:%(name)s: %(message)s",
@@ -24,15 +25,7 @@ assebmly_api = "https://www.ebi.ac.uk/metagenomics/api/v1/assemblies/{id}?format
 ena_sample_api = "https://www.ebi.ac.uk/ena/browser/api/xml/{id}"
 
 
-# def get_config():
-#     """Get Mysql Database crenentials from config.yaml file"""
-#     config_root = Path(__file__).parents[1]
-#     with open(config_root / "config.yaml") as configfile:
-#         cfg = yaml.load(configfile, Loader=yaml.CLoader)
-#     return cfg
-
-
-cfg = config()
+cfg = config
 
 
 def find_origin_assemblies(mgyps: List) -> dict:
