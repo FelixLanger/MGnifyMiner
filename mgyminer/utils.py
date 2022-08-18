@@ -1,27 +1,23 @@
-import tempfile
 from typing import Union
 
 import pandas as pd
 
 from mgyminer.config import config
-from mgyminer.phyltree import esl_sfetcher
+from mgyminer.wrappers.hmmer import esl_sfetch
 
 
 def export_sequences(args):
     """
     Export sequences from filters to FASTA format
     """
-    fetcher = esl_sfetcher()
+    fetcher = esl_sfetch()
     results = pd.read_csv(args.filter)
+    target_ids = results.target_name.drop_duplicates().to_list()
     if args.seqdb:
         seqdb = args.seqdb
     else:
-        seqdb = config["seqdb"]
-    with tempfile.NamedTemporaryFile() as temp:
-        results["target_name"].drop_duplicates().to_csv(
-            temp.name, index=False, header=False
-        )
-        fetcher.run(seqdb, temp.name, args.output, args=["-f"])
+        seqdb = config["files"]["seqdb"]
+    fetcher.run(seqdb, target_ids, args.output)
 
 
 def mgyp_to_id(mgyp: str) -> str:

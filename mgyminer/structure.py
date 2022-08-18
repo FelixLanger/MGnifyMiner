@@ -12,7 +12,7 @@ from mgyminer.wrappers.hmmer import Hmmbuild, Hmmsearch
 config_root = Path(__file__).parents[1]
 with open(config_root / "config.yaml") as configfile:
     cfg = yaml.load(configfile, Loader=yaml.CLoader)
-pdb_location = cfg["pdb"]["location"]
+pdb_location = cfg["files"]["pdb"]
 
 
 class PDBDatabase:

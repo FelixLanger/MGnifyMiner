@@ -1,22 +1,8 @@
-import hashlib
 import shutil
 from pathlib import Path
 
 from mgyminer.wrappers.hmmer import PHmmer, esl_sfetch
-
-
-def get_file_hash(file):
-    """
-    Get the md5 hash of file without the # commented lines
-    :param file: file to hash
-    :return: md5 hash digest
-    """
-    md5 = hashlib.md5()
-    with open(file, "rt") as fin:
-        for line in fin.readlines():
-            if not line.startswith("#"):
-                md5.update(line.encode("utf-8"))
-    return md5.hexdigest()
+from tests.helpers import get_file_hash
 
 
 def test_phmmer_run(tmp_path, queryseq, seqdb):

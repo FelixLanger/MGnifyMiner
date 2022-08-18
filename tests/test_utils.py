@@ -1,4 +1,8 @@
-from mgyminer.utils import mgyp_to_id, proteinID_to_mgyp, tryfloat
+import shutil
+
+from mgyminer.cli import create_parser
+from mgyminer.utils import export_sequences, mgyp_to_id, proteinID_to_mgyp, tryfloat
+from tests.helpers import get_file_hash
 
 
 def test_mgyp_to_id():
@@ -30,7 +34,12 @@ def test_tryfloat():
         assert tryfloat(case[0]) == case[1]
 
 
-# def test_export_sequences():
-#     from mgyminer.cli import create_parser
-#     parser = create_parser()
-#
+def test_export_sequences(tmp_path, seqdb, phmmer_out):
+    infile = tmp_path / seqdb.name
+    shutil.copy(seqdb, infile)
+    outfile = tmp_path / "outfile.fa"
+    parser = create_parser()
+    command = f"export --seqdb {infile} --filter {phmmer_out} --output {outfile}"
+    args = parser.parse_args(command.split())
+    export_sequences(args)
+    assert get_file_hash(outfile) == "63f250a900f7df88c3a32e3fda4c2b54"
