@@ -3,20 +3,19 @@
 import argparse
 from pathlib import Path
 
+from mgyminer.filter import (
+    domain_filter,
+    filter,
+    plot_residue_histogram,
+    residue_filter,
+    sort,
+)
 from mgyminer.metadata import get_metadata
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
 from mgyminer.structure import fetch_structure
 from mgyminer.utils import export_sequences
-
-from mgyminer.filter import (  # isort:skip
-    domain_filter,
-    sort,
-    filter,
-    plot_residue_histogram,
-    residue_filter,
-)
 
 
 def main():
@@ -265,6 +264,12 @@ def create_parser():
 
     export_parser = subparsers.add_parser(
         "export", help="export Protein sequences from filter results to FASTA file"
+    )
+    export_parser.add_argument(
+        "--seqdb",
+        type=Path,
+        required=False,
+        help="Path to the sequence database fasta file",
     )
     export_parser.add_argument(
         "--filter",
