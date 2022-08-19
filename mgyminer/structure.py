@@ -1,18 +1,13 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import requests
-import yaml
 
+from mgyminer.config import config
 from mgyminer.parsers import parse_hmmer_table
 from mgyminer.wrappers.hmmer import Hmmbuild, Hmmsearch
-
-config_root = Path(__file__).parents[1]
-with open(config_root / "config.yaml") as configfile:
-    cfg = yaml.load(configfile, Loader=yaml.CLoader)
-pdb_location = cfg["files"]["pdb"]
 
 
 class PDBDatabase:
@@ -45,10 +40,15 @@ class Structure_Fetcher:
         self.hmm = None
 
     def fetch_pdb_structures(
-        self, msa: Union[str, Path], ntop: int = 5, keep: bool = False
+        self,
+        msa: Union[str, Path],
+        ntop: int = 5,
+        keep: bool = False,
+        pdb_database: Optional[Union[str, Path]] = None,
     ):
         """
         Fetch the ntop best structure hits similar to the results of the sequence search result
+        :param pdb_database:
         :param ntop: number of structures to download
         :param keep: keep intermediate files if true
         :return:
@@ -69,9 +69,11 @@ class Structure_Fetcher:
 
         outfiles_stem = out_dir / (self.hmm.stem + "_vs_pdb")
         hmmsearch_tbl = outfiles_stem.with_suffix(".tbl")
+        if pdb_database is None:
+            pdb_database = config["files"]["pdb"]
         self.hmmsearch.run(
             self.hmm,
-            pdb_location,
+            pdb_database,
             outfiles_stem.with_suffix(".out"),
             tblout=hmmsearch_tbl,
         )

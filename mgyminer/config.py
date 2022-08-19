@@ -1,10 +1,10 @@
-import sys
 from pathlib import Path
+from typing import Optional, Union
 
 import yaml
 
 
-def find_config_file() -> Path:
+def _find_config_file() -> Union[Path, None]:
     """
     Search through directories for mgyminer config file.
     Files are used by descending priority:
@@ -22,16 +22,20 @@ def find_config_file() -> Path:
     if paths:
         return paths[0]
     else:
-        sys.exit("Exited\nCoun't find mgyminer.yaml config file")
+        return None
 
 
-def parse_config(config_file: Path) -> dict:
+def load_config(config_file: Optional[Path] = None) -> dict:
     """
-    Parse the yaml config_file into Python dirctionary
+    Parse the yaml config_file into Python dictionary
     """
+    if config_file is None:
+        config_file = _find_config_file()
+    if config_file is None:
+        return {}
     with open(config_file) as configfile:
         cfg = yaml.load(configfile, Loader=yaml.CLoader)
     return cfg
 
 
-config = parse_config(find_config_file())
+config = load_config()
