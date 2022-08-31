@@ -1,0 +1,9 @@
+name: MGnifyMiner
+channels:
+  - anaconda
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - fasttree=2.1.11=hec16e2b_1
+  - hmmer=3.3.2=h87f3376_2

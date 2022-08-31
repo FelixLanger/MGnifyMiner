@@ -22,7 +22,8 @@ jobs:
     - name: Install Conda environment from environment.yml
       uses: mamba-org/provision-with-micromamba@main
       with:
-        environment-file: false
+        environment-file: environment.yml
+        cache-downloads: true
         cache-env: true
     - name: Cache poetry virtualenv
       uses: actions/cache@v2
@@ -32,20 +33,19 @@ jobs:
         key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('poetry.lock') }}
     - name: Install poetry
       if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash -l {0}
       run: |
         python -m pip install --upgrade pip
         python -m pip install poetry
     - name: Set poetry config
+      shell: bash -l {0}
       run: python -m poetry config virtualenvs.create false
     - name: Install dependencies
       if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash -l {0}
       run: python -m poetry install
-    - name: Install conda dependencies
-      run: |
-        eval "$(micromamba shell hook --shell=bash)"
-        micromamba activate
-        micromamba install -c anaconda -c bioconda -c conda-forge hmmer=3.3 fasttree
     - name: Check code quality and formatting
+      shell: bash -l {0}
       run: |
         # stop the build if there are Python syntax errors or undefined names
         poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -54,7 +54,6 @@ jobs:
         poetry run black . --check
         poetry run isort . --check --profile black
     - name: Test with pytest
+      shell: bash -l {0}
       run: |
-        eval "$(micromamba shell hook --shell=bash)"
-        micromamba activate
         poetry run pytest
