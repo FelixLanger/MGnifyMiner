@@ -9,7 +9,7 @@ def test_phmmer_run(tmp_path, queryseq, seqdb):
     phmmer = PHmmer(1)
     hmmer_output = tmp_path / "hmmer.out"
     tbl = tmp_path / "tbl.txt"
-    domtbl = tmp_path / "domtbl.txt"
+    domtbl = tmp_path / "domTable.txt.txt"
     alignment = tmp_path / "alignment.sto"
     phmmer.run(
         seqfile=queryseq,
@@ -19,10 +19,10 @@ def test_phmmer_run(tmp_path, queryseq, seqdb):
         domtblout=domtbl,
         alignment=alignment,
     )
-    assert get_file_hash(hmmer_output) == "9229149ca98b38f3bfb7d27df60829db"
-    assert get_file_hash(tbl) == "3f1eecacfea8b9d02e88c9e1ac1006c1"
-    assert get_file_hash(domtbl) == "ad8e29dc35bcf765f3040ce733cb8519"
-    assert get_file_hash(alignment) == "72f04231ffc328ba5fed4e62b9170367"
+    assert get_file_hash(hmmer_output) == "beba727bb4d85ae16d817689ddaa1fbb"
+    assert get_file_hash(tbl) == "9dbfa9582f885ad77e07bac8508de355"
+    assert get_file_hash(domtbl) == "268891fe80d262e9ed39afbc297ba48a"
+    assert get_file_hash(alignment) == "981d34efafc91fcb4994b1bb095604d2"
 
 
 def test_esl_sfetch_index(tmp_path, seqdb):

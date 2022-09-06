@@ -1,113 +1,197 @@
-# phmmer_manylinux2010_x86_64 :: search a protein sequence against a protein database
+# phmmer :: search a protein sequence against a protein database
 # HMMER 3.3.2 (Nov 2020); http://hmmer.org/
 # Copyright (C) 2020 Howard Hughes Medical Institute.
 # Freely distributed under the BSD open source license.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# query sequence file:             X/P00582.fasta
-# target sequence database:        X/subDB.fa
-# output directed to file:         phmmer_out.txt
-# MSA of hits saved to file:       alignment.sto
-# per-seq hits tabular output:     tbl.txt
-# per-dom hits tabular output:     dom_tbl.txt
+# query sequence file:             ../tests/data/sequence_files/query.fa
+# target sequence database:        ../tests/data/sequence_files/seqdb.fa
+# output directed to file:         out
+# MSA of hits saved to file:       alignment
+# per-seq hits tabular output:     tbl
+# per-dom hits tabular output:     domtbl
 # max ASCII text line length:      unlimited
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Query:       sp|P00582|DPO1_ECOLI  [L=928]
-Description: DNA polymerase I OS=Escherichia coli (strain K12) OX=83333 GN=polA PE=1 SV=1
+Query:       sp|P0A7B3|NADK_ECOLI  [L=292]
+Description: NAD kinase OS=Escherichia coli (strain K12) OX=83333 GN=nadK PE=1 SV=1
 Scores for complete sequences (score includes all domains):
    --- full sequence ---   --- best 1 domain ---    -#dom-
     E-value  score  bias    E-value  score  bias    exp  N  Sequence         Description
     ------- ------ -----    ------- ------ -----   ---- --  --------         -----------
-          0 2073.4   9.2          0 2073.2   9.2    1.0  1  MGYP000560282607  PL=00 UP=1 BIOMES=0000000011000 LEN=928 CR=0
-          0 1885.9   9.5          0 1885.7   9.5    1.0  1  MGYP000146420439  PL=00 UP=0 BIOMES=0000000011000 LEN=1180 CR=1
-   2.7e-224  735.2   6.0   1.5e-166  544.1   2.3    2.0  2  MGYP000005943385  PL=10 UP=0 BIOMES=0000000011000 LEN=909 CR=0
-    6.5e-13   35.8   0.0    7.4e-08   19.1   0.0    2.5  3  MGYP001010558745  PL=00 UP=0 BIOMES=1000000000000 LEN=705 CR=0
+   9.4e-203  661.4   0.1   1.1e-202  661.3   0.1    1.0  1  MGYP000329524085  FL=0
+   8.1e-202  658.4   0.1   9.2e-202  658.2   0.1    1.0  1  MGYP000406905322  
+    1.1e-78  254.3   0.3    1.3e-78  254.1   0.3    1.0  1  MGYP000420419373  CR=1
+    7.2e-77  248.4   0.0    8.8e-77  248.1   0.0    1.0  1  MGYP001583336646  FL=0 CR=1
+    3.5e-38  121.5   0.6    9.8e-29   90.5   0.0    2.0  2  MGYP001082675080  FL=1 CR=1
+    5.6e-13   38.8   0.0    5.9e-13   38.7   0.0    1.2  1  MGYP000754038055  
+    1.7e-09   27.4   0.0    2.7e-09   26.7   0.0    1.3  1  MGYP000573421630  FL=0 CR=1
+    6.9e-09   25.3   0.0      8e-09   25.1   0.0    1.1  1  MGYP000604501205  CR=1
+    7.4e-09   25.2   0.0    7.4e-09   25.2   0.0    1.0  1  MGYP001394579466  FL=0
+    1.4e-06   17.8   0.7      4e-05   13.0   0.1    2.0  2  MGYP000062928162  
+    1.5e-06   17.7   0.0    1.5e-06   17.6   0.0    1.1  1  MGYP001450139400  FL=1 CR=1
 
 
 Domain annotation for each sequence (and alignments):
->> MGYP000560282607  PL=00 UP=1 BIOMES=0000000011000 LEN=928 CR=0
+>> MGYP000329524085  FL=0
    #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
  ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
-   1 ! 2073.2   9.2         0         0       1     928 []       1     928 []       1     928 [] 1.00
+   1 !  661.3   0.1  7.3e-203  1.1e-202       1     292 []       1     292 []       1     292 [] 1.00
 
   Alignments for each domain:
-  == domain 1  score: 2073.2 bits;  conditional E-value: 0
-  sp|P00582|DPO1_ECOLI   1 mvqipqnplilvdgssylyrayhafppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtntilgpeevvnkygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrwtadveagkwlqakgakpaakpqetsvadeapevtatvisydnyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiageefnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpllvevgsgenwdqah 928
-                           mvqipqnplilvdgssylyrayhafppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtntilgpeevvnkygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrwtadveagkwlqakgakpaa+pqetsvadeapevtatvisydnyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiageefnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpllvevgsgenwdqah
-      MGYP000560282607   1 MVQIPQNPLILVDGSSYLYRAYHAFPPLTNSAGEPTGAMYGVLNMLRSLIMQYKPTHAAVVFDAKGKTFRDELFEHYKSHRPPMPDDLRAQIEPLHAMVKAMGLPLLAVSGVEADDVIGTLAREAEKAGRPVLISTGDKDMAQLVTPNITLINTMTNTILGPEEVVNKYGVPPELIIDFLALMGDSSDNIPGVPGVGEKTAQALLQGLGGLDTLYAEPEKIAGLSFRGAKTMAAKLEQNKEVAYLSYQLATIKTDVELELTCEQLEVQQPAAEELLGLFKKYEFKRWTADVEAGKWLQAKGAKPAARPQETSVADEAPEVTATVISYDNYVTILDEETLKAWIAKLEKAPVFAFDTETDSLDNISANLVGLSFAIEPGVAAYIPVAHDYLDAPDQISRERALELLKPLLEDEKALKVGQNLKYDRGILANYGIELRGIAFDTMLESYILNSVAGRHDMDSLAERWLKHKTITFEEIAGKGKNQLTFNQIALEEAGRYAAEDADVTLQLHLKMWPDLQKHKGPLNVFENIEMPLVPVLSRIERNGVKIDPKVLHNHSEELTLRLAELEKKAHEIAGEEFNLSSTKQLQTILFEKQGIKPLKKTPGGAPSTSEEVLEELALDYPLPKVILEYRGLAKLKSTYTDKLPLMINPKTGRVHTSYHQAVTATGRLSSTDPNLQNIPVRNEEGRRIRQAFIAPEDYVIVSADYSQIELRIMAHLSRDKGLLTAFAEGKDIHRATAAEVFGLPLETVTSEQRRSAKAINFGLIYGMSAFGLARQLNIPRKEAQKYMDLYFERYPGVLEYMERTRAQAKEQGYVETLDGRRLYLPDIKSSNGARRAAAERAAINAPMQGTAADIIKRAMIAVDAWLQAEQPRVRMIMQVHDELVFEVHKDDVDAVAKQIHQLMENCTRLDVPLLVEVGSGENWDQAH 928
-                           89*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************9 PP
+  == domain 1  score: 661.3 bits;  conditional E-value: 7.3e-203
+  sp|P0A7B3|NADK_ECOLI   1 mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf 292
+                           mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf
+      MGYP000329524085   1 MNNHFKCIGIVGHPRHPTALTTHEMLYRWLCTKGYEVIVEQQIAHELQLKNVKTGTLAEIGQLADLAVVVGGDGNMLGAARTLARYDIKVIGINRGNLGFLTDLDPDNAQQQLADVLEGHYISEKRFLLEAQVCQQDCQKRISTAINEVVLHPGKVAHMIEFEVYIDEIFAFSQRSDGLIISTPTGSTAYSLSAGGPILTPSLDAITLVPMFPHTLSARPLVINSSSTIRLRFSHRRNDLEISCDSQIALPIQEGEDVLIRRCDYHLNLIHPKDYSYFNTLSTKLGWSKKLF 292
+                           8**************************************************************************************************************************************************************************************************************************************************************************************************8 PP
 
->> MGYP000146420439  PL=00 UP=0 BIOMES=0000000011000 LEN=1180 CR=1
+>> MGYP000406905322  
    #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
  ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
-   1 ! 1885.7   9.5         0         0       1     927 [.       1     929 [.       1     930 [. 0.99
+   1 !  658.2   0.1  6.3e-202  9.2e-202       1     292 []      19     310 .]      19     310 .] 1.00
 
   Alignments for each domain:
-  == domain 1  score: 1885.7 bits;  conditional E-value: 0
-  sp|P00582|DPO1_ECOLI   1 mvqipqnplilvdgssylyrayhafppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtntilgpeevvnkygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrwtadveagkwlqakgakpaakpqetsvadeape.v.tatvisydnyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiageefnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpllvevgsgenwdqa 927
-                           mvqip+nplilvdgssylyrayhafppltnsageptgamygvlnmlrsli+qy+ptha vvfdakgktfrdelfehykshrppmpddlraqieplh mvkamglpl+av gveaddvigtlareae+agrpvlistgdkdmaqlvtp itlintmtntilgp+evv kygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekia lsfrgaktmaakleqnk+vaylsyqlatiktdveleltce+levq paa++ll+lf++yefkrwt dveagkwlqakg kpaakp   + a ea e v  at +s ++yvtilde tl  wi kl++ap+fafdtetdsldnisan+vglsfa+epgvaay+pvahdyldapdqi rer l llkplledek lkvgqnlkydrgilany ielrgiafdtmlesyil+svagrhdmdsl++rwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwp lq+h+gpln+f++iemplvpvlsr+erngvkidp vlh hs+e+  rl ele++aheiage fnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpl++v+seqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarra aeraainapmqgtaadiikramiavd wl++e+prvrmimqvhdelvfevhkd++dav+k+ih+lmen t l vpllvevgsgenwd +
-      MGYP000146420439   1 MVQIPENPLILVDGSSYLYRAYHAFPPLTNSAGEPTGAMYGVLNMLRSLILQYQPTHAVVVFDAKGKTFRDELFEHYKSHRPPMPDDLRAQIEPLHKMVKAMGLPLMAVPGVEADDVIGTLAREAERAGRPVLISTGDKDMAQLVTPGITLINTMTNTILGPDEVVTKYGVPPELIIDFLALMGDSSDNIPGVPGVGEKTAQALLQGLGGLDTLYAEPEKIAELSFRGAKTMAAKLEQNKDVAYLSYQLATIKTDVELELTCEELEVQPPAADDLLALFRQYEFKRWTTDVEAGKWLQAKGGKPAAKPAAPAAAAEAEEeVeAATALSAEHYVTILDEATLLTWIDKLKQAPLFAFDTETDSLDNISANMVGLSFAVEPGVAAYVPVAHDYLDAPDQIPRERVLTLLKPLLEDEKVLKVGQNLKYDRGILANYDIELRGIAFDTMLESYILDSVAGRHDMDSLSDRWLKHKTITFEEIAGKGKNQLTFNQIALEEAGRYAAEDADVTLQLHLKMWPKLQQHEGPLNIFQHIEMPLVPVLSRVERNGVKIDPAVLHAHSQEIAQRLVELEQRAHEIAGEAFNLSSTKQLQTILFEKQGIKPLKKTPGGAPSTSEEVLEELALDYPLPKVILEYRGLAKLKSTYTDKLPLMINPKTGRVHTSYHQAVTATGRLSSTDPNLQNIPVRNEEGRRIRQAFIAPEDYVIVSADYSQIELRIMAHLSRDKGLLTAFAEGKDIHRATAAEVFGLPLDSVSSEQRRSAKAINFGLIYGMSAFGLARQLNIPRKEAQKYMDLYFERYPGVLEYMERTRAQAKEQGYVETLDGRRLYLPDIKSSNGARRAGAERAAINAPMQGTAADIIKRAMIAVDEWLRSEKPRVRMIMQVHDELVFEVHKDELDAVSKKIHELMENSTTLAVPLLVEVGSGENWDHS 929
-                           89*******************************************************************************************************************************************************************************************************************************************************************************************************************99999998762435899*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************86 PP
+  == domain 1  score: 658.2 bits;  conditional E-value: 6.3e-202
+  sp|P0A7B3|NADK_ECOLI   1 mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf 292
+                           mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigq adlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf
+      MGYP000406905322  19 MNNHFKCIGIVGHPRHPTALTTHEMLYRWLCTKGYEVIVEQQIAHELQLKNVKTGTLAEIGQQADLAVVVGGDGNMLGAARTLARYDIKVIGINRGNLGFLTDLDPDNAQQQLADVLEGHYISEKRFLLEAQVCQQDCQKRISTAINEVVLHPGKVAHMIEFEVYIDEIFAFSQRSDGLIISTPTGSTAYSLSAGGPILTPSLDAITLVPMFPHTLSARPLVINSSSTIRLRFSHRRNDLEISCDSQIALPIQEGEDVLIRRCDYHLNLIHPKDYSYFNTLSTKLGWSKKLF 310
+                           8**************************************************************************************************************************************************************************************************************************************************************************************************8 PP
 
->> MGYP000005943385  PL=10 UP=0 BIOMES=0000000011000 LEN=909 CR=0
+>> MGYP000420419373  CR=1
    #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
  ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
-   1 !  192.8   0.1   2.3e-60   2.3e-60       8     287 ..       6     284 ..       2     317 .. 0.93
-   2 !  544.1   2.3  1.5e-166  1.5e-166     329     884 ..     358     908 ..     338     909 .] 0.95
+   1 !  254.1   0.3     9e-79   1.3e-78       1     289 [.       1     290 [.       1     292 [. 0.97
 
   Alignments for each domain:
-  == domain 1  score: 192.8 bits;  conditional E-value: 2.3e-60
-  sp|P00582|DPO1_ECOLI   8 plilvdgssylyrayhaf..ppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtn...tilgpeevvnkygvp.peliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrw 287
-                            l+l+d+ + +yray+af   p  ns g  t+a+ g +n l+ ++ +  pth  v fd  g tfr e +e+yk++r   p+ +r  +  +  +++a  +p+l v g eaddvigtla ea + g    + t dkd  qlv+ n+ +     +    ++g ee+  k+ +   e +id+l lmgdssdnipg pgvgektaq l+  +g+++ l a  +++ g        +  k+e n+e+  +s  latik dv ++l    l  ++p  eel  +f++ ef+  
-      MGYP000005943385   6 KLFLLDAYALIYRAYYAFikNPRINSKGFNTSAILGFVNTLEEVLKKENPTHIGVAFDPSGPTFRHEAYEQYKAQREETPEAIRLSVPIIKDIIRAYRIPILEVPGYEADDVIGTLATEAGRQGIVTYMMTPDKDYGQLVSENVFMYRPKHSggfEVMGIEEIKAKFDIQsTEQVIDMLGLMGDSSDNIPGCPGVGEKTAQKLVAEFGSIENLLAHTDRLKGA-------LKTKVEANREMIAFSKFLATIKVDVPIKLDMNTLVREEPNEEELRKIFEELEFRTL 284
-                           6899**************555999*************************************************************************************************************************998765423379***********96369*********************************************98773.......56799******999***************************************865 PP
+  == domain 1  score: 254.1 bits;  conditional E-value: 9e-79
+  sp|P0A7B3|NADK_ECOLI   1 mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshr.rndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwsk 289
+                           m+ +fk +g+++ p      tt + ly+ l      v ++ + ah + +   +  ++  ++q  dl + +ggdg +l+aar + + ++ +igin g lgfl d+ p+  + q+  +leghy  e+r++l  q+ + d   +  +a+nev lh  k   +i++e y+d  f  sqrsdglii+tptgstay+ls ggp++ psldai lvp+ phtls rp+v++ +s i ++fs+r ++  +++cd+ +   i e + + i+r d  + l+hp d+ +fn l  klgwsk
+      MGYP000420419373   1 MDTQFKQVGLISKPDTSDISTTVQSLYQLLKQADINVCIDHETAHHVSVPAEQVMSMESLAQQCDLIMSIGGDGTLLSAARAIVNTNVPLIGINLGRLGFLVDISPEEMKAQIKQILEGHYHEEERIILNTQIIRNDEVIHEQSAFNEVALHRLKSPGLIDIETYVDHNFVNSQRSDGLIIATPTGSTAYALSGGGPLMHPSLDAIVLVPINPHTLSNRPIVVDGNSEISIKFSQRdKHKAQLTCDNVVLPSIFEDDLINIKRHDNKIRLLHPTDHDFFNILRVKLGWSK 290
+                           6789**************************************************************************************************************************************************************************************************************************************9946789*****98887899998899*****************************9 PP
 
-  == domain 2  score: 544.1 bits;  conditional E-value: 1.5e-166
-  sp|P00582|DPO1_ECOLI 329 nyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiag.kgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiag.eefnlsstkqlqtilfekqg.ikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdel 884
-                           +y  i  ee  k  i kl    ++++dtet   + + a lvg+sf+   + a yipv  +  +a       + +  ++pl e++ ++kvgqn+kyd  +l nyg++++g  fdtml  y+l     rh+md lae +l ++ti ++e+ g kgknq  +  +  e+  rya edadvtl+l   +  +l++h +  ++f  iemplvpvl +ie ngv+id + l   se +tlrl e+ek+ + +ag e fn+ s kq+  +lf++   ++  kkt  g   tseevle l   + +   ileyrgl kl sty d lp +inp+tgr+hts++qavtatgrlss++pnlqnip+r+e+g++ir+afi  +   + sadysqielrimahls+dk+++ af  g dih ataa+++ + +  vt++ rr ak  nfg+iyg+s fgla+++n+pr+ea++ +d yfe yp v eym+r+   a+e gyvet+  r+ +lpdi s n+  r  aer ainap+qg+aadiik am  +   lq+   + +mi+qvhdel
-      MGYP000005943385 358 DYQLIDTEEKRKKIIQKLLTKEILSIDTETTGTEPMEAELVGMSFSDAENRAYYIPVPANRDEAL------KIVNEFRPLYENKNSMKVGQNIKYDMIVLQNYGVQVKGKLFDTMLAHYVLQPE-LRHNMDYLAEIYLHYQTIHIDELIGaKGKNQKNMRDLPPEDVYRYACEDADVTLKLKNVLEKELKEHAAE-HLFYEIEMPLVPVLVNIESNGVRIDTEALKQSSEHFTLRLQEIEKEIYALAGgETFNIGSPKQVGEVLFDRLKiVEKAKKTKTGQYVTSEEVLESLRNKHAIIGKILEYRGLKKLLSTYIDALPQLINPRTGRIHTSFNQAVTATGRLSSSNPNLQNIPIRDEDGKEIRKAFIPDDGCEFFSADYSQIELRIMAHLSQDKNMIDAFLSGYDIHAATAAKIYKVDINDVTADMRRKAKTANFGIIYGISVFGLAERMNVPRQEAKELIDGYFETYPQVKEYMDRSIQVARENGYVETIFHRKRFLPDINSRNAVVRGYAERNAINAPIQGSAADIIKVAMSLIYRRLQSNNLKAKMILQVHDEL 908
-                           46666678999999*******************************************87654433......3344579*******************************************875.6*******************9976659***************************************9875.89999********************************************996378***************97625789***********************************************************************************************999999***************************************************************************************************************************************************************************************8 PP
-
->> MGYP001010558745  PL=00 UP=0 BIOMES=1000000000000 LEN=705 CR=0
+>> MGYP001583336646  FL=0 CR=1
    #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
  ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
-   1 ?   -2.5   0.0      0.25      0.25     409     435 ..      86     112 ..      32     125 .. 0.81
-   2 !   13.8   0.0   2.9e-06   2.9e-06     606     715 ..     344     458 ..     283     467 .. 0.81
-   3 !   19.1   0.0   7.4e-08   7.4e-08     731     914 ..     516     685 ..     510     697 .. 0.79
+   1 !  248.1   0.0     6e-77   8.8e-77       4     291 ..      30     318 ..      27     319 .. 0.97
 
   Alignments for each domain:
-  == domain 1  score: -2.5 bits;  conditional E-value: 0.25
-  sp|P00582|DPO1_ECOLI 409 ledekalkvgqnlkydrgilanygiel 435
-                           l ++  l ++ n+kyd  ++an g   
-      MGYP001010558745  86 LAEQAPLYLAHNIKYDLHMIANIGCPY 112
-                           55677889999**********999764 PP
+  == domain 1  score: 248.1 bits;  conditional E-value: 6e-77
+  sp|P0A7B3|NADK_ECOLI   4 hfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndle..iscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskkl 291
+                           hf+cig++g         +   l  +l  +g evi e+q a  +     k   +  ++   dla+vvggdg+ml+a+r +a+ +i ++ginrg lgfltd+ pd   +++  vl g +    rf+le  + +         a+ne+vlhpg+  +m+ fe+y+d  f +sqrsdgli++tptgstay+lsaggp+l p lda+ +vp+ phtl++rp+ ++  + i++r s  rn+l   i+cd       + g+ + ir+  + + lihpkd+++++   +klgw  +l
+      MGYP001583336646  30 HFQCIGLLGSLAVSEVRDSFNKLESFLLAQGCEVIYEEQAAKLVDWSVDKVLPIEAFSGAVDLAIVVGGDGSMLSASRKIAESNIPLLGINRGRLGFLTDISPDEIAERVLPVLAGDFKKTDRFILETSITRNGELIGEGLAVNEIVLHPGQSVRMMAFELYVDGEFVYSQRSDGLIVATPTGSTAYALSAGGPLLCPELDAMVVVPLNPHTLNSRPIALHGQAEIEIRVSA-RNELHplITCDGHDDYQTEPGDIITIRKHPHGIVLIHPKDHNFYSICRSKLGWGSRL 318
+                           9************999*************************9999999999999999999************************************************************************99888999******************************************************************************************96.57775559*********************************************9876 PP
 
-  == domain 2  score: 13.8 bits;  conditional E-value: 2.9e-06
-  sp|P00582|DPO1_ECOLI 606 apstseevleelaldyp......lpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrri...rqafiapedy.vivsadysqielrima 715
-                             st  evl  l  dyp      +  ++le r l k  sty  +   ++n    +++t  +q    + r+ss    +    ++   g+++   r+a+  p++   i   dysqielr++a
-      MGYP001010558745 344 VTSTGAEVLNRLHKDYPnnsmqeVVDIVLELRTLEKWFSTYLMR---FLN--KDKIYTQINQVGAVSLRMSSDFQQFPKDAIKTISGEELfnpRRAIRVPDNVdAITYLDYSQIELRVQA 458
-                           568999**********9554333345789999999999999544...456..469********99999***99888777666655555433339999999987356779********998 PP
+>> MGYP001082675080  FL=1 CR=1
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   29.8   0.1   2.1e-10   3.1e-10      66     133 ..      61     129 ..      54     140 .. 0.86
+   2 !   90.5   0.0   6.7e-29   9.8e-29     121     285 ..     145     313 ..     132     315 .. 0.89
 
-  == domain 3  score: 19.1 bits;  conditional E-value: 7.4e-08
-  sp|P00582|DPO1_ECOLI 731 kdihrataaevfglpletvt.seqrrsakainfgliygmsafglarqlniprkeaqkymd.lyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpl 914
-                            d+h at    fg+          r   k +nf+  yg     +++ +          +d  y++ +pg+  y+e   +  + q y   l g r +  ++            +  in  +qg++a ++k+ ++ +  +l+    + +m+m +hde+ f  + d++  +  +++++m++   + vp+
-      MGYP001010558745 516 TDVHGATTKAAFGIDESDPEyHSLRYIGKRVNFAKNYGAQRRKISEMFPEYDDATIDAIDgGYYKAFPGIKYYQEYCYSLVRFQPYATNLFGIRYW--NVSG----------HNLINMLIQGSSATLLKEKIVEMYNFLKP--YKTKMLMPIHDEVQFLTYDDELHLL-PELQKIMQSWD-VYVPI 685
-                           69************86655415567789***********99999887644333333444427******************************9976..3332..........3479***************9998888875..5789************999988755.57888887653.44555 PP
+  Alignments for each domain:
+  == domain 1  score: 29.8 bits;  conditional E-value: 2.1e-10
+  sp|P0A7B3|NADK_ECOLI  66 lavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqlad.vleghyisekrflleaqv 133
+                             + +ggdg ++ aar l    + +ig+n g lg+lt +        + d +l g++  ekr++l   v
+      MGYP001082675080  61 CVITLGGDGTLIQAARDLVDLQLPLIGVNMGTLGYLTQVSYGEGVALVLDaLLAGRFRLEKRMMLTGTV 129
+                           67899**********************************987776666662689*********998776 PP
+
+  == domain 2  score: 90.5 bits;  conditional E-value: 6.7e-29
+  sp|P0A7B3|NADK_ECOLI 121 yisekrflleaqvcqqdcq...kristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleis.cdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstkl 285
+                            +s +r   e +v  qd q    +   a+n++vl    v ++++f+vy++  +     +dg+i+stptgstay+lsaggpi+tp  + i l p+ ph++ +r ++++   t+ +r  ++    +++ cd    + +  +e + i++ d +  li+ kd s++  +  kl
+      MGYP001082675080 145 QMSPEREAPERKVPGQDPQlpaNETGIALNDIVLTRKDVMQVLKFQVYVNGELLTEYTADGMIVSTPTGSTAYNLSAGGPIVTPGAELIVLTPICPHSIHSRSIILSHRDTVGIRVLENAGQKQMAvCDGDQVIDLGANEVLEIQESDSQTTLIQLKDVSFLENIREKL 313
+                           56666777777777788772223456799*********************9999999**********************************************************999888877654****9********999******************99988876 PP
+
+>> MGYP000754038055  
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.7   0.0   4.1e-13   5.9e-13     172     262 ..      47     132 ..       3     159 .. 0.80
+
+  Alignments for each domain:
+  == domain 1  score: 38.7 bits;  conditional E-value: 4.1e-13
+  sp|P0A7B3|NADK_ECOLI 172 fsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirr 262
+                           + qr dg++istptgst +s+s ggp+l   +  + l p+   +++  p ++     i +r +h   d  +  d q  + +   e + i r
+      MGYP000754038055  47 IKQRMDGIVISTPTGSTGHSFSVGGPVLHEGMSCLILTPIA--SVNRMPQLVIPLEEILIRSTH---DSHLILDGQETFKVHADESINILR 132
+                           479************************************96..567778777788889999888...556777888888888877776655 PP
+
+>> MGYP000573421630  FL=0 CR=1
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   26.7   0.0   1.8e-09   2.7e-09      90     212 ..     126     244 ..     117     279 .. 0.73
+
+  Alignments for each domain:
+  == domain 1  score: 26.7 bits;  conditional E-value: 1.8e-09
+  sp|P0A7B3|NADK_ECOLI  90 viginrgnlgflt.dldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlh.pgkvahmiefevyideifafsq.rsdgliistptgstayslsaggpiltpsldaitlvpmf 212
+                            +gin g++gfl  +l  +n    + +  ++ +   k + + aq    +  +  + a nev l     +a    +++ i+e   + +   dg+++st  gstay+lsa g il    + + l p+ 
+      MGYP000573421630 126 FFGINFGSIGFLMnNLSNENLNDMITNAKKSTF---KPLKMTAQSVNNEIFE--AYAYNEVSLMrQTHLASK--IKIKINEKVKMEElICDGVLLSTSAGSTAYNLSAHGSILPLDSNILALTPIS 244
+                           579********8625777776666666555443...5566777777666655..56899*987513444444..5666777666655168**********************98888888888764 PP
+
+>> MGYP000604501205  CR=1
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   25.1   0.0   5.5e-09     8e-09     192     278 ..       1      86 [.       1      94 [. 0.85
+
+  Alignments for each domain:
+  == domain 1  score: 25.1 bits;  conditional E-value: 5.5e-09
+  sp|P0A7B3|NADK_ECOLI 192 lsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyf 278
+                           +saggp++ p  d + + p+ ph l  +p ++ +   i ++++h   d  + +d  + + +  g+++++   d  + +    d sy+
+      MGYP000604501205   1 MSAGGPLIYPGTDCFIVNPICPHVLGTNPTIVPTDGIIDIHLTHSYQDGYLFADGGL-INLMGGKEMFVTMLDSVFAVPPVFDDSYY 86 
+                           69**********************************************999999986.57888998888888866555444566665 PP
+
+>> MGYP001394579466  FL=0
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   25.2   0.0   5.1e-09   7.4e-09      25     119 ..      24     120 ..       2     121 .] 0.73
+
+  Alignments for each domain:
+  == domain 1  score: 25.2 bits;  conditional E-value: 5.1e-09
+  sp|P0A7B3|NADK_ECOLI  25 mlyrwlctkgyeviveqqia.hel.qlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleg 119
+                            +  w    g ev +  +i  he  q  n k     +     d+ +v+ggdg +l+ ar +      ++gi+ g+lgfl  +   +   +l  v eg
+      MGYP001394579466  24 KIMSWSKNNGLEVYLTNRILnHENgQHLNHKEILSKDDMSGLDFILVLGGDGTFLSLARIIEDVKTPILGIHLGDLGFLAKVTLKDLFHRLDQVAEG 120
+                           5667888999999888777525532333444333333334458999****************99999************998877777777777776 PP
+
+>> MGYP000062928162  
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?    3.7   0.1     0.019     0.028      46     117 ..       5      77 ..       1      89 [. 0.73
+   2 !   13.0   0.1   2.8e-05     4e-05      64      94 ..     110     140 ..     100     184 .. 0.81
+
+  Alignments for each domain:
+  == domain 1  score: 3.7 bits;  conditional E-value: 0.019
+  sp|P0A7B3|NADK_ECOLI  46 elqlkn.vktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvl 117
+                           + qlkn +  gt+  +g l       g ++ + +  r      ++v gi rg  g++t    +   q +++++
+      MGYP000062928162   5 QRQLKNmIVMGTVKCVGILTSGGDAPGMNAAIRAVTRAAIYNGLQVKGIYRGYRGLVTGEIKEFKSQNVSNII 77 
+                           567888345688888888877666666666666556665556799***********99877777777777765 PP
+
+  == domain 2  score: 13.0 bits;  conditional E-value: 2.8e-05
+  sp|P0A7B3|NADK_ECOLI  64 adlavvvggdgnmlgaartlarydikvigin 94 
+                            d  vv+ggdg++ ga     +ydi  ig+ 
+      MGYP000062928162 110 IDALVVIGGDGSLTGARIFAQEYDIPCIGLP 140
+                           58899**********9888889******984 PP
+
+>> MGYP001450139400  FL=1 CR=1
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   17.6   0.0     1e-06   1.5e-06      62     103 ..      31      72 ..       5      87 .. 0.83
+
+  Alignments for each domain:
+  == domain 1  score: 17.6 bits;  conditional E-value: 1e-06
+  sp|P0A7B3|NADK_ECOLI  62 qladlavvvggdgnmlgaartlarydikviginrgnlgfltd 103
+                           + ++l +v+ggdg ml   +   +   +  gin gn gfl +
+      MGYP001450139400  31 KKSNLVIVIGGDGFMLQTLKKNKNSKKQFYGINSGNYGFLMN 72 
+                           46799**************999999999***********975 PP
 
 
 
 Internal pipeline statistics summary:
 -------------------------------------
-Query model(s):                            1  (928 nodes)
-Target sequences:                          4  (3722 residues searched)
-Passed MSV filter:                         4  (1); expected 0.1 (0.02)
-Passed bias filter:                        4  (1); expected 0.1 (0.02)
-Passed Vit filter:                         4  (1); expected 0.0 (0.001)
-Passed Fwd filter:                         4  (1); expected 0.0 (1e-05)
-Initial search space (Z):                  4  [actual number of targets]
-Domain search space  (domZ):               4  [number of targets reported over threshold]
-# CPU time: 0.09u 0.00s 00:00:00.09 Elapsed: 00:00:00.10
-# Mc/sec: 34.46
+Query model(s):                            1  (292 nodes)
+Target sequences:                         16  (3349 residues searched)
+Passed MSV filter:                        11  (0.6875); expected 0.3 (0.02)
+Passed bias filter:                       11  (0.6875); expected 0.3 (0.02)
+Passed Vit filter:                        11  (0.6875); expected 0.0 (0.001)
+Passed Fwd filter:                        11  (0.6875); expected 0.0 (1e-05)
+Initial search space (Z):                 16  [actual number of targets]
+Domain search space  (domZ):              11  [number of targets reported over threshold]
+# CPU time: 0.04u 0.00s 00:00:00.04 Elapsed: 00:00:00.04
+# Mc/sec: 23.06
 //
-# Alignment of 6 hits satisfying inclusion thresholds saved to: alignment.sto
+# Alignment of 12 hits satisfying inclusion thresholds saved to: alignment
 [ok]

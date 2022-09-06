@@ -42,4 +42,4 @@ def test_export_sequences(tmp_path, seqdb, phmmer_out):
     command = f"export --seqdb {infile} --filter {phmmer_out} --output {outfile}"
     args = parser.parse_args(command.split())
     export_sequences(args)
-    assert get_file_hash(outfile) == "63f250a900f7df88c3a32e3fda4c2b54"
+    assert get_file_hash(outfile) == "f04c426fbbfbcf3dfac5ec5d8480e74f"

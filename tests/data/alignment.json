@@ -1,79 +1,145 @@
 {
-    "MGYP000560282607-1-928": {
-        "consensus": "mvqipqnplilvdgssylyrayhafppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtntilgpeevvnkygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrwtadveagkwlqakgakpaa+pqetsvadeapevtatvisydnyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiageefnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpllvevgsgenwdqah",
-        "target_start": "1",
-        "target_end": "928",
-        "target_seq": "MVQIPQNPLILVDGSSYLYRAYHAFPPLTNSAGEPTGAMYGVLNMLRSLIMQYKPTHAAVVFDAKGKTFRDELFEHYKSHRPPMPDDLRAQIEPLHAMVKAMGLPLLAVSGVEADDVIGTLAREAEKAGRPVLISTGDKDMAQLVTPNITLINTMTNTILGPEEVVNKYGVPPELIIDFLALMGDSSDNIPGVPGVGEKTAQALLQGLGGLDTLYAEPEKIAGLSFRGAKTMAAKLEQNKEVAYLSYQLATIKTDVELELTCEQLEVQQPAAEELLGLFKKYEFKRWTADVEAGKWLQAKGAKPAARPQETSVADEAPEVTATVISYDNYVTILDEETLKAWIAKLEKAPVFAFDTETDSLDNISANLVGLSFAIEPGVAAYIPVAHDYLDAPDQISRERALELLKPLLEDEKALKVGQNLKYDRGILANYGIELRGIAFDTMLESYILNSVAGRHDMDSLAERWLKHKTITFEEIAGKGKNQLTFNQIALEEAGRYAAEDADVTLQLHLKMWPDLQKHKGPLNVFENIEMPLVPVLSRIERNGVKIDPKVLHNHSEELTLRLAELEKKAHEIAGEEFNLSSTKQLQTILFEKQGIKPLKKTPGGAPSTSEEVLEELALDYPLPKVILEYRGLAKLKSTYTDKLPLMINPKTGRVHTSYHQAVTATGRLSSTDPNLQNIPVRNEEGRRIRQAFIAPEDYVIVSADYSQIELRIMAHLSRDKGLLTAFAEGKDIHRATAAEVFGLPLETVTSEQRRSAKAINFGLIYGMSAFGLARQLNIPRKEAQKYMDLYFERYPGVLEYMERTRAQAKEQGYVETLDGRRLYLPDIKSSNGARRAAAERAAINAPMQGTAADIIKRAMIAVDAWLQAEQPRVRMIMQVHDELVFEVHKDDVDAVAKQIHQLMENCTRLDVPLLVEVGSGENWDQAH",
-        "query_start": "1",
-        "query_end": "928",
-        "query_seq": "mvqipqnplilvdgssylyrayhafppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtntilgpeevvnkygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrwtadveagkwlqakgakpaakpqetsvadeapevtatvisydnyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiageefnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpllvevgsgenwdqah",
-        "perc_ident": 99.9,
-        "perc_sim": 100.0
+    "MGYP000062928162-110-140": {
+        "consensus": " d  vv+ggdg++ ga     +ydi  ig+ ",
+        "perc_ident": 45.2,
+        "perc_sim": 61.3,
+        "query_end": 94,
+        "query_seq": "adlavvvggdgnmlgaartlarydikvigin",
+        "query_start": 64,
+        "target_end": 140,
+        "target_seq": "IDALVVIGGDGSLTGARIFAQEYDIPCIGLP",
+        "target_start": 110
     },
-    "MGYP000146420439-1-929": {
-        "consensus": "mvqip+nplilvdgssylyrayhafppltnsageptgamygvlnmlrsli+qy+ptha vvfdakgktfrdelfehykshrppmpddlraqieplh mvkamglpl+av gveaddvigtlareae+agrpvlistgdkdmaqlvtp itlintmtntilgp+evv kygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekia lsfrgaktmaakleqnk+vaylsyqlatiktdveleltce+levq paa++ll+lf++yefkrwt dveagkwlqakg kpaakp   + a ea e v  at +s ++yvtilde tl  wi kl++ap+fafdtetdsldnisan+vglsfa+epgvaay+pvahdyldapdqi rer l llkplledek lkvgqnlkydrgilany ielrgiafdtmlesyil+svagrhdmdsl++rwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwp lq+h+gpln+f++iemplvpvlsr+erngvkidp vlh hs+e+  rl ele++aheiage fnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpl++v+seqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarra aeraainapmqgtaadiikramiavd wl++e+prvrmimqvhdelvfevhkd++dav+k+ih+lmen t l vpllvevgsgenwd +",
-        "target_start": "1",
-        "target_end": "929",
-        "target_seq": "MVQIPENPLILVDGSSYLYRAYHAFPPLTNSAGEPTGAMYGVLNMLRSLILQYQPTHAVVVFDAKGKTFRDELFEHYKSHRPPMPDDLRAQIEPLHKMVKAMGLPLMAVPGVEADDVIGTLAREAERAGRPVLISTGDKDMAQLVTPGITLINTMTNTILGPDEVVTKYGVPPELIIDFLALMGDSSDNIPGVPGVGEKTAQALLQGLGGLDTLYAEPEKIAELSFRGAKTMAAKLEQNKDVAYLSYQLATIKTDVELELTCEELEVQPPAADDLLALFRQYEFKRWTTDVEAGKWLQAKGGKPAAKPAAPAAAAEAEEeVeAATALSAEHYVTILDEATLLTWIDKLKQAPLFAFDTETDSLDNISANMVGLSFAVEPGVAAYVPVAHDYLDAPDQIPRERVLTLLKPLLEDEKVLKVGQNLKYDRGILANYDIELRGIAFDTMLESYILDSVAGRHDMDSLSDRWLKHKTITFEEIAGKGKNQLTFNQIALEEAGRYAAEDADVTLQLHLKMWPKLQQHEGPLNIFQHIEMPLVPVLSRVERNGVKIDPAVLHAHSQEIAQRLVELEQRAHEIAGEAFNLSSTKQLQTILFEKQGIKPLKKTPGGAPSTSEEVLEELALDYPLPKVILEYRGLAKLKSTYTDKLPLMINPKTGRVHTSYHQAVTATGRLSSTDPNLQNIPVRNEEGRRIRQAFIAPEDYVIVSADYSQIELRIMAHLSRDKGLLTAFAEGKDIHRATAAEVFGLPLDSVSSEQRRSAKAINFGLIYGMSAFGLARQLNIPRKEAQKYMDLYFERYPGVLEYMERTRAQAKEQGYVETLDGRRLYLPDIKSSNGARRAGAERAAINAPMQGTAADIIKRAMIAVDEWLRSEKPRVRMIMQVHDELVFEVHKDELDAVSKKIHELMENSTTLAVPLLVEVGSGENWDHS",
-        "query_start": "1",
-        "query_end": "927",
-        "query_seq": "mvqipqnplilvdgssylyrayhafppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtntilgpeevvnkygvppeliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrwtadveagkwlqakgakpaakpqetsvadeape.v.tatvisydnyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiagkgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiageefnlsstkqlqtilfekqgikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpllvevgsgenwdqa",
-        "perc_ident": 90.3,
-        "perc_sim": 95.5
+    "MGYP000062928162-5-77": {
+        "consensus": "+ qlkn +  gt+  +g l       g ++ + +  r      ++v gi rg  g++t    +   q +++++",
+        "perc_ident": 24.7,
+        "perc_sim": 49.3,
+        "query_end": 117,
+        "query_seq": "elqlkn.vktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvl",
+        "query_start": 46,
+        "target_end": 77,
+        "target_seq": "QRQLKNmIVMGTVKCVGILTSGGDAPGMNAAIRAVTRAAIYNGLQVKGIYRGYRGLVTGEIKEFKSQNVSNII",
+        "target_start": 5
     },
-    "MGYP000005943385-6-284": {
-        "consensus": " l+l+d+ + +yray+af   p  ns g  t+a+ g +n l+ ++ +  pth  v fd  g tfr e +e+yk++r   p+ +r  +  +  +++a  +p+l v g eaddvigtla ea + g    + t dkd  qlv+ n+ +     +    ++g ee+  k+ +   e +id+l lmgdssdnipg pgvgektaq l+  +g+++ l a  +++ g        +  k+e n+e+  +s  latik dv ++l    l  ++p  eel  +f++ ef+  ",
-        "target_start": "6",
-        "target_end": "284",
-        "target_seq": "KLFLLDAYALIYRAYYAFikNPRINSKGFNTSAILGFVNTLEEVLKKENPTHIGVAFDPSGPTFRHEAYEQYKAQREETPEAIRLSVPIIKDIIRAYRIPILEVPGYEADDVIGTLATEAGRQGIVTYMMTPDKDYGQLVSENVFMYRPKHSggfEVMGIEEIKAKFDIQsTEQVIDMLGLMGDSSDNIPGCPGVGEKTAQKLVAEFGSIENLLAHTDRLKGA-------LKTKVEANREMIAFSKFLATIKVDVPIKLDMNTLVREEPNEEELRKIFEELEFRTL",
-        "query_start": "8",
-        "query_end": "287",
-        "query_seq": "plilvdgssylyrayhaf..ppltnsageptgamygvlnmlrslimqykpthaavvfdakgktfrdelfehykshrppmpddlraqieplhamvkamglpllavsgveaddvigtlareaekagrpvlistgdkdmaqlvtpnitlintmtn...tilgpeevvnkygvp.peliidflalmgdssdnipgvpgvgektaqallqglggldtlyaepekiaglsfrgaktmaakleqnkevaylsyqlatiktdveleltceqlevqqpaaeellglfkkyefkrw",
-        "perc_ident": 40.2,
-        "perc_sim": 61.2
+    "MGYP000329524085-1-292": {
+        "consensus": "mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf",
+        "perc_ident": 100.0,
+        "perc_sim": 100.0,
+        "query_end": 292,
+        "query_seq": "mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf",
+        "query_start": 1,
+        "target_end": 292,
+        "target_seq": "MNNHFKCIGIVGHPRHPTALTTHEMLYRWLCTKGYEVIVEQQIAHELQLKNVKTGTLAEIGQLADLAVVVGGDGNMLGAARTLARYDIKVIGINRGNLGFLTDLDPDNAQQQLADVLEGHYISEKRFLLEAQVCQQDCQKRISTAINEVVLHPGKVAHMIEFEVYIDEIFAFSQRSDGLIISTPTGSTAYSLSAGGPILTPSLDAITLVPMFPHTLSARPLVINSSSTIRLRFSHRRNDLEISCDSQIALPIQEGEDVLIRRCDYHLNLIHPKDYSYFNTLSTKLGWSKKLF",
+        "target_start": 1
     },
-    "MGYP000005943385-358-908": {
-        "consensus": "+y  i  ee  k  i kl    ++++dtet   + + a lvg+sf+   + a yipv  +  +a       + +  ++pl e++ ++kvgqn+kyd  +l nyg++++g  fdtml  y+l     rh+md lae +l ++ti ++e+ g kgknq  +  +  e+  rya edadvtl+l   +  +l++h +  ++f  iemplvpvl +ie ngv+id + l   se +tlrl e+ek+ + +ag e fn+ s kq+  +lf++   ++  kkt  g   tseevle l   + +   ileyrgl kl sty d lp +inp+tgr+hts++qavtatgrlss++pnlqnip+r+e+g++ir+afi  +   + sadysqielrimahls+dk+++ af  g dih ataa+++ + +  vt++ rr ak  nfg+iyg+s fgla+++n+pr+ea++ +d yfe yp v eym+r+   a+e gyvet+  r+ +lpdi s n+  r  aer ainap+qg+aadiik am  +   lq+   + +mi+qvhdel",
-        "target_start": "358",
-        "target_end": "908",
-        "target_seq": "DYQLIDTEEKRKKIIQKLLTKEILSIDTETTGTEPMEAELVGMSFSDAENRAYYIPVPANRDEAL------KIVNEFRPLYENKNSMKVGQNIKYDMIVLQNYGVQVKGKLFDTMLAHYVLQPE-LRHNMDYLAEIYLHYQTIHIDELIGaKGKNQKNMRDLPPEDVYRYACEDADVTLKLKNVLEKELKEHAAE-HLFYEIEMPLVPVLVNIESNGVRIDTEALKQSSEHFTLRLQEIEKEIYALAGgETFNIGSPKQVGEVLFDRLKiVEKAKKTKTGQYVTSEEVLESLRNKHAIIGKILEYRGLKKLLSTYIDALPQLINPRTGRIHTSFNQAVTATGRLSSSNPNLQNIPIRDEDGKEIRKAFIPDDGCEFFSADYSQIELRIMAHLSQDKNMIDAFLSGYDIHAATAAKIYKVDINDVTADMRRKAKTANFGIIYGISVFGLAERMNVPRQEAKELIDGYFETYPQVKEYMDRSIQVARENGYVETIFHRKRFLPDINSRNAVVRGYAERNAINAPIQGSAADIIKVAMSLIYRRLQSNNLKAKMILQVHDEL",
-        "query_start": "329",
-        "query_end": "884",
-        "query_seq": "nyvtildeetlkawiaklekapvfafdtetdsldnisanlvglsfaiepgvaayipvahdyldapdqisreralellkplledekalkvgqnlkydrgilanygielrgiafdtmlesyilnsvagrhdmdslaerwlkhktitfeeiag.kgknqltfnqialeeagryaaedadvtlqlhlkmwpdlqkhkgplnvfeniemplvpvlsrierngvkidpkvlhnhseeltlrlaelekkaheiag.eefnlsstkqlqtilfekqg.ikplkktpggapstseevleelaldyplpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrrirqafiapedyvivsadysqielrimahlsrdkglltafaegkdihrataaevfglpletvtseqrrsakainfgliygmsafglarqlniprkeaqkymdlyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdel",
-        "perc_ident": 50.3,
-        "perc_sim": 70.3
+    "MGYP000406905322-19-310": {
+        "consensus": "mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigq adlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf",
+        "perc_ident": 99.7,
+        "perc_sim": 99.7,
+        "query_end": 292,
+        "query_seq": "mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskklf",
+        "query_start": 1,
+        "target_end": 310,
+        "target_seq": "MNNHFKCIGIVGHPRHPTALTTHEMLYRWLCTKGYEVIVEQQIAHELQLKNVKTGTLAEIGQQADLAVVVGGDGNMLGAARTLARYDIKVIGINRGNLGFLTDLDPDNAQQQLADVLEGHYISEKRFLLEAQVCQQDCQKRISTAINEVVLHPGKVAHMIEFEVYIDEIFAFSQRSDGLIISTPTGSTAYSLSAGGPILTPSLDAITLVPMFPHTLSARPLVINSSSTIRLRFSHRRNDLEISCDSQIALPIQEGEDVLIRRCDYHLNLIHPKDYSYFNTLSTKLGWSKKLF",
+        "target_start": 19
     },
-    "MGYP001010558745-86-112": {
-        "consensus": "l ++  l ++ n+kyd  ++an g   ",
-        "target_start": "86",
-        "target_end": "112",
-        "target_seq": "LAEQAPLYLAHNIKYDLHMIANIGCPY",
-        "query_start": "409",
-        "query_end": "435",
-        "query_seq": "ledekalkvgqnlkydrgilanygiel",
-        "perc_ident": 33.3,
-        "perc_sim": 59.3
+    "MGYP000420419373-1-290": {
+        "consensus": "m+ +fk +g+++ p      tt + ly+ l      v ++ + ah + +   +  ++  ++q  dl + +ggdg +l+aar + + ++ +igin g lgfl d+ p+  + q+  +leghy  e+r++l  q+ + d   +  +a+nev lh  k   +i++e y+d  f  sqrsdglii+tptgstay+ls ggp++ psldai lvp+ phtls rp+v++ +s i ++fs+r ++  +++cd+ +   i e + + i+r d  + l+hp d+ +fn l  klgwsk",
+        "perc_ident": 42.1,
+        "perc_sim": 66.2,
+        "query_end": 289,
+        "query_seq": "mnnhfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshr.rndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwsk",
+        "query_start": 1,
+        "target_end": 290,
+        "target_seq": "MDTQFKQVGLISKPDTSDISTTVQSLYQLLKQADINVCIDHETAHHVSVPAEQVMSMESLAQQCDLIMSIGGDGTLLSAARAIVNTNVPLIGINLGRLGFLVDISPEEMKAQIKQILEGHYHEEERIILNTQIIRNDEVIHEQSAFNEVALHRLKSPGLIDIETYVDHNFVNSQRSDGLIIATPTGSTAYALSGGGPLMHPSLDAIVLVPINPHTLSNRPIVVDGNSEISIKFSQRdKHKAQLTCDNVVLPSIFEDDLINIKRHDNKIRLLHPTDHDFFNILRVKLGWSK",
+        "target_start": 1
     },
-    "MGYP001010558745-344-458": {
-        "consensus": "  st  evl  l  dyp      +  ++le r l k  sty  +   ++n    +++t  +q    + r+ss    +    ++   g+++   r+a+  p++   i   dysqielr++a",
-        "target_start": "344",
-        "target_end": "458",
-        "target_seq": "VTSTGAEVLNRLHKDYPnnsmqeVVDIVLELRTLEKWFSTYLMR---FLN--KDKIYTQINQVGAVSLRMSSDFQQFPKDAIKTISGEELfnpRRAIRVPDNVdAITYLDYSQIELRVQA",
-        "query_start": "606",
-        "query_end": "715",
-        "query_seq": "apstseevleelaldyp......lpkvileyrglaklkstytdklplminpktgrvhtsyhqavtatgrlsstdpnlqnipvrneegrri...rqafiapedy.vivsadysqielrima",
-        "perc_ident": 30.8,
-        "perc_sim": 50.8
+    "MGYP000573421630-126-244": {
+        "consensus": " +gin g++gfl  +l  +n    + +  ++ +   k + + aq    +  +  + a nev l     +a    +++ i+e   + +   dg+++st  gstay+lsa g il    + + l p+ ",
+        "perc_ident": 29.4,
+        "perc_sim": 52.4,
+        "query_end": 212,
+        "query_seq": "viginrgnlgflt.dldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlh.pgkvahmiefevyideifafsq.rsdgliistptgstayslsaggpiltpsldaitlvpmf",
+        "query_start": 90,
+        "target_end": 244,
+        "target_seq": "FFGINFGSIGFLMnNLSNENLNDMITNAKKSTF---KPLKMTAQSVNNEIFE--AYAYNEVSLMrQTHLASK--IKIKINEKVKMEElICDGVLLSTSAGSTAYNLSAHGSILPLDSNILALTPIS",
+        "target_start": 126
     },
-    "MGYP001010558745-516-685": {
-        "consensus": " d+h at    fg+          r   k +nf+  yg     +++ +          +d  y++ +pg+  y+e   +  + q y   l g r +  ++            +  in  +qg++a ++k+ ++ +  +l+    + +m+m +hde+ f  + d++  +  +++++m++   + vp+",
-        "target_start": "516",
-        "target_end": "685",
-        "target_seq": "TDVHGATTKAAFGIDESDPEyHSLRYIGKRVNFAKNYGAQRRKISEMFPEYDDATIDAIDgGYYKAFPGIKYYQEYCYSLVRFQPYATNLFGIRYW--NVSG----------HNLINMLIQGSSATLLKEKIVEMYNFLKP--YKTKMLMPIHDEVQFLTYDDELHLL-PELQKIMQSWD-VYVPI",
-        "query_start": "731",
-        "query_end": "914",
-        "query_seq": "kdihrataaevfglpletvt.seqrrsakainfgliygmsafglarqlniprkeaqkymd.lyferypgvleymertraqakeqgyvetldgrrlylpdikssngarraaaeraainapmqgtaadiikramiavdawlqaeqprvrmimqvhdelvfevhkddvdavakqihqlmenctrldvpl",
-        "perc_ident": 21.5,
-        "perc_sim": 47.8
+    "MGYP000604501205-1-86": {
+        "consensus": "+saggp++ p  d + + p+ ph l  +p ++ +   i ++++h   d  + +d  + + +  g+++++   d  + +    d sy+",
+        "perc_ident": 24.1,
+        "perc_sim": 55.2,
+        "query_end": 278,
+        "query_seq": "lsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirrcdyhlnlihpkdysyf",
+        "query_start": 192,
+        "target_end": 86,
+        "target_seq": "MSAGGPLIYPGTDCFIVNPICPHVLGTNPTIVPTDGIIDIHLTHSYQDGYLFADGGL-INLMGGKEMFVTMLDSVFAVPPVFDDSYY",
+        "target_start": 1
+    },
+    "MGYP000754038055-47-132": {
+        "consensus": "+ qr dg++istptgst +s+s ggp+l   +  + l p+   +++  p ++     i +r +h   d  +  d q  + +   e + i r",
+        "perc_ident": 33.0,
+        "perc_sim": 54.9,
+        "query_end": 262,
+        "query_seq": "fsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleiscdsqialpiqegedvlirr",
+        "query_start": 172,
+        "target_end": 132,
+        "target_seq": "IKQRMDGIVISTPTGSTGHSFSVGGPVLHEGMSCLILTPIA--SVNRMPQLVIPLEEILIRSTH---DSHLILDGQETFKVHADESINILR",
+        "target_start": 47
+    },
+    "MGYP001082675080-145-313": {
+        "consensus": " +s +r   e +v  qd q    +   a+n++vl    v ++++f+vy++  +     +dg+i+stptgstay+lsaggpi+tp  + i l p+ ph++ +r ++++   t+ +r  ++    +++ cd    + +  +e + i++ d +  li+ kd s++  +  kl",
+        "perc_ident": 33.1,
+        "perc_sim": 60.9,
+        "query_end": 285,
+        "query_seq": "yisekrflleaqvcqqdcq...kristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndleis.cdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstkl",
+        "query_start": 121,
+        "target_end": 313,
+        "target_seq": "QMSPEREAPERKVPGQDPQlpaNETGIALNDIVLTRKDVMQVLKFQVYVNGELLTEYTADGMIVSTPTGSTAYNLSAGGPIVTPGAELIVLTPICPHSIHSRSIILSHRDTVGIRVLENAGQKQMAvCDGDQVIDLGANEVLEIQESDSQTTLIQLKDVSFLENIREKL",
+        "target_start": 145
+    },
+    "MGYP001082675080-61-129": {
+        "consensus": "  + +ggdg ++ aar l    + +ig+n g lg+lt +        + d +l g++  ekr++l   v",
+        "perc_ident": 34.8,
+        "perc_sim": 56.5,
+        "query_end": 133,
+        "query_seq": "lavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqlad.vleghyisekrflleaqv",
+        "query_start": 66,
+        "target_end": 129,
+        "target_seq": "CVITLGGDGTLIQAARDLVDLQLPLIGVNMGTLGYLTQVSYGEGVALVLDaLLAGRFRLEKRMMLTGTV",
+        "target_start": 61
+    },
+    "MGYP001394579466-24-120": {
+        "consensus": " +  w    g ev +  +i  he  q  n k     +     d+ +v+ggdg +l+ ar +      ++gi+ g+lgfl  +   +   +l  v eg",
+        "perc_ident": 30.9,
+        "perc_sim": 48.5,
+        "query_end": 119,
+        "query_seq": "mlyrwlctkgyeviveqqia.hel.qlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleg",
+        "query_start": 25,
+        "target_end": 120,
+        "target_seq": "KIMSWSKNNGLEVYLTNRILnHENgQHLNHKEILSKDDMSGLDFILVLGGDGTFLSLARIIEDVKTPILGIHLGDLGFLAKVTLKDLFHRLDQVAEG",
+        "target_start": 24
+    },
+    "MGYP001450139400-31-72": {
+        "consensus": "+ ++l +v+ggdg ml   +   +   +  gin gn gfl +",
+        "perc_ident": 38.1,
+        "perc_sim": 59.5,
+        "query_end": 103,
+        "query_seq": "qladlavvvggdgnmlgaartlarydikviginrgnlgfltd",
+        "query_start": 62,
+        "target_end": 72,
+        "target_seq": "KKSNLVIVIGGDGFMLQTLKKNKNSKKQFYGINSGNYGFLMN",
+        "target_start": 31
+    },
+    "MGYP001583336646-30-318": {
+        "consensus": "hf+cig++g         +   l  +l  +g evi e+q a  +     k   +  ++   dla+vvggdg+ml+a+r +a+ +i ++ginrg lgfltd+ pd   +++  vl g +    rf+le  + +         a+ne+vlhpg+  +m+ fe+y+d  f +sqrsdgli++tptgstay+lsaggp+l p lda+ +vp+ phtl++rp+ ++  + i++r s  rn+l   i+cd       + g+ + ir+  + + lihpkd+++++   +klgw  +l",
+        "perc_ident": 42.4,
+        "perc_sim": 65.2,
+        "query_end": 291,
+        "query_seq": "hfkcigivghprhptaltthemlyrwlctkgyeviveqqiahelqlknvktgtlaeigqladlavvvggdgnmlgaartlarydikviginrgnlgfltdldpdnaqqqladvleghyisekrflleaqvcqqdcqkristainevvlhpgkvahmiefevyideifafsqrsdgliistptgstayslsaggpiltpsldaitlvpmfphtlsarplvinssstirlrfshrrndle..iscdsqialpiqegedvlirrcdyhlnlihpkdysyfntlstklgwskkl",
+        "query_start": 4,
+        "target_end": 318,
+        "target_seq": "HFQCIGLLGSLAVSEVRDSFNKLESFLLAQGCEVIYEEQAAKLVDWSVDKVLPIEAFSGAVDLAIVVGGDGSMLSASRKIAESNIPLLGINRGRLGFLTDISPDEIAERVLPVLAGDFKKTDRFILETSITRNGELIGEGLAVNEIVLHPGQSVRMMAFELYVDGEFVYSQRSDGLIVATPTGSTAYALSAGGPLLCPELDAMVVVPLNPHTLNSRPIALHGQAEIEIRVSA-RNELHplITCDGHDDYQTEPGDIITIRKHPHGIVLIHPKDHNFYSICRSKLGWGSRL",
+        "target_start": 30
     }
 }

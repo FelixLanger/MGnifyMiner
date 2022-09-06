@@ -1,19 +1,26 @@
 #                                                                            --- full sequence --- -------------- this domain -------------   hmm coord   ali coord   env coord
 # target name        accession   tlen query name           accession   qlen   E-value  score  bias   #  of  c-Evalue  i-Evalue  score  bias  from    to  from    to  from    to  acc description of target
 #------------------- ---------- ----- -------------------- ---------- ----- --------- ------ ----- --- --- --------- --------- ------ ----- ----- ----- ----- ----- ----- ----- ---- ---------------------
-MGYP001414735843     -            608 AYM25428.1           -            607  1.9e-289  973.2  13.3   1   1  4.9e-294  2.2e-289  973.1  13.3     1   607     1   608     1   608 0.99 PL=00 UP=0 BIOMES=0110000000000 LEN=608 CR=0
-MGYP000559910058     -            379 AYM25428.1           -            607  1.3e-217  736.0  21.8   1   1  3.4e-222  1.5e-217  735.9  21.8   230   607     1   379     1   379 0.99 PL=01 UP=0 BIOMES=0110000000000 LEN=379 CR=0
-MGYP001074466474     -            590 AYM25428.1           -            607  1.3e-195  663.4  13.4   1   1  3.5e-200  1.6e-195  663.2  13.4    13   605     7   587     2   589 0.93 PL=00 UP=1 BIOMES=0000000011000 LEN=590 CR=0
-MGYP000001634024     -            590 AYM25428.1           -            607  2.3e-194  659.3  13.4   1   1  6.1e-199  2.7e-194  659.1  13.4    13   605     7   587     2   589 0.92 PL=00 UP=0 BIOMES=1000000000000 LEN=590 CR=1
-MGYP001122903550     -            727 AYM25428.1           -            607    3e-193  655.6  35.3   1   2  2.3e-175    1e-170  581.2  21.8    66   604    84   619    76   622 0.95 PL=00 UP=0 BIOMES=1000000000000 LEN=727 CR=1
-MGYP001122903550     -            727 AYM25428.1           -            607    3e-193  655.6  35.3   2   2     1e-23   4.7e-19   80.4   5.6   509   605   630   723   620   725 0.85 PL=00 UP=0 BIOMES=1000000000000 LEN=727 CR=1
+MGYP000329524085     -            292 sp|P0A7B3|NADK_ECOLI -            292  9.4e-203  661.4   0.1   1   1  7.3e-203  1.1e-202  661.3   0.1     1   292     1   292     1   292 1.00 FL=0
+MGYP000406905322     -            310 sp|P0A7B3|NADK_ECOLI -            292  8.1e-202  658.4   0.1   1   1  6.3e-202  9.2e-202  658.2   0.1     1   292    19   310    19   310 1.00 -
+MGYP000420419373     -            294 sp|P0A7B3|NADK_ECOLI -            292   1.1e-78  254.3   0.3   1   1     9e-79   1.3e-78  254.1   0.3     1   289     1   290     1   292 0.97 CR=1
+MGYP001583336646     -            326 sp|P0A7B3|NADK_ECOLI -            292   7.2e-77  248.4   0.0   1   1     6e-77   8.8e-77  248.1   0.0     4   291    30   318    27   319 0.97 FL=0 CR=1
+MGYP001082675080     -            316 sp|P0A7B3|NADK_ECOLI -            292   3.5e-38  121.5   0.6   1   2   2.1e-10   3.1e-10   29.8   0.1    66   133    61   129    54   140 0.86 FL=1 CR=1
+MGYP001082675080     -            316 sp|P0A7B3|NADK_ECOLI -            292   3.5e-38  121.5   0.6   2   2   6.7e-29   9.8e-29   90.5   0.0   121   285   145   313   132   315 0.89 FL=1 CR=1
+MGYP000754038055     -            160 sp|P0A7B3|NADK_ECOLI -            292   5.6e-13   38.8   0.0   1   1   4.1e-13   5.9e-13   38.7   0.0   172   262    47   132     3   159 0.80 -
+MGYP000573421630     -            320 sp|P0A7B3|NADK_ECOLI -            292   1.7e-09   27.4   0.0   1   1   1.8e-09   2.7e-09   26.7   0.0    90   212   126   244   117   279 0.73 FL=0 CR=1
+MGYP000604501205     -            127 sp|P0A7B3|NADK_ECOLI -            292   6.9e-09   25.3   0.0   1   1   5.5e-09     8e-09   25.1   0.0   192   278     1    86     1    94 0.85 CR=1
+MGYP001394579466     -            121 sp|P0A7B3|NADK_ECOLI -            292   7.4e-09   25.2   0.0   1   1   5.1e-09   7.4e-09   25.2   0.0    25   119    24   120     2   121 0.73 FL=0
+MGYP000062928162     -            201 sp|P0A7B3|NADK_ECOLI -            292   1.4e-06   17.8   0.7   1   2     0.019     0.028    3.7   0.1    46   117     5    77     1    89 0.73 -
+MGYP000062928162     -            201 sp|P0A7B3|NADK_ECOLI -            292   1.4e-06   17.8   0.7   2   2   2.8e-05     4e-05   13.0   0.1    64    94   110   140   100   184 0.81 -
+MGYP001450139400     -            108 sp|P0A7B3|NADK_ECOLI -            292   1.5e-06   17.7   0.0   1   1     1e-06   1.5e-06   17.6   0.0    62   103    31    72     5    87 0.83 FL=1 CR=1
 #
 # Program:         phmmer
 # Version:         3.3.2 (Nov 2020)
 # Pipeline mode:   SEARCH
-# Query file:      /X/query.fa
-# Target file:     /X/testSeqDB.fa
-# Option settings: /home/felix/miniconda3/envs/MGnifyMiner/lib/python3.8/site-packages/hmmer/bin/v3.3.2/phmmer_manylinux2010_x86_64 -o phmmer_out.txt -A alignment.sto --tblout tbl.txt --domtblout dom_tbl.txt --notextw /X//query.fa /X//testSeqDB.fa
-# Current dir:     /X/
-# Date:            Mon May  3 14:30:31 2021
+# Query file:      ../tests/data/sequence_files/query.fa
+# Target file:     ../tests/data/sequence_files/seqdb.fa
+# Option settings: phmmer -o out -A alignment --tblout tbl --domtblout domtbl --notextw ../tests/data/sequence_files/query.fa ../tests/data/sequence_files/seqdb.fa 
+# Current dir:     /tests
+# Date:            Mon Sep  5 16:09:59 2022
 # [ok]
