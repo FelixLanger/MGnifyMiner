@@ -24,11 +24,11 @@ def extract_alignments(hmmer_out: Union[Path, str]) -> dict:
         perc_ident, perc_sim = calculate_identity_similarity(consensus)
         alignments_dict[key] = {
             "consensus": consensus,
-            "target_start": target_start,
-            "target_end": target_end,
+            "target_start": int(target_start),
+            "target_end": int(target_end),
             "target_seq": target_seq,
-            "query_start": query_start,
-            "query_end": query_end,
+            "query_start": int(query_start),
+            "query_end": int(query_end),
             "query_seq": query_seq,
             "perc_ident": perc_ident,
             "perc_sim": perc_sim,

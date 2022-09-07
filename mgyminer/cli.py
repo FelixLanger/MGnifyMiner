@@ -153,6 +153,13 @@ def create_parser():
         help="Path to sequence search output file",
     )
     residue_parser.add_argument(
+        "--alignment",
+        type=Path,
+        required=False,
+        metavar="path/to.alignment.json",
+        help="Path to the alignment json file produced from the hmmer sequence search",
+    )
+    residue_parser.add_argument(
         "--residue",
         "-r",
         nargs="+",

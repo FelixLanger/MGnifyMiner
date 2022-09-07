@@ -50,7 +50,7 @@ def phmmer(args) -> None:
         axis=1,
     )
     results = proteinTable(results)
-    results.save(output_file)
+    results.save(output_file, index=False)
 
     if args.dashboard:
         dashboard = ProteinTableVisualiser(results)

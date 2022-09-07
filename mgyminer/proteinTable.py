@@ -14,16 +14,14 @@ class proteinTable:
     Central object to perform filters on sequence search results
     """
 
-    def __init__(self, results: Union[Path, str]):
+    def __init__(self, results: Union[Path, str, DataFrame]):
         if isinstance(results, str):
             results = Path(results)
 
         if isinstance(results, DataFrame):
             self.df = results
         elif isinstance(results, Path):
-            self.df = pd.read_csv(
-                results, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
-            )
+            self.df = pd.read_csv(results, dtype={"FL": str, "CR": str})
         else:
             raise TypeError(
                 "proteinTable must be initialised with DataFrame or Path to csv file"
@@ -79,6 +77,9 @@ class proteinTable:
             raise ValueError(
                 f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
             )
+        # if column is non-numeric convert value to string
+        if self.df[column].dtypes == "O":
+            value = str(value)
         return proteinTable(self.df[self.df[column] == value])
 
     def biome(self, biome):
@@ -112,13 +113,23 @@ class proteinTable:
 
     def save(self, outfile, sep=",", index=False, **kwargs):
         """
-        save protein table to output (csv) fileS
-        :param outfile:
-        :param sep:
-        :param index:
+        save protein table to output (csv) file
+        :param outfile: Path to output file
+        :param sep: Delimiter to distinguish between columns "," by default
+        :param index: Boolean to keep index or not, default False
         :param kwargs:
         :return:
         """
+
+        def format_eval(e):
+            if isinstance(e, str):
+                return e
+            if e > 0.0001:
+                return e
+            else:
+                return "{0:.1e}".format(e)
+
+        self.df["e-value"] = self.df["e-value"].apply(lambda x: format_eval(x))
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
 
 
