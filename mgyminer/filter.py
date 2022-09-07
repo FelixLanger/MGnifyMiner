@@ -1,6 +1,9 @@
 import json
 import re
+import string
+import sys
 from collections import Counter
+from typing import List, Union
 
 import mysql.connector
 import numpy as np
@@ -20,7 +23,13 @@ def filter(args):
 
     pt = proteinTable(args.input)
     if args.match:
-        pt = pt.match(args.feature, tryfloat(args.match))
+        # if column is non-numeric convert value to string
+        if pt.df[args.feature].dtypes == "O":
+            value = str(args.match)
+        else:
+            value = tryfloat(args.match)
+        pt = pt.match(args.feature, value)
+
     if any([args.upper, args.lower]):
         if args.upper is None:
             upper = np.PINF
@@ -50,30 +59,31 @@ def sort(args):
 def residue_filter(args):
     # get input files
     results_file = args.input
-    results_basepath = results_file.parents[0]
-    alignments = results_basepath / "alignment.json"
+    results_basedir = results_file.parents[0]
+    if args.alignment:
+        alignment = args.alignment
+    elif (results_basedir / "alignment.json").exists():
+        alignment = results_basedir / "alignment.json"
+    else:
+        sys.exit("Wrong or missing alignment file. Please use the --alignment flag")
 
-    # read input files
-    results_table = pd.read_csv(
-        results_file, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
-    )
-    results_table["hmm_from"].astype(int)
-    results_table["hmm_to"].astype(int)
-    with open(alignments, "r") as fin:
+    results_table = proteinTable(args.input)
+
+    with open(alignment, "r") as fin:
         alignment_dict = json.load(fin)
 
     filters = args.residue
     for filter in filters:
-        selection = overlapping_targets(filter, results_table)
+        selection = overlapping_targets(filter, results_table.df)
         hits = check_residue(selection, alignment_dict, filter)
         filter_name = "_".join(filter)
-        results_table[filter_name] = results_table["target_name"].map(hits)
-        results_table.dropna(inplace=True)
+        results_table.df[filter_name] = results_table.df["target_name"].map(hits)
+        results_table.df.dropna(inplace=True)
 
     if args.output:
-        results_table.to_csv(args.output, index=False, sep=",")
+        results_table.save(args.output)
     else:
-        print(results_table.to_string())
+        print(results_table.df.to_string())
 
 
 def overlapping_targets(args, results_table):
@@ -428,6 +438,80 @@ def loose_select(pfams):
     else:
         hits["MGYP"] = hits["MGYP"].astype(int).apply(lambda x: f"MGYP{x:012d}")
         return hits
+
+
+class alignment(dict):
+    _TARSEQ_INSERT_TABLE = str.maketrans("", "", string.ascii_lowercase)
+
+    def overlaps_at(self, coordinate):
+        """
+        Return all alignment entries where target sequences overlap
+        with the query sequence at specified query residue.
+        :param coordinate: Query sequence coordinate which should be aligned by target sequence
+        :return: dict of overlap alignment entries
+        """
+        for key, value in self.items():
+            if value["query_start"] <= coordinate <= value["query_end"]:
+                yield key, value
+
+    def match_residue(self, coordinate: int, aminoacid: Union[str, List[str]]):
+        """
+        Return all alignment entries that have a specific aminoacid at
+        coordinate corresponding to query sequence
+        :param coordinate: Coordinate corresponding to query sequence
+        :param aminoacid: single or list of amino acids that should be present
+        :return:
+        """
+        if isinstance(aminoacid, str):
+            aminoacid = [aminoacid]
+
+        aminoacid = [a.upper() for a in aminoacid]
+        matches = []
+        for key, value in self.overlaps_at(coordinate):
+            target_without_inserts = value["target_seq"].translate(
+                self._TARSEQ_INSERT_TABLE
+            )
+            relative_coordinate = coordinate - value["query_start"]
+            if target_without_inserts[relative_coordinate] in aminoacid:
+                matches.append(key)
+        return alignment((entry, self[entry]) for entry in matches)
+
+    def match_query(self, coordinate):
+        """
+        Return all entries of alignment where the entry matches the aminoacid of the query
+        at the specified coordinate
+        :param coordinate: Coordinate of the position in the query sequence
+        :return:
+        """
+        matches = []
+        for key, value in self.overlaps_at(coordinate):
+            relative_coordinate = coordinate - value["query_start"]
+            target_without_inserts = value["target_seq"].translate(
+                self._TARSEQ_INSERT_TABLE
+            )
+            query_without_inserts = value["query_seq"].replace(".", "")
+            if (
+                target_without_inserts[relative_coordinate].lower()
+                == query_without_inserts[relative_coordinate]
+            ):
+                matches.append(key)
+        return alignment((entry, self[entry]) for entry in matches)
+
+    def residue_distribution(self, coordinate):
+        """
+        Calculate the aminoacid distribution of all aligned sequences at a coordinate
+        corresponding to the query sequence
+        :param coordinate: Coordinate of the position in the query sequence
+        :return: Counter of all aminoacids aligned to that coordinate
+        """
+        residues = []
+        for key, value in self.overlaps_at(coordinate):
+            relative_coordinate = coordinate - value["query_start"]
+            target_without_inserts = value["target_seq"].translate(
+                self._TARSEQ_INSERT_TABLE
+            )
+            residues.append(target_without_inserts[relative_coordinate])
+        return Counter(residues)
 
 
 cfg = config
