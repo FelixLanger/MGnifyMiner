@@ -5,7 +5,7 @@ from pathlib import Path
 
 from mgyminer.filter import (
     domain_filter,
-    filter,
+    feat_filter,
     plot_residue_histogram,
     residue_filter,
     sort,
@@ -139,7 +139,7 @@ def create_parser():
         metavar="path/to/filter_output.csv",
         help="Path to the desired output file",
     ),
-    filter_parser.set_defaults(func=filter)
+    filter_parser.set_defaults(func=feat_filter)
 
     residue_parser = subparsers.add_parser(
         "residue", help="filter target proteins by residue features"

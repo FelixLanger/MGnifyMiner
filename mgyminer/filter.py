@@ -1,5 +1,4 @@
 import json
-import re
 import string
 import sys
 from collections import Counter
@@ -14,7 +13,7 @@ from mgyminer.proteinTable import proteinTable
 from mgyminer.utils import tryfloat
 
 
-def filter(args):
+def feat_filter(args):
 
     if args.match and any([args.upper, args.lower]):
         exit(
@@ -57,283 +56,54 @@ def sort(args):
 
 
 def residue_filter(args):
-    # get input files
+    # check if alignment file is present in input dir
     results_file = args.input
     results_basedir = results_file.parents[0]
     if args.alignment:
-        alignment = args.alignment
+        alignment_file = args.alignment
     elif (results_basedir / "alignment.json").exists():
-        alignment = results_basedir / "alignment.json"
+        alignment_file = results_basedir / "alignment.json"
     else:
         sys.exit("Wrong or missing alignment file. Please use the --alignment flag")
 
+    # load input files
     results_table = proteinTable(args.input)
 
-    with open(alignment, "r") as fin:
-        alignment_dict = json.load(fin)
+    with open(alignment_file, "r") as fin:
+        algnmt = alignment(json.load(fin))
 
     filters = args.residue
-    for filter in filters:
-        selection = overlapping_targets(filter, results_table.df)
-        hits = check_residue(selection, alignment_dict, filter)
-        filter_name = "_".join(filter)
-        results_table.df[filter_name] = results_table.df["target_name"].map(hits)
-        results_table.df.dropna(inplace=True)
+    for rfilter in filters:
+        coordinate = rfilter[0]
+        in_ex = rfilter[1]
+        aa = rfilter[2:]
+        coordinate = int(coordinate)
+        # get all entries where aa in sequence matches reference
+        matches = algnmt.match_residue(coordinate, aa)
+        if in_ex == "exclude":
+            # if aa should be excluded, get all sequences with overlap at specified coordinate
+            # and substract all sequences that have the specified aas
+            overlaps = [key for key, value in algnmt.overlaps_at(coordinate)]
+            match_keys = set(overlaps) - set(matches.keys())
+            # create new matches dict with only the sequences matching the criteria
+            matches = alignment({match_id: algnmt[match_id] for match_id in match_keys})
+        match_ids = matches.ids()
+        results_table = proteinTable(
+            results_table.df[results_table.df["target_name"].isin(match_ids)]
+        )
+        id_aa_mapping = {
+            key.split("-")[0]: matches.corresponding_aa(key, coordinate)
+            for (key, value) in matches.items()
+        }
+        filter_name = "_".join(rfilter)
+        results_table.df[filter_name] = results_table.df["target_name"].map(
+            id_aa_mapping
+        )
 
     if args.output:
         results_table.save(args.output)
     else:
         print(results_table.df.to_string())
-
-
-def overlapping_targets(args, results_table):
-    """
-    returns a list of target proteins whos alignment overlaps with the query residue
-    :param args:
-    :param results_table:
-    :return:
-    """
-    residue_coordinate = int(args[0])
-    selection = (
-        results_table.loc[
-            (results_table["hmm_from"] <= residue_coordinate)
-            & (results_table["hmm_to"] >= residue_coordinate),
-            ["target_name", "ali_from", "ali_to"],
-        ]
-        .to_string(header=False, index=False, index_names=False)
-        .split("\n")
-    )
-    selection = [element.split() for element in selection]
-
-    return selection
-
-
-def check_residue(selection, alignment_dict, filter):
-    residue_coordinate = int(filter[0])
-    ex_inc = filter[1]
-    residues = [residue.upper() for residue in filter[2:]]
-
-    matches = {}
-
-    for element in selection:
-        entry = alignment_dict["-".join(element)]
-        relative_coordinate = residue_coordinate - int(entry["query_start"])
-        target_index = index_on_target(relative_coordinate, entry["query_seq"])
-        residue = entry["target_seq"][target_index]
-        if ex_inc == "include":
-            if residue in residues:
-                matches[element[0]] = residue
-            else:
-                continue
-        if ex_inc == "exclude":
-            if residue not in residues:
-                matches[element[0]] = residue
-    return matches
-
-
-def index_on_target(pos, query_seq):
-    inserts = query_seq[: pos + 1].count(".")
-    residues = pos - inserts
-    index = pos
-    while residues != pos:
-        index += 1
-        inserts = query_seq[: index + 1].count(".")
-        residues = index - inserts
-    return index
-
-
-# def parse_domtable(file):
-#
-#     column_names = [
-#         "target_name",
-#         "target_accession",
-#         "tlen",
-#         "query_name",
-#         "query_accession",
-#         "qlen",
-#         "e-value",
-#         "score",
-#         "bias",
-#         "ndom",
-#         "ndom_of",
-#         "c-value",
-#         "i-value",
-#         "dom_score",
-#         "dom_bias",
-#         "hmm_from",
-#         "hmm_to",
-#         "ali_from",
-#         "ali_to",
-#         "env_from",
-#         "env_to",
-#         "acc",
-#         "description",
-#     ]
-#
-#     convert_dict = {
-#         "target_name": str,
-#         "target_accession": str,
-#         "tlen": int,
-#         "query_name": str,
-#         "query_accession": str,
-#         "qlen": int,
-#         "e-value": float,
-#         "score": float,
-#         "bias": float,
-#         "ndom": int,
-#         "ndom_of": int,
-#         "c-value": float,
-#         "i-value": float,
-#         "dom_score": float,
-#         "dom_bias": float,
-#         "hmm_from": int,
-#         "hmm_to": int,
-#         "ali_from": int,
-#         "ali_to": int,
-#         "env_from": int,
-#         "env_to": int,
-#         "acc": float,
-#         "description": str,
-#     }
-#
-#     closeit = False
-#     if isinstance(file, str):
-#         file = Path(file)
-#
-#     if isinstance(file, Path):
-#         file = open(file, "r")
-#         closeit = True
-#
-#     rows = []
-#     for line in csv.reader(decomment(file), delimiter=" ", skipinitialspace=True):
-#         row = [item for item in line]
-#         row[22] = " ".join(row[22:])
-#         del row[23:]
-#         rows.append(row)
-#
-#     if closeit:
-#         file.close()
-#
-#     dom_table_df = pd.DataFrame(rows, columns=column_names)
-#     dom_table_df = dom_table_df.astype(convert_dict)
-#     return dom_table_df
-#
-#
-# def decomment(rows):
-#     for row in rows:
-#         if row.startswith("#"):
-#             continue
-#         yield row
-
-#
-# def calculate_coverage(df):
-#     df["coverage_hit"] = round((df["ali_to"] - df["ali_from"]) / df["tlen"], 2)
-#     df["coverage_query"] = round((df["ali_to"] - df["ali_from"]) / df["qlen"], 2)
-
-
-def _extract_range(threshold):
-    # extend regex to allow floats in args directly to set threshold more precisely
-    # [+-]?(\d+\.?\d*)|(\.\d+)
-    regex = r"(\d+)"
-    threshold_range = sorted([float(x) / 100 for x in re.findall(regex, threshold)])
-    return threshold_range
-
-
-# def alignments(file):
-#     closeit = False
-#     if isinstance(file, str):
-#         file = Path(file)
-#
-#     if isinstance(file, Path):
-#         file = open(file, "r")
-#         closeit = True
-#
-#     alignment_upcomming = False
-#     alignment = []
-#     for line in decomment(file):
-#         if alignment_upcomming is True:
-#             alignment.append(line)
-#             if len(alignment) > 2:
-#                 alignment_upcomming = False
-#                 yield alignment
-#         elif line.startswith("  =="):
-#             alignment_upcomming = True
-#             alignment = []
-#         else:
-#             continue
-#     if closeit:
-#         file.close()
-
-
-def end_of_column(string):
-    found_letter = False
-    for count, character in enumerate(string):
-        if character == " ":
-            if found_letter:
-                return count
-            else:
-                continue
-        else:
-            found_letter = True
-
-
-# def get_alignment_consensus(file):
-#     alignments_dict = {}
-#     for alignment in alignments(file):
-#         # get the start index of the consensus sequence.
-#         # problem: amount of leading witespaces is dependend on the length of query or target sequence but needs to
-#         # be exactly calculated because whitespaces in the consensus stand for mismatches of the two aligned sequences
-#         # Solution: count characters until you hit the first whitespace after hitting letters. Doing it once to get
-#         # lenght until the name. doing it twice to get characters until the end of the start coordinates.
-#         temp_index = end_of_column(alignment[2])
-#         start_index = temp_index + end_of_column(alignment[2][temp_index:]) + 1
-#         consensus = alignment[1][start_index:].strip("\n")
-#         query_id, query_start, query_seq, query_end = alignment[0].split()
-#         target_id, target_start, target_seq, target_end = alignment[2].split()
-#         key = f"{target_id}-{target_start}-{target_end}"
-#         perc_ident, perc_sim = calculate_identity_similarity(consensus)
-#         alignments_dict[key] = {
-#             "consensus": consensus,
-#             "target_start": target_start,
-#             "target_end": target_end,
-#             "target_seq": target_seq,
-#             "query_start": query_start,
-#             "query_end": query_end,
-#             "query_seq": query_seq,
-#             "perc_ident": perc_ident,
-#             "perc_sim": perc_sim,
-#         }
-#     return alignments_dict
-
-
-def calculate_identity_similarity(consensus):
-    identical = 0
-    similar = 0
-    for character in consensus:
-        if character == " ":
-            continue
-        elif character == "+":
-            similar += 1
-        else:
-            identical += 1
-
-    percent_identity = round(identical / len(consensus) * 100, 2)
-    percent_similarity = round((identical + similar) / len(consensus) * 100, 2)
-
-    return percent_identity, percent_similarity
-
-
-def add_sim_ident(df, alignment_dict):
-    df["similarity"] = (
-        df["target_name"]
-        + "-"
-        + df["ali_from"].astype(str)
-        + "-"
-        + df["ali_to"].astype(str)
-    )
-    df["identity"] = df["similarity"]
-    df["similarity"] = df["similarity"].apply(lambda x: alignment_dict[x]["perc_sim"])
-    df["identity"] = df["identity"].apply(lambda x: alignment_dict[x]["perc_ident"])
 
 
 def plot_residue_histogram(args):
@@ -344,19 +114,9 @@ def plot_residue_histogram(args):
     plotwidth = args.plotwidth
 
     with open(alignments, "r") as fin:
-        alignment_dict = json.load(fin)
+        alignment_dict = alignment(json.load(fin))
 
-    # Get residue counts data
-    found = []
-    for key, alignment in alignment_dict.items():
-        if (
-            int(alignment["query_start"]) <= residue
-            and int(alignment["query_end"]) >= residue
-        ):
-            relative_coordinate = residue - int(alignment["query_start"])
-            target_index = index_on_target(relative_coordinate, alignment["query_seq"])
-            found.append(alignment["target_seq"][target_index])
-    found = Counter(found).most_common()
+    found = alignment_dict.residue_distribution(residue).most_common()
 
     # Plot output
     max_value = max(count for label, count in found)
@@ -512,6 +272,24 @@ class alignment(dict):
             )
             residues.append(target_without_inserts[relative_coordinate])
         return Counter(residues)
+
+    def ids(self):
+        return {k.split("-")[0] for k in self.keys()}
+
+    def corresponding_aa(self, key, coordinate):
+        """
+        Function to return the corresponding aminoacid on the aligned sequence at
+        the coordinate corresponding to the reference.
+        :param key:
+        :param coordinate:
+        :return:
+        """
+        value = self[key]
+        relative_coordinate = coordinate - value["query_start"]
+        target_without_inserts = value["target_seq"].translate(
+            self._TARSEQ_INSERT_TABLE
+        )
+        return target_without_inserts[relative_coordinate]
 
 
 cfg = config

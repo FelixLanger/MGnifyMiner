@@ -44,41 +44,41 @@ def test_cli_sort(tmp_path, phmmer_out):
 def test_cli_filter(tmp_path, phmmer_out):
     # test different number notations and match function
     outfile = tmp_path / "filtered_results.txt"
-    # match_cases = [
-    #     {
-    #         "feature": "tlen",
-    #         "value": 127,
-    #         "expected_first": "MGYP000604501205",
-    #         "nresults": 1,
-    #     },
-    #     {
-    #         "feature": "e-value",
-    #         "value": 7.2e-77,
-    #         "expected_first": "MGYP001583336646",
-    #         "nresults": 1,
-    #     },
-    #     {
-    #         "feature": "FL",
-    #         "value": 1,
-    #         "expected_first": "MGYP001082675080",
-    #         "nresults": 3,
-    #     },
-    #     {
-    #         "feature": "score",
-    #         "value": 17.8,
-    #         "expected_first": "MGYP000062928162",
-    #         "nresults": 2,
-    #     },
-    # ]
-    # for case in match_cases:
-    #     command = (
-    #         f"MGnifyMiner filter --input {phmmer_out} --feature {case['feature']} --match "
-    #         f"{case['value']} --output {outfile}"
-    #     )
-    #     subprocess.run(command.split())
-    #     results = pd.read_csv(outfile)
-    #     assert results.iloc[0]["target_name"] == case["expected_first"]
-    #     assert len(results) == case["nresults"]
+    match_cases = [
+        {
+            "feature": "tlen",
+            "value": 127,
+            "expected_first": "MGYP000604501205",
+            "nresults": 1,
+        },
+        {
+            "feature": "e-value",
+            "value": 7.2e-77,
+            "expected_first": "MGYP001583336646",
+            "nresults": 1,
+        },
+        {
+            "feature": "FL",
+            "value": 1,
+            "expected_first": "MGYP001082675080",
+            "nresults": 3,
+        },
+        {
+            "feature": "score",
+            "value": 17.8,
+            "expected_first": "MGYP000062928162",
+            "nresults": 2,
+        },
+    ]
+    for case in match_cases:
+        command = (
+            f"MGnifyMiner filter --input {phmmer_out} --feature {case['feature']} --match "
+            f"{case['value']} --output {outfile}"
+        )
+        subprocess.run(command.split())
+        results = pd.read_csv(outfile)
+        assert results.iloc[0]["target_name"] == case["expected_first"]
+        assert len(results) == case["nresults"]
 
     # test filter thresholds
     command = f"MGnifyMiner filter --input {phmmer_out} --feature tlen --upper 300 --output {outfile}"
