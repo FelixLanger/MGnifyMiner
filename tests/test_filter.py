@@ -116,3 +116,32 @@ def test_residue_distribution(alignmt):
     ]
     for case in cases:
         assert alignmt.residue_distribution(case["coordinate"]) == case["expected"]
+
+
+def test_ids(alignmt):
+    assert set(alignmt.ids()) == {
+        "MGYP000329524085",
+        "MGYP000406905322",
+        "MGYP000420419373",
+        "MGYP001583336646",
+        "MGYP001082675080",
+        "MGYP000754038055",
+        "MGYP000573421630",
+        "MGYP000604501205",
+        "MGYP001394579466",
+        "MGYP000062928162",
+        "MGYP001450139400",
+    }
+
+
+def test_corresponding_aa(alignmt):
+    cases = [
+        {"coordinate": 52, "key": "MGYP000062928162-5-77", "expected": "I"},
+        {"coordinate": 10, "key": "MGYP000329524085-1-292", "expected": "I"},
+        {"coordinate": 140, "key": "MGYP001082675080-145-313", "expected": "N"},
+    ]
+    for case in cases:
+        assert (
+            alignmt.corresponding_aa(case["key"], case["coordinate"])
+            == case["expected"]
+        )
