@@ -1,7 +1,8 @@
 import shutil
+from hashlib import md5
 from pathlib import Path
 
-from mgyminer.wrappers.hmmer import PHmmer, esl_sfetch
+from mgyminer.wrappers.hmmer import EslAlimanip, Hmmbuild, Hmmsearch, PHmmer, esl_sfetch
 from tests.helpers import get_file_hash
 
 
@@ -48,3 +49,48 @@ def test_sequence_fetch(tmp_path, seqdb):
     out_file = tmp_path / "sfetch_out.fa"
     sfetcher.run(sequence_file=test_db, sequence_ids=ids, out_file=out_file)
     assert get_file_hash(out_file) == get_file_hash(test_db)
+
+
+def test_Hmmbuild_run(sto_ali, tmp_path):
+    hmmbuilder = Hmmbuild()
+    hmm_out = tmp_path / "test.hmm"
+    hmmbuilder.run(hmmfile=hmm_out, msafile=sto_ali, single_seq=False)
+    checksum = md5()
+    with open(hmm_out, "rt") as fin:
+        for line in fin.readlines()[11:]:
+            if not line.startswith("#"):
+                checksum.update(line.encode("utf-8"))
+    assert checksum.hexdigest() == "3e5547af52d2b234342c35f83a2d89cb"
+
+
+def test_Hmmsearch_run(test_hmm, seqdb, tmp_path):
+    hmmsearch = Hmmsearch()
+    outfile = tmp_path / "hmmsearch.out"
+    tlb_out = tmp_path / "hmmsearch.tbl"
+    domtlb_out = tmp_path / "hmmsearch.domtbl"
+    alignment = tmp_path / "hmmsearch.sto"
+    hmmsearch.run(
+        test_hmm,
+        seqdb,
+        outfile,
+        tblout=tlb_out,
+        domtblout=domtlb_out,
+        alignment=alignment,
+        notextw=True,
+    )
+    assert get_file_hash(outfile) == "2bb0a394ea2b14c964d75557ba07c195"
+    assert get_file_hash(tlb_out) == "a1ca391ad3a67fc640292bdd1d65c2d3"
+    assert get_file_hash(domtlb_out) == "e7a46fb0d0f560d329d8a08414ccdab0"
+    assert get_file_hash(alignment) == "d09999713b23e74b72aec417cbfe6b97"
+
+
+def test_alimanip_run(sto_ali, tmp_path):
+    manip = EslAlimanip()
+    filtered_ali = tmp_path / "filtered.sto"
+    with open(tmp_path / "idfile", "wt") as fout:
+        fout.write("MGYP001082675080/61-129 \n")
+        fout.write("MGYP001583336646/30-318")
+    manip.run(msafile=sto_ali, output_file=filtered_ali, exclude_ids="infile")
+    get_file_hash(
+        filtered_ali, ignore_comments=False
+    ) == "b7f2e241fe55c2d9012e6f1763196329"

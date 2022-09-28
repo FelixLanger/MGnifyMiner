@@ -169,8 +169,6 @@ class Hmmsearch(Program):
             arguments.extend(["--tblout", tblout])
         if domtblout:
             arguments.extend(["--domtblout", domtblout])
-        if domtblout:
-            arguments.extend(["--domtblout", domtblout])
         if alignment:
             arguments.extend(["-A", alignment])
         if cut_ga:
@@ -185,4 +183,27 @@ class Hmmsearch(Program):
         logging.info(
             "Running hmmsearch with %s as query hmm and %s as DB.", hmmfile, seqdb
         )
+        return self._run(arguments)
+
+
+class EslAlimanip(Program):
+    def __init__(self, cores: int = 1) -> None:
+        super().__init__("esl-alimanip")
+        self.cores = cores
+
+    def run(
+        self,
+        msafile: Union[str, Path],
+        output_file: Union[str, Path],
+        exclude_ids: Union[str, Path] = None,
+    ) -> bool:
+
+        arguments = []
+
+        if output_file:
+            arguments.extend(["-o", output_file])
+        if exclude_ids:
+            arguments.extend(["--seq-r", exclude_ids])
+        arguments.append(msafile)
+        logging.info("Running esl-alimanip with %s", arguments)
         return self._run(arguments)

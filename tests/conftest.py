@@ -27,3 +27,13 @@ def phmmer_out():
 def alignmt():
     with open(data_dir / "alignment.json", "rt") as ali:
         return alignment(json.load(ali))
+
+
+@pytest.fixture
+def sto_ali():
+    return data_dir / "alignment.sto"
+
+
+@pytest.fixture
+def test_hmm():
+    return data_dir / "hmmer_files/test.hmm"

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Union
 
 import pandas as pd
@@ -30,16 +31,16 @@ def mgyp_to_id(mgyp: str) -> str:
     return mgyp.lstrip("MGYP0")
 
 
-def proteinID_to_mgyp(id: Union[str, int]) -> str:
+def proteinID_to_mgyp(proteinid: Union[str, int]) -> str:
     """
     Convert a protein ID into MGnify protein accession
 
-    :param id: numeric protein ID
+    :param proteinid: numeric protein ID
     :return: MGnify MGYP accession
     """
-    if isinstance(id, str):
-        id = int(id)
-    return "MGYP%012d" % int(id)
+    if isinstance(proteinid, str):
+        proteinid = int(proteinid)
+    return "MGYP%012d" % int(proteinid)
 
 
 def tryfloat(value: str) -> Union[str, float]:
@@ -54,3 +55,16 @@ def tryfloat(value: str) -> Union[str, float]:
         return float(value)
     except ValueError:
         return value
+
+
+def write_list_to_file(lst: list, outfile: Union[str, Path]):
+    """
+    Write a list to a file with every item in list in a new line.
+    :param lst: List to write to file
+    :param outfile: Path to file
+    :return: Path
+    """
+    with open(outfile, "wt") as name_file:
+        for item in lst:
+            name_file.write(f"{item} \n")
+    return Path(outfile)
