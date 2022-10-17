@@ -12,6 +12,7 @@ app = Dash(
     __name__,
     suppress_callback_exceptions=True,
     external_stylesheets=external_stylesheets,
+    long_callback_manager=long_callback_manager,
 )
 app_title = "MGnifyMiner"
 app.title = app_title
