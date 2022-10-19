@@ -44,8 +44,8 @@ def update_scatter(data, xaxis_column_name, yaxis_column_name):
         log_x=log_x,
         log_y=log_y,
     )
-    fig.update_xaxes(title=xaxis_column_name)
-    fig.update_yaxes(title=yaxis_column_name)
+    # fig.update_xaxes(title=xaxis_column_name)
+    # fig.update_yaxes(title=yaxis_column_name)
     fig.update_layout(clickmode="event+select")
     return fig
 
@@ -842,6 +842,13 @@ def alignment_callbacks(_app):
         [Input("alignment-textsize-slider", "value")],
     )
     def customize_textsize(val):
+        return val
+
+    @_app.callback(
+        Output("alignment-chart", "correctgap"),
+        [Input("alignment-correctgap-radio", "value")],
+    )
+    def customize_correctgap(val):
         return val
 
     @_app.callback(

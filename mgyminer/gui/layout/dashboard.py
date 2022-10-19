@@ -419,6 +419,33 @@ alignment_controls = html.Div(
                                             ),
                                         ],
                                     ),
+                                    html.Div(
+                                        className="app-controls-block",
+                                        children=[
+                                            html.Div(
+                                                className="app-controls-name",
+                                                children="Colorscale",
+                                            ),
+                                            dcc.RadioItems(
+                                                id="alignment-correctgap-radio",
+                                                className="alignment-radio",
+                                                options=[
+                                                    {"label": "Yes", "value": True},
+                                                    {"label": "No", "value": False},
+                                                ],
+                                                value=True,
+                                                labelStyle={
+                                                    "display": "inline-block",
+                                                    "margin-right": "8px",
+                                                },
+                                            ),
+                                            html.Div(
+                                                className="app-controls-desc",
+                                                children="Lowers conservation "
+                                                "of high gap sequences.",
+                                            ),
+                                        ],
+                                    ),
                                 ]
                             ),
                             html.Hr(),
