@@ -133,7 +133,7 @@ def fetch_structure(
     analysis_name: str,
     outdir: Optional[Union[str, Path]] = None,
     best_n: int = 1,
-    databases: Optional[dict] = None,
+    databases: Optional[dict] = dict(),
     alphafold=False,
     keep=False,
     coverage=False,
@@ -188,3 +188,20 @@ def fetch_structure(
                 if sdownload.download_alphafold(accession, outfile):
                     structures.append(outfile)
     return structures
+
+
+def fetch_structure_cli(args):
+    selectionTable = proteinTable(args.input)
+    msa = args.msa
+    analysis_name = args.input.stem
+    best_n = args.ntop
+    alphafold = (args.alphafold,)
+    keep = (args.keep,)
+    fetch_structure(
+        selectionTable=selectionTable,
+        msa=msa,
+        analysis_name=analysis_name,
+        best_n=best_n,
+        alphafold=alphafold,
+        keep=keep,
+    )

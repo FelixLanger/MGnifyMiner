@@ -14,7 +14,7 @@ from mgyminer.metadata import get_metadata
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
-from mgyminer.structure import fetch_structure
+from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
 
 
@@ -366,7 +366,14 @@ def create_parser():
         action="store_true",
         help="keep intermediate files",
     )
-    structure_parser.set_defaults(func=fetch_structure)
+    structure_parser.add_argument(
+        "--alphafold",
+        "-a",
+        default=False,
+        action="store_true",
+        help="expand search to alphafold structures",
+    )
+    structure_parser.set_defaults(func=fetch_structure_cli)
 
     return parser
 
