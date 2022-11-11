@@ -2,5 +2,7 @@ __pycache__/
 .idea
 *.egg-info/
 playground
-config.yaml
+mgyminer.yaml
 .coverage
+poetry.lock
+cache/
