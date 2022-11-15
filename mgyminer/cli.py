@@ -14,6 +14,7 @@ from mgyminer.metadata import get_metadata
 from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
+from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
 
@@ -375,6 +376,27 @@ def create_parser():
     )
     structure_parser.set_defaults(func=fetch_structure_cli)
 
+    download_parser = subparsers.add_parser(
+        "download",
+        help="download necessary files like MGnify Database, PDB or AlphaFold sequences",
+    )
+
+    download_parser.add_argument(
+        "--outdir",
+        "-o",
+        type=Path,
+        required=True,
+        help="output directory of files",
+    )
+    download_parser.add_argument(
+        "--source",
+        "--s",
+        type=str,
+        required=True,
+        metavar="AlphaFold | PDB | MGnify",
+        help="Files to download",
+    )
+    download_parser.set_defaults(func=setup_cli)
     return parser
 
 
