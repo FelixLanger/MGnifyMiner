@@ -1,4 +1,6 @@
 import logging
+import shutil
+import sys
 import tempfile
 from pathlib import Path
 from typing import Optional, Union
@@ -92,10 +94,15 @@ def filter_msa(msa: Path, selection: set, outfile: Union[str, Path]):
     sto_entries = get_sto_entries(msa)
     entries_to_filter = remove_entries(selection, sto_entries)
     msa_filter = EslAlimanip()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        id_file = Path(temp_dir) / "sto_entries.txt"
-        write_list_to_file(entries_to_filter, id_file)
-        return msa_filter.run(msa, outfile, id_file)
+
+    if entries_to_filter:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            id_file = Path(temp_dir) / "sto_entries.txt"
+            write_list_to_file(entries_to_filter, id_file)
+            return msa_filter.run(msa, outfile, id_file)
+    else:
+        shutil.copy(msa, outfile)
+        return True
 
 
 def searchDB(msa: Path, database: Path, outdir: Path, outfile: Optional[Path] = None):
@@ -187,6 +194,7 @@ def fetch_structure(
                 outfile = outdir / (analysis_name + f"-pdb_{accession}.pdb")
                 if sdownload.download_alphafold(accession, outfile):
                     structures.append(outfile)
+    sys.stdout.write(f"Found {len(structures)} structures")
     return structures
 
 
@@ -195,8 +203,8 @@ def fetch_structure_cli(args):
     msa = args.msa
     analysis_name = args.input.stem
     best_n = args.ntop
-    alphafold = (args.alphafold,)
-    keep = (args.keep,)
+    alphafold = args.alphafold
+    keep = args.keep
     fetch_structure(
         selectionTable=selectionTable,
         msa=msa,
