@@ -29,7 +29,6 @@ cfg = config
 
 
 def find_origin_assemblies(mgyps: List) -> dict:
-
     # Create Database connection
     proteindb = mysql.connector.connect(**cfg["mysql"])
     cursor = proteindb.cursor()
@@ -125,7 +124,6 @@ async def assembly_metadata(session, assembly):
 
 
 async def sample_metadata(assemblies):
-
     cache = SQLiteBackend(
         cache_name=cfg["metadata"]["location"],
         expire_after=timedelta(days=cfg["metadata"]["expire_after"]),
@@ -218,7 +216,6 @@ def make_min_max(values):
 
 
 def get_metadata(args):
-
     filename = args.input.stem
     file_dir = args.input.parents[0]
     df = pd.read_csv(args.input)

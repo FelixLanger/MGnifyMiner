@@ -291,7 +291,6 @@ def build_tree(set_progress, n_clicks, data, selectedData, queryfasta, sequences
     set_progress((str(i), str(total)))
     pt = proteinTable(pd.DataFrame(data))
     if selectedData:
-
         indices = [int(e["pointIndex"]) for e in selectedData["points"]]
         dff = pt.df.iloc[indices]
     else:

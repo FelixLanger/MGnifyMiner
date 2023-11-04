@@ -14,7 +14,6 @@ from mgyminer.utils import tryfloat
 
 
 def feat_filter(args):
-
     if args.match and any([args.upper, args.lower]):
         exit(
             "Only use match or upper/lower. Not both. Use [MgnifyMiner filter --help] for more info"

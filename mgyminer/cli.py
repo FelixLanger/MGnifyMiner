@@ -134,12 +134,14 @@ def create_parser():
         metavar="54.6",
         help="Value that feature needs to match exactly",
     )
-    filter_parser.add_argument(
-        "--output",
-        type=Path,
-        metavar="path/to/filter_output.csv",
-        help="Path to the desired output file",
-    ),
+    (
+        filter_parser.add_argument(
+            "--output",
+            type=Path,
+            metavar="path/to/filter_output.csv",
+            help="Path to the desired output file",
+        ),
+    )
     filter_parser.set_defaults(func=feat_filter)
 
     residue_parser = subparsers.add_parser(

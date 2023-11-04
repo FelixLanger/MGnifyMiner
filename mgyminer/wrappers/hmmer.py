@@ -160,7 +160,6 @@ class Hmmsearch(Program):
         heuristic: bool = True,
         **kwargs,
     ) -> bool:
-
         arguments = []
 
         if output_file:
@@ -197,7 +196,6 @@ class EslAlimanip(Program):
         output_file: Union[str, Path],
         exclude_ids: Union[str, Path] = None,
     ) -> bool:
-
         arguments = []
 
         if output_file:

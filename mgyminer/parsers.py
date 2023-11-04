@@ -193,6 +193,7 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
 
     return proteinTable
 
+
 def parse_hmmer_table(domtable: Union[Path, str]) -> DataFrame:
     """
     Parse HMMER Table to pandas DataFrame
