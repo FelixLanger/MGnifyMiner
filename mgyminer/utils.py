@@ -21,14 +21,14 @@ def export_sequences(args):
     fetcher.run(seqdb, target_ids, args.output)
 
 
-def mgyp_to_id(mgyp: str) -> str:
+def mgyp_to_id(mgyp: str) -> int:
     """
     Strip MGYP beginning and leading zeroes from a MGYP accession
 
     :param mgyp: Standard MGnify MGYP protein accession
     :return: Plain protein ID without leading MGYP and zeroes
     """
-    return mgyp.lstrip("MGYP0")
+    return int(mgyp.lstrip("MGYP0"))
 
 
 def proteinID_to_mgyp(proteinid: Union[str, int]) -> str:
