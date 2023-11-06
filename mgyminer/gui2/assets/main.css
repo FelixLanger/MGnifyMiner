@@ -1,0 +1,59 @@
+/* main.css */
+
+#header-title {
+    text-align: center;
+    padding: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 16rem;
+    padding: 2rem 1rem;
+    background-color: #f8f9fa;
+}
+
+#page-content {
+    margin-left: 120px;
+    margin-right: 2rem;
+    padding: 2rem 1rem;
+}
+
+.control-tabs {
+    width: 400px;
+    height: 600px;
+    margin: 20px 20px 100px 0px;
+    background-color: #f7f7f7;
+    font-size: 10pt;
+    float: left;
+    display: inline;
+}
+
+.control-tabs .tab-content {
+    padding: 20px;
+}
+
+.control-tab {
+    height: 450px;
+    overflow-y: auto;
+    padding-right: 20px;
+    margin: 10px 0 10px 10px;
+}
+
+.data-field {
+    width: calc(100vw - 550px);
+    height: 600px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 50px;
+    display: grid;
+}
+
+.data-card {
+    margin: 20px 20px 100px 0;
+}
