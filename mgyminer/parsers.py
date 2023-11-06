@@ -149,6 +149,7 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
             "env_from",
             "env_to",
             "acc",
+            "desc"
         ],
         dtype={
             "target_name": str,
@@ -173,6 +174,7 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
             "env_from": int,
             "env_to": int,
             "acc": np.object_,
+            "desc" : str
         },
     )
 
