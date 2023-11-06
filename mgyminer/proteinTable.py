@@ -1,11 +1,13 @@
 from collections import Counter
 from pathlib import Path
 from typing import Union
+import json
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from pandas import DataFrame
+from mgyminer.constants import BIGQUERY_PROJECT, BIGQUERY_DATASET
+from mgyminer.utils import mgyp_to_id
 
 
 class proteinTable:
@@ -14,18 +16,34 @@ class proteinTable:
     Central object to perform filters on sequence search results
     """
 
-    def __init__(self, results: Union[Path, str, DataFrame]):
+    def __init__(self, results: Union[Path, str, pd.DataFrame]):
+        self.json_columns = ["assemblies", "biomes"]  # Corrected the column names
+
         if isinstance(results, str):
             results = Path(results)
 
-        if isinstance(results, DataFrame):
+        if isinstance(results, pd.DataFrame):
             self.df = results
         elif isinstance(results, Path):
-            self.df = pd.read_csv(results, dtype={"FL": str, "CR": str})
+            self.df = pd.read_csv(results)
+            for col in self.json_columns:
+                if col in self.df.columns:
+                    self.df[col] = self.df[col].apply(
+                        json.loads
+                    )  # Use json.loads to convert string to list
         else:
             raise TypeError(
                 "proteinTable must be initialised with DataFrame or Path to csv file"
             )
+
+    def _nunique_nested(self, column):
+        """
+        Calculate the number of unique values in a column with lists
+        """
+        flattened_values = [
+            item for sublist in self.df[column].tolist() for item in sublist
+        ]
+        return pd.Series(flattened_values).value_counts()
 
     def sort(self, by: Union[str, list], ascending: bool = False):
         """
@@ -130,7 +148,48 @@ class proteinTable:
                 return "{0:.1e}".format(e)
 
         self.df["e-value"] = self.df["e-value"].apply(lambda x: format_eval(x))
+
+        for col in ["assemblies", "biomes"]:
+            if col in self.df.columns:
+                self.df[col] = self.df[col].apply(lambda x: x.tolist())
+                self.df[col] = self.df[col].apply(json.dumps)
+
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
+
+    def fetch_metadata(self):
+        columns_to_check = ["complete", "truncation", "assemblies", "biomes"]
+        if all(column in self.df.columns for column in columns_to_check):
+            ## TODO add logging to verbalise that we skipped the fetch
+            return
+
+        self.df["mgyp"] = self.df["target_name"].apply(lambda x: mgyp_to_id(x))
+        join_query = f"""SELECT 
+                                t.target_name AS mgyp,
+                                m.complete as complete,
+                                m.truncation as truncation,
+                                a.pfam_architecture,
+                                ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
+                                ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
+                            FROM 
+                                {BIGQUERY_DATASET}.temp t
+                            JOIN 
+                                {BIGQUERY_DATASET}.protein p ON t.target_name = p.id
+                            JOIN 
+                                {BIGQUERY_DATASET}.architecture a ON p.architecture = a.id
+                            JOIN 
+                                {BIGQUERY_DATASET}.protein_metadata m ON t.target_name = m.mgyp
+                            JOIN 
+                                {BIGQUERY_DATASET}.assembly asmbly ON m.assembly = asmbly.id
+                            GROUP BY 
+                                t.target_name,
+                                m.complete,
+                                m.truncation,
+                                a.pfam_architecture;
+                            """
+        metadata = pd.read_gbq(join_query, project_id=BIGQUERY_PROJECT)
+        result = pd.merge(self.df, metadata, on="mgyp")
+
+        self.df = result
 
 
 class ProteinTableVisualiser:
