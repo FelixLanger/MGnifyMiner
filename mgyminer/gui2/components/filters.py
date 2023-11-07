@@ -96,9 +96,7 @@ filter_controls = html.Div(
                         ],
                     ),
                 ),
-                dcc.Tab(
-                    label="Domains"
-                )
+                dcc.Tab(label="Domains"),
             ],
         )
     ],

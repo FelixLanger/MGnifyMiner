@@ -3,6 +3,7 @@ from mgyminer.gui2.app import app
 import plotly.express as px
 from mgyminer.gui2.utils.data_singleton import DataSingleton
 
+
 @app.callback(
     Output("stats-scatter", "figure"),
     # Input("data-storage", "data"),
@@ -10,8 +11,10 @@ from mgyminer.gui2.utils.data_singleton import DataSingleton
     Input("scatter-yaxis", "value"),
 )
 def update_scatter(
-        # data,
-        xaxis_column_name, yaxis_column_name):
+    # data,
+    xaxis_column_name,
+    yaxis_column_name,
+):
     data = DataSingleton().data.df.to_dict()
     if not data:
         return px.scatter()

@@ -2,6 +2,7 @@ from dash.dependencies import Input, Output
 from mgyminer.gui2.app import app
 from mgyminer.gui2.layouts.homepage import page
 
+
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == "/":

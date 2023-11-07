@@ -8,14 +8,17 @@ from dash import html
 # the styles for the main content position it to the right of the sidebar and
 # add some padding.
 
-page = html.Div(id="page-content",
-                children=[
-                    dbc.Row(
-                        statsbar
-                    ),
-                    dbc.Row([
-                        dbc.Col(filter_controls),
-                        dbc.Col(scatter),
-                        dbc.Col(metadata),
-                    ])
-                ])
+page = html.Div(
+    id="page-content",
+    children=[
+        dbc.Row(statsbar),
+        dbc.Row(
+            [
+                dbc.Col(filter_controls),
+                dbc.Col(scatter, className="data-container"),
+                dbc.Col(metadata, className="data-container"),
+            ],
+        ),
+        dbc.Row(html.Div(["blabla"])),
+    ],
+)

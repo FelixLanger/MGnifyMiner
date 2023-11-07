@@ -10,8 +10,9 @@ plot_axes = [
     {"label": "Identity", "value": "identity"},
 ]
 
-scatter = dbc.Card(className="data-card", children=
-    dbc.CardBody(
+scatter = dbc.Card(
+    className="data-card",
+    children=dbc.CardBody(
         [
             html.H4("Protein Hits", className="card-title"),
             dbc.Row(dcc.Graph(id="stats-scatter")),
@@ -42,7 +43,6 @@ scatter = dbc.Card(className="data-card", children=
                     ),
                 ]
             ),
-
         ]
-    )
+    ),
 )

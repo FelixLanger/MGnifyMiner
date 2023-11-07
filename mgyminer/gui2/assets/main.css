@@ -13,19 +13,19 @@
     top: 0;
     left: 0;
     bottom: 0;
-    width: 16rem;
+    width: 10rem;
     padding: 2rem 1rem;
     background-color: #f8f9fa;
 }
 
 #page-content {
     margin-left: 120px;
-    margin-right: 2rem;
+    margin-right: 0.5rem;
     padding: 2rem 1rem;
 }
 
 .control-tabs {
-    width: 400px;
+    width: 300px;
     height: 600px;
     margin: 20px 20px 100px 0px;
     background-color: #f7f7f7;
@@ -45,15 +45,12 @@
     margin: 10px 0 10px 10px;
 }
 
-.data-field {
-    width: calc(100vw - 550px);
-    height: 600px;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-top: 50px;
-    display: grid;
+.data-container {
+  display: grid;
+  flex-wrap: nowrap;
+  gap: 0;
 }
 
 .data-card {
-    margin: 20px 20px 100px 0;
+    margin: 20px 10px 10px 0;
 }

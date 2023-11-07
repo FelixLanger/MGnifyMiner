@@ -1,4 +1,6 @@
 from mgyminer.proteinTable import proteinTable
+
+
 class DataSingleton:
     _instance = None
     _data = None
