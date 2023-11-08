@@ -1,29 +1,32 @@
+import pandas as pd
 from dash import Input, Output
 from mgyminer.gui2.app import app
 import plotly.express as px
-from mgyminer.gui2.utils.data_singleton import DataSingleton
+from dash import exceptions
 
 
 @app.callback(
     Output("stats-scatter", "figure"),
-    # Input("data-storage", "data"),
+    Input("filtered-data", "data"),
     Input("scatter-xaxis", "value"),
     Input("scatter-yaxis", "value"),
 )
 def update_scatter(
-    # data,
+    data_json,
     xaxis_column_name,
     yaxis_column_name,
 ):
-    data = DataSingleton().data.df.to_dict()
-    if not data:
-        return px.scatter()
-    if xaxis_column_name == "e-value":
+    if not data_json:
+        raise exceptions.PreventUpdate
+
+    data = pd.read_json(data_json)
+
+    if xaxis_column_name == "e_value":
         log_x = True
     else:
         log_x = False
 
-    if yaxis_column_name == "e-value":
+    if yaxis_column_name == "e_value":
         log_y = True
     else:
         log_y = False

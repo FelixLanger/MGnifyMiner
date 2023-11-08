@@ -147,12 +147,24 @@ class proteinTable:
             else:
                 return "{0:.1e}".format(e)
 
+        def convert_cell(cell):
+            if isinstance(cell, np.ndarray):
+                # Convert numpy array to list and then to JSON string
+                return json.dumps(cell.tolist())
+            elif isinstance(cell, str):
+                # If it's a string, return as it is
+                return cell
+            else:
+                # Add any other type conditions if necessary
+                pass
+
         self.df["e-value"] = self.df["e-value"].apply(lambda x: format_eval(x))
 
-        for col in ["assemblies", "biomes"]:
+        # bigquery either returns json columns as json or as string.
+        # we need to test what it is and convert the json arrays to a json string for saving
+        for col in self.json_columns:
             if col in self.df.columns:
-                self.df[col] = self.df[col].apply(lambda x: x.tolist())
-                self.df[col] = self.df[col].apply(json.dumps)
+                self.df[col] = self.df[col].apply(convert_cell)
 
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
 
@@ -163,25 +175,33 @@ class proteinTable:
             return
 
         self.df["mgyp"] = self.df["target_name"].apply(lambda x: mgyp_to_id(x))
+        table_name = self.df["query_name"][0]
+        mgyp_ids = self.df["mgyp"].to_frame()
+        mgyp_ids.to_gbq(
+            f"{BIGQUERY_DATASET}.{table_name}",
+            project_id=f"{BIGQUERY_PROJECT}",
+            if_exists="replace",
+        )
+
         join_query = f"""SELECT 
-                                t.target_name AS mgyp,
+                                t.mgyp AS mgyp,
                                 m.complete as complete,
                                 m.truncation as truncation,
                                 a.pfam_architecture,
                                 ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
                                 ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
                             FROM 
-                                {BIGQUERY_DATASET}.temp t
+                                {BIGQUERY_DATASET}.{table_name} t
                             JOIN 
-                                {BIGQUERY_DATASET}.protein p ON t.target_name = p.id
+                                {BIGQUERY_DATASET}.protein p ON t.mgyp = p.id
                             JOIN 
                                 {BIGQUERY_DATASET}.architecture a ON p.architecture = a.id
                             JOIN 
-                                {BIGQUERY_DATASET}.protein_metadata m ON t.target_name = m.mgyp
+                                {BIGQUERY_DATASET}.protein_metadata m ON t.mgyp = m.mgyp
                             JOIN 
                                 {BIGQUERY_DATASET}.assembly asmbly ON m.assembly = asmbly.id
                             GROUP BY 
-                                t.target_name,
+                                t.mgyp,
                                 m.complete,
                                 m.truncation,
                                 a.pfam_architecture;

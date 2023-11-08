@@ -35,7 +35,6 @@ filter_controls = html.Div(
                                         type="number",
                                         placeholder="Max",
                                         min=0,
-                                        max=100,
                                     ),
                                 ],
                             ),
@@ -75,6 +74,7 @@ filter_controls = html.Div(
                                         placeholder="Min",
                                         min=0,
                                         max=100,
+                                        value=0,
                                     ),
                                     dcc.Input(
                                         id="similarity-max",
@@ -82,14 +82,7 @@ filter_controls = html.Div(
                                         placeholder="Max",
                                         min=0,
                                         max=100,
-                                    ),
-                                ],
-                            ),
-                            html.Div(
-                                className="app-controls-block",
-                                children=[
-                                    dbc.Button(
-                                        "Submit", id="submit-filter", n_clicks=0
+                                        value=100,
                                     ),
                                 ],
                             ),
@@ -97,7 +90,34 @@ filter_controls = html.Div(
                     ),
                 ),
                 dcc.Tab(label="Domains"),
+                dcc.Tab(
+                    label="Completeness",
+                    children=[
+                        html.H4(children="Completeness"),
+                        html.Div(
+                            [
+                                dbc.Label("Choose a bunch"),
+                                dbc.Checklist(
+                                    options=[
+                                        {"label": "Full length / complete", "value": 0},
+                                        {"label": "N-terminal truncated ", "value": 10},
+                                        {"label": "C-terminal truncated", "value": 1},
+                                        {"label": "fragments", "value": 11},
+                                    ],
+                                    value=[0, 10, 1, 11],
+                                    id="completeness-checklist",
+                                ),
+                            ]
+                        ),
+                    ],
+                ),
             ],
-        )
+        ),
+        html.Div(
+            className="submit-button",
+            children=[
+                dbc.Button("Apply filter", id="apply-filter-button", n_clicks=0),
+            ],
+        ),
     ],
 )

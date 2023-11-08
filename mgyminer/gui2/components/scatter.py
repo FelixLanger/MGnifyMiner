@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 
 plot_axes = [
     {"label": "Target Length", "value": "tlen"},
-    {"label": "E-Value", "value": "e-value"},
+    {"label": "E-Value", "value": "e_value"},
     {"label": "Hit Coverage", "value": "coverage_hit"},
     {"label": "Query Coverage", "value": "coverage_query"},
     {"label": "Similarity", "value": "similarity"},
@@ -25,7 +25,7 @@ scatter = dbc.Card(
                                 html.Label("X-Axis:", htmlFor="scatter-xaxis"),
                                 dcc.Dropdown(
                                     options=plot_axes,
-                                    value="e-value",
+                                    value="e_value",
                                     id="scatter-xaxis",
                                 ),
                             ]

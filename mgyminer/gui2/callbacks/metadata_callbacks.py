@@ -1,19 +1,30 @@
 from dash import Input, Output
 from mgyminer.gui2.app import app
 import plotly.graph_objects as go
-from mgyminer.gui2.utils.data_singleton import DataSingleton
 import pandas as pd
 from mgyminer.constants import BIOMES
+from dash import exceptions
+import json
 
 
 @app.callback(
     Output("completeness-plot", "figure"),
-    # Input("data-storage", "data"),
-    Input("scatter-xaxis", "value"),
-    Input("scatter-yaxis", "value"),
+    [
+        Input("filtered-data", "data"),
+        Input("selected-indices", "data"),
+    ],
 )
-def update_completeness_barchart(a, b):
-    value_counts = DataSingleton().data.df["truncation"].value_counts(dropna=False)
+def update_completeness_barchart(data_json, selected_indices):
+    if not data_json:
+        raise exceptions.PreventUpdate
+    truncation_data = json.loads(data_json).get("truncation")
+    truncation_series = pd.Series(truncation_data)
+    if selected_indices:
+        truncation_series = truncation_series[
+            truncation_series.index.isin([str(i) for i in selected_indices])
+        ]
+
+    value_counts = truncation_series.value_counts(dropna=False)
 
     labels = {
         0: "complete",
@@ -58,16 +69,26 @@ def update_completeness_barchart(a, b):
 
 @app.callback(
     Output("biome-plot", "figure"),
-    # Input("data-storage", "data"),
-    Input("scatter-xaxis", "value"),
-    Input("scatter-yaxis", "value"),
+    [
+        Input("filtered-data", "data"),
+        Input("selected-indices", "data"),
+    ],
 )
-def update_biome_sunburst_plot(a, b):
+def update_biome_sunburst_plot(data_json, selected_indices):
+    if not data_json:
+        raise exceptions.PreventUpdate
+    biome_data = json.loads(data_json).get("biomes")
+
+    if selected_indices:
+        str_indices = [str(i) for i in selected_indices]
+        biome_data = {key: biome_data[key] for key in biome_data if key in str_indices}
+
     flattened_values = [
-        BIOMES[item]
-        for sublist in DataSingleton().data.df["biomes"].tolist()
-        for item in sublist
+        BIOMES[biomeid]
+        for index, biomelist in biome_data.items()
+        for biomeid in biomelist
     ]
+
     df = build_sunburst_dataframe(flattened_values)
     fig = go.Figure(
         go.Sunburst(
