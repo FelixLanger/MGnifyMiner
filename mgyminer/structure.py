@@ -7,12 +7,14 @@ from typing import Optional, Union
 
 import requests
 
-from mgyminer.config import config
+from mgyminer.config import load_config
 from mgyminer.parsers import parse_hmmer_table
 from mgyminer.proteinTable import proteinTable
 from mgyminer.utils import write_list_to_file
 from mgyminer.wrappers.hmmer import EslAlimanip, Hmmbuild, Hmmsearch
 
+
+config = load_config()
 
 class StructureDownloader:
     @staticmethod

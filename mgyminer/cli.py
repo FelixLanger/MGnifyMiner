@@ -17,7 +17,7 @@ from mgyminer.phyltree import build_tree
 from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
-
+from mgyminer.config import config_cli
 
 def main():
     parser = create_parser()
@@ -399,6 +399,22 @@ def create_parser():
         help="Files to download",
     )
     download_parser.set_defaults(func=setup_cli)
+    config_parser = subparsers.add_parser("config", help="manage configuration")
+    config_parser.add_argument(
+        "--home",
+        "-H",
+        action="store_true",
+        help="save the configuration in the $HOME directory"
+    )
+    config_parser.add_argument(
+        "--blank",
+        "-b",
+        action="store_true",
+        help="create a blank configuration template, to be filled in later."
+    )
+    config_parser.set_defaults(func=config_cli)
+
+
     return parser
 
 

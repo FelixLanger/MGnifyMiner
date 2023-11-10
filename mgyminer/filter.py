@@ -8,7 +8,6 @@ import mysql.connector
 import numpy as np
 import pandas as pd
 
-from mgyminer.config import config
 from mgyminer.proteinTable import proteinTable
 from mgyminer.utils import tryfloat
 
@@ -289,6 +288,3 @@ class alignment(dict):
             self._TARSEQ_INSERT_TABLE
         )
         return target_without_inserts[relative_coordinate]
-
-
-cfg = config

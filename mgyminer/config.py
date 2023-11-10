@@ -52,29 +52,6 @@ def load_config(config_file: Optional[Path] = None) -> dict:
         return {}
 
 
-def save_config(new_config_data: Dict, save_to_home: bool = False) -> None:
-    """
-    Update the configuration file with new data.
-    :param new_config_data: Dictionary containing new configuration data.
-    :param save_to_home: Boolean indicating whether to save in the home directory or CWD.
-    """
-    filename = "miner.toml"
-    config_path = Path.home() / filename if save_to_home else Path.cwd() / filename
-
-    # Load existing configuration, if any
-    existing_config = load_config(config_path) if config_path.exists() else {}
-
-    # Update the existing configuration with new data
-    updated_config = {**existing_config, **new_config_data}
-
-    try:
-        with open(config_path, 'w') as file:
-            toml.dump(updated_config, file)
-        logger.info(f"Config updated successfully at {config_path}")
-    except Exception as e:
-        logger.error(f"Failed to update config file: {e}")
-
-
 def prompt_for_config() -> Dict:
     """
     Prompt the user for configuration values.
@@ -87,32 +64,38 @@ def prompt_for_config() -> Dict:
             user_config[key] = user_input
     return user_config
 
-def create_blank_config_template(config_path: Path) -> None:
-    """
-    Create a blank configuration template.
-    """
-    try:
-        with open(config_path, 'w') as file:
-            toml.dump(config_template, file)
-        logger.info(f"Blank config template created at {config_path}")
-    except Exception as e:
-        logger.error(f"Failed to create config template: {e}")
 
-
-def create_config(save_to_home: bool = False, use_user_input: bool = True) -> None:
+def save_config(new_config_data: Optional[Dict] = None, save_to_home: bool = False, blank: bool = False) -> None:
     """
-    Create a configuration file based on user input or as a blank template.
+    Create or update the configuration file with new data.
+    :param new_config_data: Optional dictionary containing new configuration data.
     :param save_to_home: Boolean indicating whether to save in the home directory or CWD.
-    :param use_user_input: Boolean indicating whether to use user input or create a blank template.
+    :param blank: Boolean indicating whether to create a blank configuration file.
     """
     filename = ".miner.toml"
     config_path = Path.home() / filename if save_to_home else Path.cwd() / filename
 
-    if use_user_input:
-        config_data = prompt_for_config()
-        save_config(config_data, save_to_home)
+    if blank:
+        config_data = config_template
     else:
-        create_blank_config_template(config_path)
+        # Load existing configuration, if any, and update with new data
+        existing_config = load_config(config_path) if config_path.exists() else {}
+        config_data = {**existing_config, **(new_config_data or {})}
 
+    try:
+        with open(config_path, 'w') as file:
+            toml.dump(config_data, file)
+        logger.info(f"Config {'created' if blank else 'updated'} successfully at {config_path}")
+        print(f"Config {'created' if blank else 'updated'} successfully at {config_path}")
+    except Exception as e:
+        logger.error(f"Failed to {'create' if blank else 'update'} config file: {e}")
 
-config = load_config()
+def config_cli(args):
+    """
+    CLI handler for creating or updating the configuration file.
+    """
+    if args.blank:
+        save_config(save_to_home=args.home, blank=True)
+    else:
+        user_config = prompt_for_config()
+        save_config(user_config, save_to_home=args.home)

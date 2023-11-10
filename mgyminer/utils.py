@@ -3,9 +3,10 @@ from typing import Union
 
 import pandas as pd
 
-from mgyminer.config import config
+from mgyminer.config import load_config
 from mgyminer.wrappers.hmmer import esl_sfetch
 
+config = load_config()
 
 def export_sequences(args):
     """

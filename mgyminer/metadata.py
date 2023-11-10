@@ -9,7 +9,7 @@ import mysql.connector
 import pandas as pd
 from aiohttp_client_cache import CachedSession, SQLiteBackend
 
-from mgyminer.config import config
+from mgyminer.config import load_config
 from mgyminer.utils import mgyp_to_id, proteinID_to_mgyp
 
 logging.basicConfig(
@@ -25,7 +25,7 @@ assebmly_api = "https://www.ebi.ac.uk/metagenomics/api/v1/assemblies/{id}?format
 ena_sample_api = "https://www.ebi.ac.uk/ena/browser/api/xml/{id}"
 
 
-cfg = config
+cfg = load_config()
 
 
 def find_origin_assemblies(mgyps: List) -> dict:
