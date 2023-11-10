@@ -95,7 +95,7 @@ def config_cli(args):
     CLI handler for creating or updating the configuration file.
     """
     if args.blank:
-        save_config(save_to_home=args.home, blank=True)
+        save_config(save_to_home=args.project, blank=True)
     else:
         user_config = prompt_for_config()
         save_config(user_config, save_to_home=args.home)

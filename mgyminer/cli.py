@@ -401,15 +401,15 @@ def create_parser():
     download_parser.set_defaults(func=setup_cli)
     config_parser = subparsers.add_parser("config", help="manage configuration")
     config_parser.add_argument(
-        "--home",
-        "-H",
+        "--project",
+        "-p",
         action="store_true",
-        help="save the configuration in the $HOME directory"
+        help="save the configuration in the current directory instead of $HOME"
     )
     config_parser.add_argument(
         "--blank",
         "-b",
-        action="store_true",
+        action="store_false",
         help="create a blank configuration template, to be filled in later."
     )
     config_parser.set_defaults(func=config_cli)
