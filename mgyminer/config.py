@@ -4,12 +4,12 @@ import toml
 from loguru import logger
 
 config_template = {
-        "Google service account json": "",
-        "BigQuery project": "",
-        "BigQuery Dataset": "",
-        "MGnify 90 sequences": "",
-        "MGnify sequences": ""
-    }
+    "Google service account json": "",
+    "BigQuery project": "",
+    "BigQuery Dataset": "",
+    "MGnify 90 sequences": "",
+    "MGnify sequences": "",
+}
 
 
 def _find_config_file() -> Optional[Path]:
@@ -65,7 +65,11 @@ def prompt_for_config() -> Dict:
     return user_config
 
 
-def save_config(new_config_data: Optional[Dict] = None, save_to_home: bool = False, blank: bool = False) -> None:
+def save_config(
+    new_config_data: Optional[Dict] = None,
+    save_to_home: bool = False,
+    blank: bool = False,
+) -> None:
     """
     Create or update the configuration file with new data.
     :param new_config_data: Optional dictionary containing new configuration data.
@@ -83,12 +87,17 @@ def save_config(new_config_data: Optional[Dict] = None, save_to_home: bool = Fal
         config_data = {**existing_config, **(new_config_data or {})}
 
     try:
-        with open(config_path, 'w') as file:
+        with open(config_path, "w") as file:
             toml.dump(config_data, file)
-        logger.info(f"Config {'created' if blank else 'updated'} successfully at {config_path}")
-        print(f"Config {'created' if blank else 'updated'} successfully at {config_path}")
+        logger.info(
+            f"Config {'created' if blank else 'updated'} successfully at {config_path}"
+        )
+        print(
+            f"Config {'created' if blank else 'updated'} successfully at {config_path}"
+        )
     except Exception as e:
         logger.error(f"Failed to {'create' if blank else 'update'} config file: {e}")
+
 
 def config_cli(args):
     """

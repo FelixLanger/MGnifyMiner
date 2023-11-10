@@ -8,6 +8,7 @@ from mgyminer.wrappers.hmmer import esl_sfetch
 
 config = load_config()
 
+
 def export_sequences(args):
     """
     Export sequences from filters to FASTA format

@@ -16,6 +16,7 @@ from mgyminer.wrappers.hmmer import EslAlimanip, Hmmbuild, Hmmsearch
 
 config = load_config()
 
+
 class StructureDownloader:
     @staticmethod
     def download_file(url: str, outfile: Union[str, Path]) -> bool:

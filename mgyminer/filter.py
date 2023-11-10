@@ -10,6 +10,9 @@ import pandas as pd
 
 from mgyminer.proteinTable import proteinTable
 from mgyminer.utils import tryfloat
+from mgyminer.config import load_config
+
+cfg = load_config()
 
 
 def feat_filter(args):

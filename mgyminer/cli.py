@@ -19,6 +19,7 @@ from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
 from mgyminer.config import config_cli
 
+
 def main():
     parser = create_parser()
     args = parser.parse_args()
@@ -404,16 +405,15 @@ def create_parser():
         "--project",
         "-p",
         action="store_true",
-        help="save the configuration in the current directory instead of $HOME"
+        help="save the configuration in the current directory instead of $HOME",
     )
     config_parser.add_argument(
         "--blank",
         "-b",
         action="store_false",
-        help="create a blank configuration template, to be filled in later."
+        help="create a blank configuration template, to be filled in later.",
     )
     config_parser.set_defaults(func=config_cli)
-
 
     return parser
 
