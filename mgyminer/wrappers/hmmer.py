@@ -1,7 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 from mgyminer.wrappers._base import Program
 
@@ -31,8 +31,9 @@ class esl_sfetch(Program):
     def run(
         self,
         sequence_file: Union[Path, str],
-        sequence_ids: Union[str, list],
+        sequence_ids: Union[str, List[str], Path],
         out_file: Union[Path, str],
+        subsequences=False,
         *args: str,
     ) -> bool:
         """
@@ -44,9 +45,6 @@ class esl_sfetch(Program):
         :return:
         """
 
-        if isinstance(sequence_ids, str):
-            sequence_ids = [sequence_ids]
-
         if isinstance(sequence_file, str):
             sequence_file = Path(sequence_file)
 
@@ -56,16 +54,29 @@ class esl_sfetch(Program):
             )
             self.index(sequence_file)
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_dir = Path(temp_dir)
-            with open(temp_dir / "key_file", "wt") as name_file:
-                for sequence_id in sequence_ids:
-                    name_file.write(f"{sequence_id} \n")
-            arguments = ["-o", out_file, "-f", sequence_file, name_file.name]
-            if args:
-                arguments.extend(args)
-            logging.info("Fetching sequences from %s", sequence_file)
-            return self._run(arguments)
+        if isinstance(sequence_ids, Path) or (
+            isinstance(sequence_ids, str) and Path(sequence_ids).is_file()
+        ):
+            key_file_path = Path(sequence_ids)
+        else:
+            # If sequence_ids is not a path, treat it as a single ID or a list of IDs
+            if isinstance(sequence_ids, str):
+                sequence_ids = [sequence_ids]
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_dir = Path(temp_dir)
+                key_file_path = temp_dir / "key_file"
+                with open(key_file_path, "wt") as name_file:
+                    for sequence_id in sequence_ids:
+                        name_file.write(f"{sequence_id}\n")
+
+        arguments = ["-o", out_file, "-f", sequence_file, key_file_path]
+        if subsequences:
+            arguments = ["-o", out_file, "-Cf", sequence_file, key_file_path]
+        if args:
+            arguments.extend(args)
+        logging.info("Fetching sequences from %s", sequence_file)
+        return self._run(arguments)
 
 
 class PHmmer(Program):

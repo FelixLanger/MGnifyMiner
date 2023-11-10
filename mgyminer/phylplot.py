@@ -187,9 +187,9 @@ def smallest_y_dist(protein_ys):
     return smallest_dist
 
 
-def plot_tree(args):
-    metadata = pd.read_csv(args.filter)
-    tree = Phylo.read(args.tree, "newick")
+def plot_tree(inmetadata, intree):
+    metadata = inmetadata
+    tree = Phylo.read(intree, "newick")
 
     def _idpluscoords(row):
         if row["ndom"] > 1:
@@ -201,17 +201,17 @@ def plot_tree(args):
     metadata["dom_acc"] = metadata.apply(lambda row: _idpluscoords(row), axis=1)
     query = metadata["query_name"].iloc[0]
 
-    minimum = 0 if args.min is None else args.min
-    maximum = math.inf if args.max is None else args.max
+    minimum = 0  # if args.min is None else args.min
+    maximum = math.inf  # if args.max is None else args.max
 
-    if args.param is not None:
-        # if parameter is specified find proteins that match filter for parameter
-        filter_dict = _filter_dict(metadata, args.param)
-        of_interest = _in_thresholds(filter_dict, minimum, maximum)
-    else:
-        # if no parameter is given take the tree distance
-        filter_dict = distances(tree, query)
-        of_interest = _in_thresholds(filter_dict, minimum, maximum)
+    # if args.param is not None:
+    #     # if parameter is specified find proteins that match filter for parameter
+    #     filter_dict = _filter_dict(metadata, args.param)
+    #     of_interest = _in_thresholds(filter_dict, minimum, maximum)
+    # else:
+    #     # if no parameter is given take the tree distance
+    filter_dict = distances(tree, query)
+    of_interest = _in_thresholds(filter_dict, minimum, maximum)
 
     x_coords = get_x_coordinates(tree)
     y_coords = get_y_coordinates(tree)
@@ -435,4 +435,4 @@ def plot_tree(args):
                 )
             )
 
-    f.write_html("tree_vis.html")
+    return f

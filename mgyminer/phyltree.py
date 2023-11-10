@@ -4,8 +4,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import List, Optional, Union
-
-import pandas as pd
+from mgyminer.wrappers.hmmer import esl_sfetch
 
 
 class runner:
@@ -74,30 +73,30 @@ class runner:
                 return False
 
 
-class esl_sfetcher(runner):
-    def __init__(self) -> None:
-        super().__init__("esl-sfetch")
-
-    def run(
-        self,
-        input_file: Union[Path, str],
-        namefile: Union[Path, str],
-        outfile: Union[Path, str],
-        args: Optional[List] = None,
-    ) -> bool:
-        """
-        Run ESL sfetch command to retrieve (sub)-sequences from a sequence file
-        :param input_file: Path to input sequence file
-        :param namefile: Path to namefile with sequence ID to be fetched. One ID per line
-        :param outfile: Path to output file location
-        :param args: additional esl-sfetch arguments
-        :return:
-        """
-        command = [self.program]
-        if args is not None:
-            command.extend(args)
-        command.extend([input_file, namefile])
-        return self._run(command, stdout_file=outfile)
+# class esl_sfetcher(runner):
+#     def __init__(self) -> None:
+#         super().__init__("esl-sfetch")
+#
+#     def run(
+#         self,
+#         input_file: Union[Path, str],
+#         namefile: Union[Path, str],
+#         outfile: Union[Path, str],
+#         args: Optional[List] = None,
+#     ) -> bool:
+#         """
+#         Run ESL sfetch command to retrieve (sub)-sequences from a sequence file
+#         :param input_file: Path to input sequence file
+#         :param namefile: Path to namefile with sequence ID to be fetched. One ID per line
+#         :param outfile: Path to output file location
+#         :param args: additional esl-sfetch arguments
+#         :return:
+#         """
+#         command = [self.program]
+#         if args is not None:
+#             command.extend(args)
+#         command.extend([input_file, namefile])
+#         return self._run(command, stdout_file=outfile)
 
 
 class hmmbuilder(runner):
@@ -211,21 +210,18 @@ class fastTree(runner):
 
 
 class treebuilder:
-    def __init__(self, args) -> None:
-        self.inputfile = args.input
-        self.fetcher = esl_sfetcher()
+    def __init__(self, input, query, hit_seqs, output=False, aligmnent=False) -> None:
+        self.inputfile = input
+        self.fetcher = esl_sfetch()
         self.aligner = hmmaligner()
         self.hmmbuilder = hmmbuilder()
-        self.query = args.query
+        self.query = query
+        self.hitseqs = hit_seqs
         self.tree = (
-            args.output
-            if args.output
-            else Path(str(args.input).replace(args.input.suffix, ".tree"))
+            output if output else Path(str(input).replace(input.suffix, ".tree"))
         )
         self.alignment = (
-            args.alignment
-            if args.alignment
-            else Path(str(args.input).replace(args.input.suffix, ".afa"))
+            aligmnent if aligmnent else Path(str(input).replace(input.suffix, ".afa"))
         )
 
     def make_alignment(self: Union[Path, str]) -> Path:
@@ -233,7 +229,7 @@ class treebuilder:
             keyfile = Path(tmpdir) / "keyfile"
             sequences = Path(tmpdir) / "sequences"
             hmm = Path(tmpdir) / "hmm"
-            seq_df = pd.read_csv(self.inputfile)
+            seq_df = self.inputfile
 
             def _idpluscoords(row):
                 if row["ndom"] > 1:
@@ -246,12 +242,7 @@ class treebuilder:
             seq_df[["dom_acc", "env_from", "env_to", "target_name"]].to_csv(
                 keyfile, index=False, header=False, sep=" "
             )
-            self.fetcher.run(
-                "/home/felix/PycharmProjects/MGnifyMiner/playground/2022-03-02-antioxidant-peptides/hit_sequences.fa",
-                keyfile,
-                sequences,
-                args=["-Cf"],
-            )
+            self.fetcher.run(self.hitseqs, keyfile, sequences, subsequences=True)
             self.hmmbuilder.run(hmm, self.query)
             # Append query sequence to the alignment to add it to the tree
             with open(sequences, "at") as fout, open(self.query, "rt") as fin:
