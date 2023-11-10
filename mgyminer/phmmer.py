@@ -50,7 +50,7 @@ def phmmer(args) -> None:
         axis=1,
     )
     results = proteinTable(results)
-    results.fetch_metadata()
+    results.fetch_metadata(database="bigquery")
     results.save(output_file, index=False)
 
     if args.dashboard:
