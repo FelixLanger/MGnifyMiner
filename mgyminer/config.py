@@ -107,4 +107,4 @@ def config_cli(args):
         save_config(save_to_home=args.project, blank=True)
     else:
         user_config = prompt_for_config()
-        save_config(user_config, save_to_home=args.home)
+        save_config(user_config, save_to_home=args.project)

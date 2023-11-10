@@ -404,13 +404,13 @@ def create_parser():
     config_parser.add_argument(
         "--project",
         "-p",
-        action="store_true",
+        action="store_false",
         help="save the configuration in the current directory instead of $HOME",
     )
     config_parser.add_argument(
         "--blank",
         "-b",
-        action="store_false",
+        action="store_true",
         help="create a blank configuration template, to be filled in later.",
     )
     config_parser.set_defaults(func=config_cli)
