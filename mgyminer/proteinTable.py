@@ -178,6 +178,7 @@ class proteinTable:
                 credentials = service_account.Credentials.from_service_account_file(
                     cfg["Google service account json"]
                 )
+                logger.info("loaded Google service account credentials")
             except Exception as e:
                 logger.error("Invalid Google service account JSON key file: " + str(e))
                 raise Exception("Invalid Google service account JSON key file") from e
