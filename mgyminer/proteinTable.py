@@ -206,6 +206,7 @@ class proteinTable:
                 f"{BIGQUERY_DATASET}.{table_name}",
                 project_id=f"{BIGQUERY_PROJECT}",
                 if_exists="replace",
+                credentials=credentials
             )
 
             join_query = f"""SELECT 
