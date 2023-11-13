@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Union
-
+import hashlib
 import pandas as pd
 
 from mgyminer.config import load_config
@@ -70,3 +70,30 @@ def write_list_to_file(lst: list, outfile: Union[str, Path]):
         for item in lst:
             name_file.write(f"{item} \n")
     return Path(outfile)
+
+
+def create_md5_hash(input_string):
+    """
+    Generate an MD5 hash for a given input string.
+
+    This function takes a string, encodes it into bytes, and then computes its MD5 hash.
+    The resulting hash is returned in hexadecimal format. Note that MD5 is not secure against
+    collision attacks and should not be used for cryptographic purposes.
+
+    Args:
+    input_string (str): The string to be hashed.
+
+    Returns:
+    str: The hexadecimal MD5 hash of the input string.
+    """
+
+    # Create an MD5 hash object
+    hash_object = hashlib.md5()
+
+    # Update the hash object with the bytes of the input string
+    hash_object.update(input_string.encode())
+
+    # Get the hexadecimal representation of the hash
+    hash_hex = hash_object.hexdigest()
+
+    return hash_hex

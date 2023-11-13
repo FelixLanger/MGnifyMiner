@@ -6,7 +6,7 @@ from loguru import logger
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from mgyminer.utils import mgyp_to_id
+from mgyminer.utils import mgyp_to_id, create_md5_hash
 from mgyminer.config import load_config
 
 
@@ -200,13 +200,13 @@ class proteinTable:
                 return
 
             self.df["mgyp"] = self.df["target_name"].apply(lambda x: mgyp_to_id(x))
-            table_name = self.df["query_name"][0]
+            table_name = create_md5_hash(self.df["query_name"][0])[:16]
             mgyp_ids = self.df["mgyp"].to_frame()
             mgyp_ids.to_gbq(
                 f"{BIGQUERY_DATASET}.{table_name}",
                 project_id=f"{BIGQUERY_PROJECT}",
                 if_exists="replace",
-                credentials=credentials
+                credentials=credentials,
             )
 
             join_query = f"""SELECT 
