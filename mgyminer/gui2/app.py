@@ -4,7 +4,7 @@ import argparse
 parser = argparse.ArgumentParser(
     description="Run the Dash app with specified input files."
 )
-parser.add_argument("--query_file", type=str, help="Path to the query file.")
+parser.add_argument("--query", type=str, help="Path to the query file.")
 parser.add_argument("--hit_sequences", type=str, help="Path to the hit sequences file.")
 parser.add_argument(
     "--search_out", type=str, help="Path to the search output CSV file."
@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 search_results = DataSingleton(
     data_path=args.search_out,
-    query_file=args.query_file,
+    query_file=args.query,
     hit_sequences=args.hit_sequences,
 )
 
@@ -33,4 +33,4 @@ from mgyminer.gui2.callbacks import (
 app.layout = main_layout.layout
 
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8888, debug=True)
+    app.run_server(port=8888, debug=True)

@@ -1,6 +1,8 @@
-from dash import Input, Output, State, exceptions
+from dash import Input, Output, State, exceptions, ALL, Patch, html, dcc
 from mgyminer.gui2.app import app
 from mgyminer.gui2.utils.data_singleton import DataSingleton
+from mgyminer.constants import BIOMES
+from mgyminer.utils import flatten_list
 
 
 @app.callback(
@@ -13,6 +15,7 @@ from mgyminer.gui2.utils.data_singleton import DataSingleton
         Input("identity-max", "value"),
         Input("similarity-min", "value"),
         Input("similarity-max", "value"),
+        Input({"type": "city-filter-dropdown", "index": ALL}, "value"),
     ],
 )
 def update_filters_store(
@@ -23,13 +26,18 @@ def update_filters_store(
     identmax,
     simmin,
     simmax,
+    biomes,
 ):
+    if biomes:
+        biomes = [biome_descendant[biome] for biome in biomes]
     filter_dict = {
         "completeness": completeness,
         "e_value": {"min": evalmin, "max": evalmax},
         "identity": {"min": identmin, "max": identmax},
         "similarity": {"min": simmin, "max": simmax},
+        "biomes": biomes,
     }
+    print(filter_dict)
     return filter_dict
 
 
@@ -82,3 +90,61 @@ def parse_selected_indices(selected_points):
     if not selected_points:
         return []
     return [point["pointIndex"] for point in selected_points["points"]]
+
+
+@app.callback(
+    Output("biome-dropdown-container-div", "children"),
+    Input("add-filter-btn", "n_clicks"),
+)
+def display_dropdowns(n_clicks):
+    patched_children = Patch()
+    new_dropdown = dcc.Dropdown(
+        all_possible_biomes(),
+        id={"type": "city-filter-dropdown", "index": n_clicks},
+    )
+    patched_children.append(new_dropdown)
+    return patched_children
+
+
+@app.callback(
+    Output("biome-dropdown-container-output-div", "children"),
+    Input({"type": "city-filter-dropdown", "index": ALL}, "value"),
+)
+def display_output(values):
+    return html.Div(
+        [html.Div(f"Dropdown {i + 1} = {value}") for (i, value) in enumerate(values)]
+    )
+
+
+def x_level_biomes(biomes, x):
+    """
+    Return a list of all the biomes with a depth of x or smaller.
+    Depth is the level of detail of th biome description
+    """
+
+    def get_depth(biome_description):
+        return biome_description.count(":")
+
+    return [desc for desc in biomes.values() if get_depth(desc) <= x]
+
+
+def all_possible_biomes():
+    biome_ids = set(flatten_list(DataSingleton().data.df["biomes"].to_list()))
+    return sorted([BIOMES[id] for id in biome_ids])
+
+
+def biome_descendants(biome_dict):
+    """
+    Returns a mapping of the biome strings : to all biome IDs which are children of this string
+    Example:
+        'root:Host-associated:Reptile:Oral cavity:Venom gland' : {486, 487}
+    """
+    descendant_mapping = {biome: set() for biome in biome_dict.values()}
+    for biome_id, biome_str in biome_dict.items():
+        for key in descendant_mapping:
+            if biome_str.startswith(key):
+                descendant_mapping[key].add(biome_id)
+    return descendant_mapping
+
+
+biome_descendant = biome_descendants(BIOMES)

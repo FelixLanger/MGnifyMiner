@@ -111,6 +111,24 @@ filter_controls = html.Div(
                         ),
                     ],
                 ),
+                dcc.Tab(
+                    label="Biome",
+                    children=[
+                        html.H4(children="Biomes"),
+                        html.Div(
+                            [
+                                dbc.Label("Select Biomes"),
+                                dbc.Button(
+                                    "Add Filter", id="add-filter-btn", n_clicks=0
+                                ),
+                                html.Div(
+                                    id="biome-dropdown-container-div", children=[]
+                                ),
+                                html.Div(id="biome-dropdown-container-output-div"),
+                            ]
+                        ),
+                    ],
+                ),
             ],
         ),
         html.Div(
