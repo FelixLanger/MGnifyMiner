@@ -115,42 +115,43 @@ def decomment(rows):
         yield row
 
 
-def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
+def parse_hmmer_domtable(domtable: Union[Path, str]) -> pd.DataFrame:
     """
     Parse HMMER domain Table to pandas DataFrame
     :param domtable: Path to domain table file
     :return: domain table pandas DataFrame
     """
+    column_names = [
+        "target_name",
+        "target_accession",
+        "tlen",
+        "query_name",
+        "query_accession",
+        "qlen",
+        "e-value",
+        "score",
+        "bias",
+        "ndom",
+        "ndom_of",
+        "c-value",
+        "i-value",
+        "dom_score",
+        "dom_bias",
+        "hmm_from",
+        "hmm_to",
+        "ali_from",
+        "ali_to",
+        "env_from",
+        "env_to",
+        "acc",
+    ]
+
     proteinTable = pd.read_csv(
         domtable,
         sep=r"\s+",
         comment="#",
-        index_col=False,
-        names=[
-            "target_name",
-            "target_accession",
-            "tlen",
-            "query_name",
-            "query_accession",
-            "qlen",
-            "e-value",
-            "score",
-            "bias",
-            "ndom",
-            "ndom_of",
-            "c-value",
-            "i-value",
-            "dom_score",
-            "dom_bias",
-            "hmm_from",
-            "hmm_to",
-            "ali_from",
-            "ali_to",
-            "env_from",
-            "env_to",
-            "acc",
-            "desc",
-        ],
+        usecols=range(len(column_names)),
+        names=column_names,
         dtype={
             "target_name": str,
             "target_accession": str,
@@ -174,8 +175,8 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> DataFrame:
             "env_from": int,
             "env_to": int,
             "acc": np.object_,
-            "desc": str,
         },
+        engine="python",
     )
 
     # Calculate coverages
