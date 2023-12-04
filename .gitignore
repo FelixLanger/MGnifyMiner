@@ -6,3 +6,4 @@ mgyminer.yaml
 .coverage
 poetry.lock
 cache/
+codon
