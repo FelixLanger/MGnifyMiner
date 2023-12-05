@@ -91,6 +91,40 @@ filter_controls = html.Div(
                 ),
                 dcc.Tab(label="Domains"),
                 dcc.Tab(
+                    label="Export",
+                    children=html.Div(
+                        className="control-tab",
+                        children=[
+                            html.H4(
+                                children="Export Results",
+                            ),
+                            html.Div(
+                                className="app-controls-block",
+                                children=[
+                                    # html.Div(
+                                    #     className="fullwidth-app-controls-name",
+                                    #     children="Output file path",
+                                    # ),    Output("filtered-data", "data"),
+                                    dbc.Input(
+                                        id="output-file-name-form",
+                                        placeholder="output file name",
+                                        type="text",
+                                    ),
+                                    dbc.Button(
+                                        "Export results", id="export-results-button"
+                                    ),
+                                    dbc.Alert(
+                                        id="export-alert",
+                                        is_open=False,
+                                        duration=2000,
+                                        color="success",
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+                dcc.Tab(
                     label="Completeness",
                     children=[
                         html.H4(children="Completeness"),
@@ -111,24 +145,24 @@ filter_controls = html.Div(
                         ),
                     ],
                 ),
-                dcc.Tab(
-                    label="Biome",
-                    children=[
-                        html.H4(children="Biomes"),
-                        html.Div(
-                            [
-                                dbc.Label("Select Biomes"),
-                                dbc.Button(
-                                    "Add Filter", id="add-filter-btn", n_clicks=0
-                                ),
-                                html.Div(
-                                    id="biome-dropdown-container-div", children=[]
-                                ),
-                                html.Div(id="biome-dropdown-container-output-div"),
-                            ]
-                        ),
-                    ],
-                ),
+                # dcc.Tab(
+                #     label="Biome",
+                #     children=[
+                #         html.H4(children="Biomes"),
+                #         html.Div(
+                #             [
+                #                 dbc.Label("Select Biomes"),
+                #                 dbc.Button(
+                #                     "Add Filter", id="add-filter-btn", n_clicks=0
+                #                 ),
+                #                 html.Div(
+                #                     id="biome-dropdown-container-div", children=[]
+                #                 ),
+                #                 html.Div(id="biome-dropdown-container-output-div"),
+                #             ]
+                #         ),
+                #     ],
+                # ),
             ],
         ),
         html.Div(

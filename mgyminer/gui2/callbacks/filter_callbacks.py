@@ -1,8 +1,10 @@
-from dash import Input, Output, State, exceptions, ALL, Patch, html, dcc
+import pandas as pd
+from dash import Input, Output, State, exceptions
 from mgyminer.gui2.app import app
 from mgyminer.gui2.utils.data_singleton import DataSingleton
 from mgyminer.constants import BIOMES
 from mgyminer.utils import flatten_list
+from mgyminer.proteinTable import proteinTable
 
 
 @app.callback(
@@ -15,7 +17,6 @@ from mgyminer.utils import flatten_list
         Input("identity-max", "value"),
         Input("similarity-min", "value"),
         Input("similarity-max", "value"),
-        Input({"type": "city-filter-dropdown", "index": ALL}, "value"),
     ],
 )
 def update_filters_store(
@@ -26,16 +27,12 @@ def update_filters_store(
     identmax,
     simmin,
     simmax,
-    biomes,
 ):
-    if biomes:
-        biomes = [biome_descendant[biome] for biome in biomes]
     filter_dict = {
         "completeness": completeness,
         "e_value": {"min": evalmin, "max": evalmax},
         "identity": {"min": identmin, "max": identmax},
         "similarity": {"min": simmin, "max": simmax},
-        "biomes": biomes,
     }
     print(filter_dict)
     return filter_dict
@@ -84,36 +81,51 @@ def filter_data(n_clicks, filters):
 
 
 @app.callback(
-    Output("selected-indices", "data"), Input("stats-scatter", "selectedData")
+    [Output("export-alert", "children"), Output("export-alert", "is_open")],
+    [Input("export-results-button", "n_clicks")],
+    [State("filtered-data", "data"), State("output-file-name-form", "value")],
 )
-def parse_selected_indices(selected_points):
-    if not selected_points:
-        return []
-    return [point["pointIndex"] for point in selected_points["points"]]
-
-
-@app.callback(
-    Output("biome-dropdown-container-div", "children"),
-    Input("add-filter-btn", "n_clicks"),
-)
-def display_dropdowns(n_clicks):
-    patched_children = Patch()
-    new_dropdown = dcc.Dropdown(
-        all_possible_biomes(),
-        id={"type": "city-filter-dropdown", "index": n_clicks},
+def export_selected_data(n_clicks, selected_data, output_file_name):
+    if n_clicks is None or selected_data is None or output_file_name is None:
+        raise exceptions.PreventUpdate
+    filtered_df = proteinTable(
+        pd.read_json(selected_data).rename({"e_value": "e-value"}, axis=1)
     )
-    patched_children.append(new_dropdown)
-    return patched_children
+    filtered_df.save(output_file_name)
+    return f"Data successfully exported to {output_file_name}", True
 
 
-@app.callback(
-    Output("biome-dropdown-container-output-div", "children"),
-    Input({"type": "city-filter-dropdown", "index": ALL}, "value"),
-)
-def display_output(values):
-    return html.Div(
-        [html.Div(f"Dropdown {i + 1} = {value}") for (i, value) in enumerate(values)]
-    )
+# @app.callback(
+#     Output("selected-indices", "data"), Input("stats-scatter", "selectedData")
+# )
+# def parse_selected_indices(selected_points):
+#     if not selected_points:
+#         return []
+#     return [point["pointIndex"] for point in selected_points["points"]]
+#
+#
+# @app.callback(
+#     Output("biome-dropdown-container-div", "children"),
+#     Input("add-filter-btn", "n_clicks"),
+# )
+# def display_dropdowns(n_clicks):
+#     patched_children = Patch()
+#     new_dropdown = dcc.Dropdown(
+#         all_possible_biomes(),
+#         id={"type": "city-filter-dropdown", "index": n_clicks},
+#     )
+#     patched_children.append(new_dropdown)
+#     return patched_children
+
+
+# @app.callback(
+#     Output("biome-dropdown-container-output-div", "children"),
+#     Input({"type": "city-filter-dropdown", "index": ALL}, "value"),
+# )
+# def display_output(values):
+#     return html.Div(
+#         [html.Div(f"Dropdown {i + 1} = {value}") for (i, value) in enumerate(values)]
+#     )
 
 
 def x_level_biomes(biomes, x):
