@@ -8,7 +8,7 @@ layout = html.Div(
         dcc.Store(id="filter-parameters", storage_type="session"),
         dcc.Store(id="filtered-data", storage_type="session"),
         dcc.Store(id="selected-indices", storage_type="session"),
-        sidebar.sidebar,
+        # sidebar.sidebar,
         homepage.page,
     ]
 )

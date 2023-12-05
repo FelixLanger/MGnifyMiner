@@ -155,7 +155,6 @@ class proteinTable:
                 # If it's a string, return as it is
                 return cell
             else:
-                # Add any other type conditions if necessary
                 pass
 
         self.df["e-value"] = self.df["e-value"].apply(lambda x: format_eval(x))
