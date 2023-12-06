@@ -107,3 +107,15 @@ def flatten_list(nested_list):
         else:
             flat_list.append(element)
     return flat_list
+
+
+def dataframe_to_fasta(df, fasta_file):
+    """
+    Convert a DataFrame with protein IDs and sequences to a FASTA file.
+
+    :param df: DataFrame with protein data. First column should be the ID, second column the sequence.
+    :param fasta_file: Path to the output FASTA file.
+    """
+    with open(fasta_file, "w") as file:
+        for index, row in df.iterrows():
+            file.write(f">{row[0]}\n{row[1]}\n")
