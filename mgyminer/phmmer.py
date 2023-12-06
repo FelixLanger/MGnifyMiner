@@ -52,6 +52,8 @@ def phmmer(args) -> None:
     results = proteinTable(results)
     results.fetch_metadata(database="bigquery")
     results.save(output_file, index=False)
+    hit_seqs = save_dir / f"{query_name}_hit_sequences.fa"
+    results.fetch_and_export_sequences(hit_seqs)
 
     if args.dashboard:
         dashboard = ProteinTableVisualiser(results)
