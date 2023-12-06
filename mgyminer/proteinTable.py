@@ -6,7 +6,12 @@ from loguru import logger
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from mgyminer.utils import mgyp_to_id, create_md5_hash
+from mgyminer.utils import (
+    mgyp_to_id,
+    create_md5_hash,
+    dataframe_to_fasta,
+    proteinID_to_mgyp,
+)
 from mgyminer.config import load_config
 
 
@@ -167,34 +172,50 @@ class proteinTable:
 
         self.df.to_csv(outfile, sep=sep, index=index, **kwargs)
 
-    def fetch_metadata(self, database):
+    def _setup_bigquery_connection(self):
+        """
+        Set up the connection to Google BigQuery.
+        This method loads credentials and configuration settings.
+        """
         cfg = load_config()
-        if database.lower() == "bigquery":
+
+        # Load Google service account credentials
+        try:
             from google.oauth2 import service_account
 
-            # Check if the Google service account JSON key file is valid
-            try:
-                credentials = service_account.Credentials.from_service_account_file(
-                    cfg["Google service account json"]
-                )
-                logger.info("loaded Google service account credentials")
-            except Exception as e:
-                logger.error("Invalid Google service account JSON key file: " + str(e))
-                raise Exception("Invalid Google service account JSON key file") from e
+            credentials = service_account.Credentials.from_service_account_file(
+                cfg["Google service account json"]
+            )
+            logger.info("Loaded Google service account credentials")
+        except Exception as e:
+            logger.error("Invalid Google service account JSON key file: " + str(e))
+            raise Exception("Invalid Google service account JSON key file") from e
 
-            # Check if BigQuery Dataset and BigQuery project are set in the config
-            BIGQUERY_DATASET = cfg.get("BigQuery Dataset")
-            BIGQUERY_PROJECT = cfg.get("BigQuery project")
-            if not BIGQUERY_DATASET or not BIGQUERY_PROJECT:
-                error_message = "BigQuery Dataset and/or BigQuery Project not set in the configuration."
-                logger.error(error_message)
-                raise ValueError(error_message)
+        # Retrieve BigQuery Dataset and Project details from the configuration
+        BIGQUERY_DATASET = cfg.get("BigQuery Dataset")
+        BIGQUERY_PROJECT = cfg.get("BigQuery project")
+        if not BIGQUERY_DATASET or not BIGQUERY_PROJECT:
+            error_message = (
+                "BigQuery Dataset and/or BigQuery Project not set in the configuration."
+            )
+            logger.error(error_message)
+            raise ValueError(error_message)
+
+        return credentials, BIGQUERY_DATASET, BIGQUERY_PROJECT
+
+    def fetch_metadata(self, database):
+        if database.lower() == "bigquery":
+            # Set up BigQuery connection
+            (
+                credentials,
+                BIGQUERY_DATASET,
+                BIGQUERY_PROJECT,
+            ) = self._setup_bigquery_connection()
 
             columns_to_check = ["complete", "truncation", "assemblies", "biomes"]
             if all(column in self.df.columns for column in columns_to_check):
                 logger.info(
-                    f"Skipping fetching of data from bigquery because {columns_to_check} columns are already "
-                    f"present"
+                    f"Skipping fetching of data from BigQuery because {columns_to_check} columns are already present"
                 )
                 return
 
@@ -203,42 +224,98 @@ class proteinTable:
             mgyp_ids = self.df["mgyp"].to_frame()
             mgyp_ids.to_gbq(
                 f"{BIGQUERY_DATASET}.{table_name}",
-                project_id=f"{BIGQUERY_PROJECT}",
+                project_id=BIGQUERY_PROJECT,
                 if_exists="replace",
                 credentials=credentials,
             )
 
             join_query = f"""SELECT 
-                                    t.mgyp AS mgyp,
-                                    m.complete as complete,
-                                    m.truncation as truncation,
-                                    a.pfam_architecture,
-                                    ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
-                                    ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
-                                FROM 
-                                    {BIGQUERY_DATASET}.{table_name} t
-                                JOIN 
-                                    {BIGQUERY_DATASET}.protein p ON t.mgyp = p.id
-                                JOIN 
-                                    {BIGQUERY_DATASET}.architecture a ON p.architecture = a.id
-                                JOIN 
-                                    {BIGQUERY_DATASET}.protein_metadata m ON t.mgyp = m.mgyp
-                                JOIN 
-                                    {BIGQUERY_DATASET}.assembly asmbly ON m.assembly = asmbly.id
-                                GROUP BY 
-                                    t.mgyp,
-                                    m.complete,
-                                    m.truncation,
-                                    a.pfam_architecture;
-                                """
+                                t.mgyp AS mgyp,
+                                m.complete as complete,
+                                m.truncation as truncation,
+                                a.pfam_architecture,
+                                ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
+                                ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
+                            FROM 
+                                {BIGQUERY_DATASET}.{table_name} t
+                            JOIN 
+                                {BIGQUERY_DATASET}.protein p ON t.mgyp = p.id
+                            JOIN 
+                                {BIGQUERY_DATASET}.architecture a ON p.architecture = a.id
+                            JOIN 
+                                {BIGQUERY_DATASET}.protein_metadata m ON t.mgyp = m.mgyp
+                            JOIN 
+                                {BIGQUERY_DATASET}.assembly asmbly ON m.assembly = asmbly.id
+                            GROUP BY 
+                                t.mgyp,
+                                m.complete,
+                                m.truncation,
+                                a.pfam_architecture;
+                            """
             metadata = pd.read_gbq(
                 join_query, project_id=BIGQUERY_PROJECT, credentials=credentials
             )
             result = pd.merge(self.df, metadata, on="mgyp")
-        if database.lower() == "mysql":
-            ## TODO Implement fetching from MySQL
+            self.df = result
+
+        elif database.lower() == "mysql":
+            # TODO: Implement fetching from MySQL
             pass
-        self.df = result
+
+    def fetch_and_export_sequences(
+        self, output_path: Union[Path, str], database="bigquery"
+    ):
+        if database.lower() == "bigquery":
+            # Set up BigQuery connection
+            (
+                credentials,
+                BIGQUERY_DATASET,
+                BIGQUERY_PROJECT,
+            ) = self._setup_bigquery_connection()
+
+            # Name of the temporary table
+            temp_table_name = create_md5_hash(self.df["query_name"][0])[:16]
+
+            # Check if the temporary table exists
+            check_query = f"SELECT table_name FROM {BIGQUERY_DATASET}.INFORMATION_SCHEMA.TABLES WHERE table_name = '{temp_table_name}'"
+            check_result = pd.read_gbq(
+                check_query, project_id=BIGQUERY_PROJECT, credentials=credentials
+            )
+
+            if check_result.empty:
+                # Temporary table does not exist, create it
+                logger.info(f"Creating temporary table {temp_table_name}")
+                self.df["mgyp"] = self.df["target_name"].apply(lambda x: mgyp_to_id(x))
+                mgyp_ids = self.df["mgyp"].to_frame()
+                mgyp_ids.to_gbq(
+                    f"{BIGQUERY_DATASET}.{temp_table_name}",
+                    project_id=BIGQUERY_PROJECT,
+                    if_exists="replace",
+                    credentials=credentials,
+                )
+
+            # Fetch sequences using the (existing or newly created) temporary table
+            sequence_query = f"""SELECT p.id AS mgyp, p.sequence
+                                 FROM {BIGQUERY_DATASET}.protein p
+                                 JOIN {BIGQUERY_DATASET}.{temp_table_name} t ON p.id = t.mgyp"""
+
+            sequences = pd.read_gbq(
+                sequence_query, project_id=BIGQUERY_PROJECT, credentials=credentials
+            )
+
+            # Exporting to file
+            if isinstance(output_path, str):
+                output_path = Path(output_path)
+            print(sequences)
+            sequences["mgyp"] = sequences["mgyp"].apply(lambda x: proteinID_to_mgyp(x))
+            dataframe_to_fasta(sequences, output_path)
+            logger.info(f"Sequence data exported to {output_path}")
+
+        elif database.lower() == "mysql":
+            # TODO: Implement MySQL functionality
+            pass
+        else:
+            raise ValueError("Unsupported database type")
 
 
 class ProteinTableVisualiser:
