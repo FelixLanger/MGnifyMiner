@@ -228,12 +228,13 @@ class proteinTable:
                 if_exists="replace",
                 credentials=credentials,
             )
-
+            ## ARRAY_AGG(DISTINCT COALESCE(m.truncation, '11')) inserts 11 in case there is no trunctation
+            ## which is currently only the case for FGS proteins. We just assume that they are truncated both sides
             join_query = f"""SELECT 
                                 t.mgyp AS mgyp,
-                                m.complete as complete,
-                                m.truncation as truncation,
-                                a.pfam_architecture,
+                                ARRAY_AGG(DISTINCT m.complete) as complete,
+                                ARRAY_AGG(DISTINCT COALESCE(m.truncation, '11')) as truncation,
+                                ARRAY_AGG(DISTINCT a.pfam_architecture) as pfam_architecture,
                                 ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
                                 ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
                             FROM 
@@ -247,10 +248,7 @@ class proteinTable:
                             JOIN 
                                 {BIGQUERY_DATASET}.assembly asmbly ON m.assembly = asmbly.id
                             GROUP BY 
-                                t.mgyp,
-                                m.complete,
-                                m.truncation,
-                                a.pfam_architecture;
+                                t.mgyp;
                             """
             metadata = pd.read_gbq(
                 join_query, project_id=BIGQUERY_PROJECT, credentials=credentials
