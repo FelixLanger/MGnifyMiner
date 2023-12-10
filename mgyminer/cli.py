@@ -18,7 +18,6 @@ from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
 from mgyminer.config import config_cli
-from mgyminer.gui2.app import start_gui
 
 
 def main():
@@ -416,15 +415,15 @@ def create_parser():
     )
     config_parser.set_defaults(func=config_cli)
 
-    gui_parser = subparsers.add_parser("gui", help="Start the MGnigyMiner GUI")
-    gui_parser.add_argument("--query", type=str, help="Path to the query file.")
-    gui_parser.add_argument(
-        "--hit_sequences", type=str, help="Path to the hit sequences file."
-    )
-    gui_parser.add_argument(
-        "--search_out", type=str, help="Path to the search output CSV file."
-    )
-    gui_parser.set_defaults(func=start_gui)
+    # gui_parser = subparsers.add_parser("gui", help="Start the MGnifyMiner GUI")
+    # gui_parser.add_argument("--query", type=str, help="Path to the query file.")
+    # gui_parser.add_argument(
+    #     "--hit_sequences", type=str, help="Path to the hit sequences file."
+    # )
+    # gui_parser.add_argument(
+    #     "--search_out", type=str, help="Path to the search output CSV file."
+    # )
+    # gui_parser.set_defaults(func=start_gui)
 
     return parser
 
