@@ -250,6 +250,7 @@ class proteinTable:
                             GROUP BY 
                                 t.mgyp;
                             """
+            logger.debug(f"run query:\n {join_query}")
             metadata = pd.read_gbq(
                 join_query, project_id=BIGQUERY_PROJECT, credentials=credentials
             )
@@ -296,7 +297,7 @@ class proteinTable:
             sequence_query = f"""SELECT p.id AS mgyp, p.sequence
                                  FROM {BIGQUERY_DATASET}.protein p
                                  JOIN {BIGQUERY_DATASET}.{temp_table_name} t ON p.id = t.mgyp"""
-
+            logger.debug(f"run query:\n {sequence_query}")
             sequences = pd.read_gbq(
                 sequence_query, project_id=BIGQUERY_PROJECT, credentials=credentials
             )
@@ -304,7 +305,6 @@ class proteinTable:
             # Exporting to file
             if isinstance(output_path, str):
                 output_path = Path(output_path)
-            print(sequences)
             sequences["mgyp"] = sequences["mgyp"].apply(lambda x: proteinID_to_mgyp(x))
             dataframe_to_fasta(sequences, output_path)
             logger.info(f"Sequence data exported to {output_path}")
