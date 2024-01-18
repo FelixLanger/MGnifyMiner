@@ -37,3 +37,7 @@ def sto_ali():
 @pytest.fixture
 def test_hmm():
     return data_dir / "hmmer_files/test.hmm"
+
+@pytest.fixture
+def results_metadata():
+    return data_dir / "results_with_metadata.csv"

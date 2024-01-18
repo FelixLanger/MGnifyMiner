@@ -18,11 +18,11 @@ from mgyminer.config import load_config
 class proteinTable:
     """
     Class to hold a list of proteins (from a protein search against the MGnify protein database.
-    Central object to perform filters on sequence search results
+    Central object proteinTable to perform filters on sequence search results
     """
 
     def __init__(self, results: Union[Path, str, pd.DataFrame]):
-        self.json_columns = ["assemblies", "biomes"]  # Corrected the column names
+        self.json_columns = ["assemblies", "biomes"]
 
         if isinstance(results, str):
             results = Path(results)
