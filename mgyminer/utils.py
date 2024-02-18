@@ -1,6 +1,9 @@
+import hashlib
+from json import JSONEncoder
 from pathlib import Path
 from typing import Union
-import hashlib
+
+import numpy as np
 import pandas as pd
 
 from mgyminer.config import load_config
@@ -66,7 +69,7 @@ def write_list_to_file(lst: list, outfile: Union[str, Path]):
     :param outfile: Path to file
     :return: Path
     """
-    with open(outfile, "wt") as name_file:
+    with open(outfile, "w") as name_file:
         for item in lst:
             name_file.write(f"{item} \n")
     return Path(outfile)
@@ -119,3 +122,43 @@ def dataframe_to_fasta(df, fasta_file):
     with open(fasta_file, "w") as file:
         for index, row in df.iterrows():
             file.write(f">{row[0]}\n{row[1]}\n")
+
+
+class NumpyJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super().default(obj)
+
+
+def biome_str_to_ids(biome_strs: list[str], biome_mapping: dict):
+    """
+    Converts a list of biome strings to a non-redundant list of corresponding biome IDs, including all specified biomes
+    and their descendants in the biome hierarchy.
+
+    Args:
+        biome_strs (list[str]): A list of biome strings to be matched. These strings should correspond to the beginning
+                                of the biome names in the biome_mapping dictionary to include all relevant descendants.
+        biome_mapping (dict[int, str]): A dictionary mapping biome IDs (int) to their full hierarchical names (str).
+
+    Returns:
+        list[int]: A list of unique biome IDs that match the given biome strings and their descendants within the
+                   hierarchy defined by biome_mapping.
+
+    Example:
+        >>> biome_mapping = {1: "root:Host-associated", 2: "root:Host-associated:Mammals"}
+        >>> biome_strs = ["root:Host-associated"]
+        >>> print(biome_str_to_ids(biome_strs, biome_mapping))
+        [1, 2]
+    """
+    matching_biome_ids = set()
+    for biome_str in biome_strs:
+        for biome_id, biome_name in biome_mapping.items():
+            if biome_name.startswith(biome_str):
+                matching_biome_ids.add(biome_id)
+    return list(matching_biome_ids)
