@@ -1,7 +1,7 @@
 import shutil
 
 from mgyminer.cli import create_parser
-from mgyminer.utils import export_sequences, mgyp_to_id, proteinID_to_mgyp, tryfloat
+from mgyminer.utils import biome_str_to_ids, export_sequences, mgyp_to_id, proteinID_to_mgyp, tryfloat
 from tests.helpers import get_file_hash
 
 
@@ -43,3 +43,25 @@ def test_export_sequences(tmp_path, seqdb, phmmer_out):
     args = parser.parse_args(command.split())
     export_sequences(args)
     assert get_file_hash(outfile) == "f04c426fbbfbcf3dfac5ec5d8480e74f"
+
+
+def test_biome_str_to_ids():
+    biomes = {
+        10: "root:Engineered:Bioremediation",
+        9: "root:Engineered:Bioreactor:Continuous culture:Marine sediment inoculum:Wadden Sea-Germany",
+        8: "root:Engineered:Bioreactor:Continuous culture:Marine sediment inoculum",
+        7: "root:Engineered:Bioreactor:Continuous culture:Marine intertidal flat sediment inoculum:Wadden Sea-Germany",
+        6: "root:Engineered:Bioreactor:Continuous culture:Marine intertidal flat sediment inoculum",
+        5: "root:Engineered:Bioreactor:Continuous culture",
+        4: "root:Engineered:Bioreactor",
+        3: "root:Engineered:Biogas plant:Wet fermentation",
+        2: "root:Engineered:Biogas plant",
+        1: "root:Engineered",
+        0: "root",
+    }
+    assert len(biome_str_to_ids(["root"], biomes)) == 11
+    assert sorted(
+        biome_str_to_ids(["root:Engineered:Bioreactor:Continuous culture:Marine sediment inoculum"], biomes)
+    ) == [8, 9]
+    assert sorted(biome_str_to_ids(["root:Engineered:Bioreactor"], biomes)) == [4, 5, 6, 7, 8, 9]
+    assert sorted(biome_str_to_ids(["root:Engineered:Bioreactor:Continuous culture:Marine"], biomes)) == [6, 7, 8, 9]
