@@ -174,9 +174,7 @@ controls = html.Div(
                             html.Div(
                                 className="app-controls-block",
                                 children=[
-                                    dbc.Button(
-                                        "Submit", id="submit-filter", n_clicks=0
-                                    ),
+                                    dbc.Button("Submit", id="submit-filter", n_clicks=0),
                                 ],
                             ),
                         ],
@@ -244,9 +242,7 @@ metadata = dbc.Card(
 treesection = dbc.Row(
     [
         html.H2("Phylogenetic tree"),
-        html.Div(
-            "Select proteins in scatter plot and press the button to start the pylogenetic tree building"
-        ),
+        html.Div("Select proteins in scatter plot and press the button to start the pylogenetic tree building"),
         html.Br(),
         html.Div(
             [
@@ -385,8 +381,7 @@ alignment_controls = html.Div(
                                             ),
                                             html.Div(
                                                 className="app-controls-desc",
-                                                children="Toggle the consensus "
-                                                "(most frequent) sequence.",
+                                                children="Toggle the consensus " "(most frequent) sequence.",
                                             ),
                                         ],
                                     ),
@@ -414,8 +409,7 @@ alignment_controls = html.Div(
                                             ),
                                             html.Div(
                                                 className="app-controls-desc",
-                                                children="Adjust the font size "
-                                                "(in px) of viewer text.",
+                                                children="Adjust the font size " "(in px) of viewer text.",
                                             ),
                                         ],
                                     ),
@@ -441,8 +435,7 @@ alignment_controls = html.Div(
                                             ),
                                             html.Div(
                                                 className="app-controls-desc",
-                                                children="Lowers conservation "
-                                                "of high gap sequences.",
+                                                children="Lowers conservation " "of high gap sequences.",
                                             ),
                                         ],
                                     ),

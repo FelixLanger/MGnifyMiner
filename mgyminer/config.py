@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 import toml
 from loguru import logger
 
@@ -45,7 +46,7 @@ def load_config(config_file: Optional[Path] = None) -> dict:
         return {}
 
     try:
-        with open(config_file, "r") as configfile:
+        with open(config_file) as configfile:
             return toml.load(configfile)
     except Exception as e:
         logger.error(f"Failed to load config file: {e}")
@@ -60,7 +61,7 @@ def prompt_for_config() -> Dict:
     user_config = {}
     for key in config_template:
         user_input = input(f"{key}: ")
-        if user_input:  # Only add entry if user provided a value
+        if user_input:
             user_config[key] = user_input
     return user_config
 
@@ -89,12 +90,8 @@ def save_config(
     try:
         with open(config_path, "w") as file:
             toml.dump(config_data, file)
-        logger.info(
-            f"Config {'created' if blank else 'updated'} successfully at {config_path}"
-        )
-        print(
-            f"Config {'created' if blank else 'updated'} successfully at {config_path}"
-        )
+        logger.info(f"Config {'created' if blank else 'updated'} successfully at {config_path}")
+        print(f"Config {'created' if blank else 'updated'} successfully at {config_path}")
     except Exception as e:
         logger.error(f"Failed to {'create' if blank else 'update'} config file: {e}")
 

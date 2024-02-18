@@ -1,10 +1,11 @@
-from dash import Input, Output
-from mgyminer.gui2.app import app
-import plotly.graph_objects as go
-import pandas as pd
-from mgyminer.constants import BIOMES
-from dash import exceptions
 import json
+
+import pandas as pd
+import plotly.graph_objects as go
+from dash import Input, Output, exceptions
+
+from mgyminer.constants import BIOMES
+from mgyminer.gui2.app import app
 
 
 @app.callback(
@@ -20,12 +21,10 @@ def update_completeness_barchart(data_json, selected_indices):
     truncation_data = json.loads(data_json).get("truncation")
     truncation_series = pd.Series(truncation_data)
     if selected_indices:
-        truncation_series = truncation_series[
-            truncation_series.index.isin([str(i) for i in selected_indices])
-        ]
-
-    value_counts = truncation_series.value_counts(dropna=False)
-
+        truncation_series = truncation_series[truncation_series.index.isin([str(i) for i in selected_indices])]
+    flattened_list = pd.Series([item for sublist in truncation_series for item in sublist])
+    value_counts = flattened_list.value_counts(dropna=False)
+    print(value_counts)
     labels = {
         0: "complete",
         1: "C-terminal-truncated",
@@ -83,11 +82,7 @@ def update_biome_sunburst_plot(data_json, selected_indices):
         str_indices = [str(i) for i in selected_indices]
         biome_data = {key: biome_data[key] for key in biome_data if key in str_indices}
 
-    flattened_values = [
-        BIOMES[biomeid]
-        for index, biomelist in biome_data.items()
-        for biomeid in biomelist
-    ]
+    flattened_values = [BIOMES[biomeid] for index, biomelist in biome_data.items() for biomeid in biomelist]
 
     df = build_sunburst_dataframe(flattened_values)
     fig = go.Figure(
@@ -151,9 +146,7 @@ def build_sunburst_dataframe(biome_list, root_label="root"):
         if row_parent == row_id:  # This happens when we are at the root level
             row_parent = ""
 
-        data_rows.append(
-            {"id": row_id, "parent": row_parent, "value": row_value, "label": row_label}
-        )
+        data_rows.append({"id": row_id, "parent": row_parent, "value": row_value, "label": row_label})
 
     # Create the DataFrame
     df = pd.DataFrame(data_rows, columns=["id", "parent", "value", "label"])

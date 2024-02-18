@@ -25,7 +25,7 @@ def phmmer_out():
 
 @pytest.fixture
 def alignmt():
-    with open(data_dir / "alignment.json", "rt") as ali:
+    with open(data_dir / "alignment.json") as ali:
         return alignment(json.load(ali))
 
 
@@ -37,6 +37,7 @@ def sto_ali():
 @pytest.fixture
 def test_hmm():
     return data_dir / "hmmer_files/test.hmm"
+
 
 @pytest.fixture
 def results_metadata():

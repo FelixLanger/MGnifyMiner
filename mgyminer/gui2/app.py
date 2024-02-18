@@ -1,14 +1,10 @@
 from mgyminer.gui2.utils.data_singleton import DataSingleton
 import argparse
 
-parser = argparse.ArgumentParser(
-    description="Run the Dash app with specified input files."
-)
+parser = argparse.ArgumentParser(description="Run the Dash app with specified input files.")
 parser.add_argument("--query", type=str, help="Path to the query file.")
 parser.add_argument("--hit_sequences", type=str, help="Path to the hit sequences file.")
-parser.add_argument(
-    "--search_out", type=str, help="Path to the search output CSV file."
-)
+parser.add_argument("--search_out", type=str, help="Path to the search output CSV file.")
 
 args = parser.parse_args()
 

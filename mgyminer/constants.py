@@ -121,7 +121,6 @@ BIOMES = {
     374: "root:Host-associated:Human:Digestive system:Oral:tongue dorsum",
     373: "root:Host-associated:Human:Digestive system:Oral:Throat",
     372: "root:Host-associated:Human:Digestive system:Oral:Supragingival plaque",
-    371: "Duplicate - root:Host-associated:Human:Digestive system:Oral:subgingival plaque",
     370: "root:Host-associated:Human:Digestive system:Oral:Subgingival plaque",
     369: "root:Host-associated:Human:Digestive system:Oral:Saliva",
     368: "root:Host-associated:Human:Digestive system:Oral:Periodontal pockets",

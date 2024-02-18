@@ -17,9 +17,7 @@ from gui.layout.header import header
 app.layout = html.Div(
     [
         header,
-        html.Div(
-            id="overview-module", className="app-body", children=[controls, plots]
-        ),
+        html.Div(id="overview-module", className="app-body", children=[controls, plots]),
         html.Div(id="tree-moduke", className="app-body", children=[treesection]),
         html.Div(
             id="alignment-module",

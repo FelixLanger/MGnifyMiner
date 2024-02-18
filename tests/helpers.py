@@ -9,7 +9,7 @@ def get_file_hash(file, ignore_comments=True):
     :return: md5 hash digest
     """
     md5 = hashlib.md5()
-    with open(file, "rt") as fin:
+    with open(file) as fin:
         if ignore_comments:
             for line in fin.readlines():
                 if not line.startswith("#"):

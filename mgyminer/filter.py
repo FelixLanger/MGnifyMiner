@@ -8,18 +8,16 @@ import mysql.connector
 import numpy as np
 import pandas as pd
 
+from mgyminer.config import load_config
 from mgyminer.proteinTable import proteinTable
 from mgyminer.utils import tryfloat
-from mgyminer.config import load_config
 
 cfg = load_config()
 
 
 def feat_filter(args):
     if args.match and any([args.upper, args.lower]):
-        exit(
-            "Only use match or upper/lower. Not both. Use [MgnifyMiner filter --help] for more info"
-        )
+        exit("Only use match or upper/lower. Not both. Use [MgnifyMiner filter --help] for more info")
 
     pt = proteinTable(args.input)
     if args.match:
@@ -70,7 +68,7 @@ def residue_filter(args):
     # load input files
     results_table = proteinTable(args.input)
 
-    with open(alignment_file, "r") as fin:
+    with open(alignment_file) as fin:
         algnmt = alignment(json.load(fin))
 
     filters = args.residue
@@ -89,17 +87,12 @@ def residue_filter(args):
             # create new matches dict with only the sequences matching the criteria
             matches = alignment({match_id: algnmt[match_id] for match_id in match_keys})
         match_ids = matches.ids()
-        results_table = proteinTable(
-            results_table.df[results_table.df["target_name"].isin(match_ids)]
-        )
+        results_table = proteinTable(results_table.df[results_table.df["target_name"].isin(match_ids)])
         id_aa_mapping = {
-            key.split("-")[0]: matches.corresponding_aa(key, coordinate)
-            for (key, value) in matches.items()
+            key.split("-")[0]: matches.corresponding_aa(key, coordinate) for (key, value) in matches.items()
         }
         filter_name = "_".join(rfilter)
-        results_table.df[filter_name] = results_table.df["target_name"].map(
-            id_aa_mapping
-        )
+        results_table.df[filter_name] = results_table.df["target_name"].map(id_aa_mapping)
 
     if args.output:
         results_table.save(args.output)
@@ -114,7 +107,7 @@ def plot_residue_histogram(args):
     residue = int(args.residue)
     plotwidth = args.plotwidth
 
-    with open(alignments, "r") as fin:
+    with open(alignments) as fin:
         alignment_dict = alignment(json.load(fin))
 
     found = alignment_dict.residue_distribution(residue).most_common()
@@ -125,11 +118,7 @@ def plot_residue_histogram(args):
 
     longest_label_length = max(len(label) for label, count in found)
 
-    print(
-        f"Hit residues corresponding to position {residue} on query sequence".center(
-            plotwidth
-        )
-    )
+    print(f"Hit residues corresponding to position {residue} on query sequence".center(plotwidth))
     print(plotwidth * "=")
     for label, count in found:
         bar_chunks, remainder = divmod(int(count * 8 / increment), 8)
@@ -141,17 +130,14 @@ def plot_residue_histogram(args):
 
 
 def domain_filter(args):
-    hits = pd.read_csv(
-        args.input, dtype={"biome": str, "PL": str, "UP": str, "CR": str}
-    )
+    hits = pd.read_csv(args.input, dtype={"biome": str, "PL": str, "UP": str, "CR": str})
     if args.strict:
         matches = strict_select(args.arch)
     else:
         matches = loose_select(args.arch)
     results = pd.merge(matches, hits, left_on="MGYP", right_on="target_name")
     results = results[
-        [column for column in results if column not in ["Pfams", "domain_names"]]
-        + ["Pfams", "domain_names"]
+        [column for column in results if column not in ["Pfams", "domain_names"]] + ["Pfams", "domain_names"]
     ]
     del results["MGYP"]
     if args.output:
@@ -229,9 +215,7 @@ class alignment(dict):
         aminoacid = [a.upper() for a in aminoacid]
         matches = []
         for key, value in self.overlaps_at(coordinate):
-            target_without_inserts = value["target_seq"].translate(
-                self._TARSEQ_INSERT_TABLE
-            )
+            target_without_inserts = value["target_seq"].translate(self._TARSEQ_INSERT_TABLE)
             relative_coordinate = coordinate - value["query_start"]
             if target_without_inserts[relative_coordinate] in aminoacid:
                 matches.append(key)
@@ -247,14 +231,9 @@ class alignment(dict):
         matches = []
         for key, value in self.overlaps_at(coordinate):
             relative_coordinate = coordinate - value["query_start"]
-            target_without_inserts = value["target_seq"].translate(
-                self._TARSEQ_INSERT_TABLE
-            )
+            target_without_inserts = value["target_seq"].translate(self._TARSEQ_INSERT_TABLE)
             query_without_inserts = value["query_seq"].replace(".", "")
-            if (
-                target_without_inserts[relative_coordinate].lower()
-                == query_without_inserts[relative_coordinate]
-            ):
+            if target_without_inserts[relative_coordinate].lower() == query_without_inserts[relative_coordinate]:
                 matches.append(key)
         return alignment((entry, self[entry]) for entry in matches)
 
@@ -268,9 +247,7 @@ class alignment(dict):
         residues = []
         for key, value in self.overlaps_at(coordinate):
             relative_coordinate = coordinate - value["query_start"]
-            target_without_inserts = value["target_seq"].translate(
-                self._TARSEQ_INSERT_TABLE
-            )
+            target_without_inserts = value["target_seq"].translate(self._TARSEQ_INSERT_TABLE)
             residues.append(target_without_inserts[relative_coordinate])
         return Counter(residues)
 
@@ -287,7 +264,5 @@ class alignment(dict):
         """
         value = self[key]
         relative_coordinate = coordinate - value["query_start"]
-        target_without_inserts = value["target_seq"].translate(
-            self._TARSEQ_INSERT_TABLE
-        )
+        target_without_inserts = value["target_seq"].translate(self._TARSEQ_INSERT_TABLE)
         return target_without_inserts[relative_coordinate]

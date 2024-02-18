@@ -1,4 +1,5 @@
-from dash import html, dcc
+from dash import dcc, html
+
 from mgyminer.gui2.layouts import homepage
 
 layout = html.Div(

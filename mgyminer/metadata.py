@@ -40,8 +40,7 @@ def find_origin_assemblies(mgyps: List) -> dict:
     # Database queries to build table with assemblies
     table = "temp1"
     create_tmp_table = (
-        f"CREATE TEMPORARY TABLE IF NOT EXISTS {table} (`id` bigint(20)"
-        f" unsigned NOT NULL,  PRIMARY KEY (`id`));"
+        f"CREATE TEMPORARY TABLE IF NOT EXISTS {table} (`id` bigint(20)" f" unsigned NOT NULL,  PRIMARY KEY (`id`));"
     )
     cursor.execute(create_tmp_table)
     populate_statement = f"INSERT INTO {table} (id) VALUES (%s)"
@@ -88,9 +87,7 @@ def get_sample_accession(assembly_metadata):
     """Take assembly api response and parse out the corresponding sample accession"""
     if assembly_metadata:
         try:
-            sample_accession = assembly_metadata["data"]["relationships"]["samples"][
-                "data"
-            ][0]["id"]
+            sample_accession = assembly_metadata["data"]["relationships"]["samples"]["data"][0]["id"]
             return sample_accession
         # do nothing in the cases where there is an assembly entry in the api that is not pointing to a sample
         except IndexError:
@@ -130,9 +127,7 @@ async def sample_metadata(assemblies):
     )
 
     async with CachedSession(cache=cache) as session:
-        sample_metadata = await asyncio.gather(
-            *(assembly_metadata(session, assembly) for assembly in assemblies)
-        )
+        sample_metadata = await asyncio.gather(*(assembly_metadata(session, assembly) for assembly in assemblies))
         metadata = {}
         for assembly, sample_accession, sample_meta in sample_metadata:
             if sample_meta:
@@ -183,11 +178,7 @@ def add_metadata(df, interests, metadata, assemblies_mapping):
             if assembly in metadata.keys():
                 # TODO if assembly should be removed once private proteins are removed
                 for field in interests:
-                    hit = [
-                        name
-                        for name in meta_mapping[field]
-                        if name in metadata[assembly][1].keys()
-                    ]
+                    hit = [name for name in meta_mapping[field] if name in metadata[assembly][1].keys()]
                     if hit:
                         data[field].append(metadata[assembly][1][hit[0]]["value"])
         table_data.append(data)
@@ -221,19 +212,9 @@ def get_metadata(args):
     df = pd.read_csv(args.input)
     accessions = list(df.target_name)
     assemblies_mapping = find_origin_assemblies(accessions)
-    all_assemblies = [
-        assembly
-        for assemblies in assemblies_mapping.values()
-        for assembly in assemblies
-    ]
+    all_assemblies = [assembly for assemblies in assemblies_mapping.values() for assembly in assemblies]
     metadata = asyncio.run(sample_metadata(all_assemblies))
-    meta_df = add_metadata(
-        df, ["location", "ph", "biome", "temperature"], metadata, assemblies_mapping
-    )
-    meta_df["temperature"] = meta_df["temperature"].apply(
-        lambda x: make_min_max(only_numeric(x))
-    )
-    result = df.merge(
-        meta_df, left_on="target_name", right_on="target_name", how="left"
-    )
+    meta_df = add_metadata(df, ["location", "ph", "biome", "temperature"], metadata, assemblies_mapping)
+    meta_df["temperature"] = meta_df["temperature"].apply(lambda x: make_min_max(only_numeric(x)))
+    result = df.merge(meta_df, left_on="target_name", right_on="target_name", how="left")
     result.to_csv(file_dir / f"{filename}_meta.csv", index=False)

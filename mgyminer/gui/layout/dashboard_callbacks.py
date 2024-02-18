@@ -135,9 +135,7 @@ def piecharts(df):
 
     # Prepare for each plot
     fragments_data = _value_dist(df["FL"])
-    fragments_data["labels"] = [
-        pretty_labels["FL"][i] for i in fragments_data["labels"]
-    ]
+    fragments_data["labels"] = [pretty_labels["FL"][i] for i in fragments_data["labels"]]
     fragments = go.Pie(**fragments_data, hole=hole, textinfo=textinfo, visible=True)
 
     # uniprot_data = _value_dist(df["UP"])
@@ -339,9 +337,7 @@ class treebuilder:
                 return f"{row['target_name']}{domain}/{row['env_from']}-{row['env_to']}"
 
             seq_df["dom_acc"] = seq_df.apply(lambda row: _idpluscoords(row), axis=1)
-            seq_df[["dom_acc", "env_from", "env_to", "target_name"]].to_csv(
-                keyfile, index=False, header=False, sep=" "
-            )
+            seq_df[["dom_acc", "env_from", "env_to", "target_name"]].to_csv(keyfile, index=False, header=False, sep=" ")
             self.fetcher.run(
                 "/home/felix/PycharmProjects/MGnifyMiner/playground/"
                 "2022-09-27-MGnifyMiner_phmmer/ENTEROCIN/all_seqs.fa",
@@ -351,7 +347,7 @@ class treebuilder:
             )
             self.hmmbuilder.run(hmm, self.query)
             # Append query sequence to the alignment to add it to the tree
-            with open(sequences, "at") as fout, open(self.query, "rt") as fin:
+            with open(sequences, "at") as fout, open(self.query) as fin:
                 fout.write(fin.read())
             self.aligner.run(hmm, self.alignment, sequences, outformat="afa")
 
@@ -481,26 +477,16 @@ def plot_tree(df, treefile):
 
         # Build mapping of Pfam accs to domain name
         dom_names = dom_names = [
-            name
-            for arch in metadata["domain_names"].tolist()
-            if isinstance(arch, str)
-            for name in arch.split("~")
+            name for arch in metadata["domain_names"].tolist() if isinstance(arch, str) for name in arch.split("~")
         ]
-        dom_accs = [
-            name
-            for arch in metadata["Pfams"].tolist()
-            if isinstance(arch, str)
-            for name in arch.split("-")
-        ]
+        dom_accs = [name for arch in metadata["Pfams"].tolist() if isinstance(arch, str) for name in arch.split("-")]
         acc_to_name = dict(zip(dom_accs, dom_names))
 
         # Dict with protein and its domains
         pfams = _filter_dict(metadata, "Pfams")
         pfams = {k: v.split("-") for k, v in pfams.items()}
         # Get unique pfam domains in all hits
-        unique_domains = set(
-            [domain for domains in list(pfams.values()) for domain in domains]
-        )
+        unique_domains = set([domain for domains in list(pfams.values()) for domain in domains])
 
         baseline = domain_start(x_coords)
         smallest_y = smallest_y_dist(protein_ys)
@@ -540,9 +526,7 @@ def plot_tree(df, treefile):
                     dom_hover_x.append([x0, x1, x1, x0, x0])
                     dom_hover_y.append([y0, y0, y1, y1, y0])
                     dom_hover_fill.append(pfam_colors[domain])
-                    dom_hover_text.append(
-                        f"<br>Pfam Accession: {domain} <br>Name: {acc_to_name[domain]}"
-                    )
+                    dom_hover_text.append(f"<br>Pfam Accession: {domain} <br>Name: {acc_to_name[domain]}")
 
                     start = start + domain_width + x_gab
                 # Add a straight line to conncect domains
@@ -651,10 +635,7 @@ def get_y_coordinates(tree, dist=1.3):
 
     maxheight = tree.count_terminals()  # Counts the number of tree leafs.
 
-    ycoords = dict(
-        (leaf, maxheight - i * dist)
-        for i, leaf in enumerate(reversed(tree.get_terminals()))
-    )
+    ycoords = dict((leaf, maxheight - i * dist) for i, leaf in enumerate(reversed(tree.get_terminals())))
 
     def calc_row(clade):
         for subclade in clade:
@@ -679,9 +660,7 @@ def get_clade_lines(
 ):
     # define a Plotly shape of type 'line', for each branch
 
-    branch_line = dict(
-        type="line", layer="below", line=dict(color=line_color, width=line_width)
-    )
+    branch_line = dict(type="line", layer="below", line=dict(color=line_color, width=line_width))
     if orientation == "horizontal":
         branch_line.update(x0=x_start, y0=y_curr, x1=x_curr, y1=y_curr)
     elif orientation == "vertical":
@@ -742,10 +721,7 @@ def draw_clade(
 def distances(tree, target):
     if isinstance(target, str):
         target = [i for i in tree.find_elements(target)][0]
-    closest = {
-        terminal.name: tree.distance(target, terminal)
-        for terminal in tree.get_terminals()
-    }
+    closest = {terminal.name: tree.distance(target, terminal) for terminal in tree.get_terminals()}
     closest = {k: v for k, v in sorted(closest.items(), key=lambda item: item[1])}
     return closest
 
@@ -758,11 +734,7 @@ def _in_thresholds(paramdict, threshold_min=0, threshold_max=math.inf):
     :param threshold_max:
     :return:
     """
-    x = [
-        key
-        for key, value in paramdict.items()
-        if value > threshold_min and value < threshold_max
-    ]
+    x = [key for key, value in paramdict.items() if value > threshold_min and value < threshold_max]
     return x
 
 
@@ -860,6 +832,6 @@ def alignment_callbacks(_app):
         if click == 0:
             raise PreventUpdate
         else:
-            with open(path, "rt") as fin:
+            with open(path) as fin:
                 data = fin.read()
         return data, {"visibility": "visible"}

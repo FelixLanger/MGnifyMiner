@@ -1,7 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import Union, List
+from typing import List, Union
 
 from mgyminer.wrappers._base import Program
 
@@ -49,14 +49,10 @@ class esl_sfetch(Program):
             sequence_file = Path(sequence_file)
 
         if not self._is_indexed(sequence_file):
-            logging.info(
-                "%s is not indexed \n Indexing %s", sequence_file, sequence_file
-            )
+            logging.info("%s is not indexed \n Indexing %s", sequence_file, sequence_file)
             self.index(sequence_file)
 
-        if isinstance(sequence_ids, Path) or (
-            isinstance(sequence_ids, str) and Path(sequence_ids).is_file()
-        ):
+        if isinstance(sequence_ids, Path) or (isinstance(sequence_ids, str) and Path(sequence_ids).is_file()):
             key_file_path = Path(sequence_ids)
         else:
             # If sequence_ids is not a path, treat it as a single ID or a list of IDs
@@ -66,7 +62,7 @@ class esl_sfetch(Program):
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_dir = Path(temp_dir)
                 key_file_path = temp_dir / "key_file"
-                with open(key_file_path, "wt") as name_file:
+                with open(key_file_path, "w") as name_file:
                     for sequence_id in sequence_ids:
                         name_file.write(f"{sequence_id}\n")
 
@@ -190,9 +186,7 @@ class Hmmsearch(Program):
 
         arguments.extend(["--cpu", str(self.cores)])
         arguments.extend([str(hmmfile), str(seqdb)])
-        logging.info(
-            "Running hmmsearch with %s as query hmm and %s as DB.", hmmfile, seqdb
-        )
+        logging.info("Running hmmsearch with %s as query hmm and %s as DB.", hmmfile, seqdb)
         return self._run(arguments)
 
 

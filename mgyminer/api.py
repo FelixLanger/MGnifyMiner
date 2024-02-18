@@ -9,11 +9,7 @@ from aiohttp_client_cache import CachedSession, SQLiteBackend
 
 with open("../playground/assembly_accessions.txt") as fin:
     assemblies = fin.read().splitlines()
-    assemblies = [
-        assembly
-        for assembly in assemblies
-        if assembly.startswith("ERZ") and len(assembly) < 11
-    ]
+    assemblies = [assembly for assembly in assemblies if assembly.startswith("ERZ") and len(assembly) < 11]
 
 # Logger setup
 logging.basicConfig(
@@ -38,9 +34,7 @@ ena_sample_api = "https://www.ebi.ac.uk/ena/browser/api/xml/{id}"
 def get_sample_accession(assembly_metadata):
     """Take assembly api response and parse out the corresponding sample accession"""
     if assembly_metadata:
-        sample_accession = assembly_metadata["data"]["relationships"]["samples"][
-            "data"
-        ][0]["id"]
+        sample_accession = assembly_metadata["data"]["relationships"]["samples"]["data"][0]["id"]
         return sample_accession
 
 
@@ -94,9 +88,7 @@ async def task(session, assembly):
 
 async def main():
     async with CachedSession() as session:
-        sample_metadata = await asyncio.gather(
-            *(task(session, assembly) for assembly in assemblies)
-        )
+        sample_metadata = await asyncio.gather(*(task(session, assembly) for assembly in assemblies))
         for i, sample in enumerate(sample_metadata):
             if sample:
                 f = io.StringIO(sample)

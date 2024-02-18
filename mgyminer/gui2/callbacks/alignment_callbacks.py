@@ -1,5 +1,6 @@
 from dash import Input, Output
 from dash.exceptions import PreventUpdate
+
 from mgyminer.gui2.server import app
 
 
@@ -62,7 +63,6 @@ def update_alignment(click):
     else:
         with open(
             "/home/flx/PycharmProjects/MGnifyMiner2/local_tests/ZMM4/aligmnent.out",
-            "rt",
         ) as fin:
             data = fin.read()
     return data, {"visibility": "visible"}

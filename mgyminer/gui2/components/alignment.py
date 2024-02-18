@@ -95,8 +95,7 @@ alignment_controls = html.Div(
                                             ),
                                             html.Div(
                                                 className="app-controls-desc",
-                                                children="Toggle the consensus "
-                                                "(most frequent) sequence.",
+                                                children="Toggle the consensus " "(most frequent) sequence.",
                                             ),
                                         ],
                                     ),
@@ -124,8 +123,7 @@ alignment_controls = html.Div(
                                             ),
                                             html.Div(
                                                 className="app-controls-desc",
-                                                children="Adjust the font size "
-                                                "(in px) of viewer text.",
+                                                children="Adjust the font size " "(in px) of viewer text.",
                                             ),
                                         ],
                                     ),
@@ -151,8 +149,7 @@ alignment_controls = html.Div(
                                             ),
                                             html.Div(
                                                 className="app-controls-desc",
-                                                children="Lowers conservation "
-                                                "of high gap sequences.",
+                                                children="Lowers conservation " "of high gap sequences.",
                                             ),
                                         ],
                                     ),

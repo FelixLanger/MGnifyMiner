@@ -1,10 +1,11 @@
 import pandas as pd
 from dash import Input, Output, State, exceptions
+
+from mgyminer.constants import BIOMES
 from mgyminer.gui2.app import app
 from mgyminer.gui2.utils.data_singleton import DataSingleton
-from mgyminer.constants import BIOMES
-from mgyminer.utils import flatten_list
 from mgyminer.proteinTable import proteinTable
+from mgyminer.utils import flatten_list
 
 
 @app.callback(
@@ -88,9 +89,7 @@ def filter_data(n_clicks, filters):
 def export_selected_data(n_clicks, selected_data, output_file_name):
     if n_clicks is None or selected_data is None or output_file_name is None:
         raise exceptions.PreventUpdate
-    filtered_df = proteinTable(
-        pd.read_json(selected_data).rename({"e_value": "e-value"}, axis=1)
-    )
+    filtered_df = proteinTable(pd.read_json(selected_data).rename({"e_value": "e-value"}, axis=1))
     filtered_df.save(output_file_name)
     return f"Data successfully exported to {output_file_name}", True
 

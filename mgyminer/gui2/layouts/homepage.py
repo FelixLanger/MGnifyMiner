@@ -1,10 +1,11 @@
-from mgyminer.gui2.components.statsbar import statsbar
-from mgyminer.gui2.components.filters import filter_controls
-from mgyminer.gui2.components.scatter import scatter
-from mgyminer.gui2.components.metadata import metadata
-from mgyminer.gui2.components.phylogeny import phylogeny
 import dash_bootstrap_components as dbc
 from dash import html
+
+from mgyminer.gui2.components.filters import filter_controls
+from mgyminer.gui2.components.metadata import metadata
+from mgyminer.gui2.components.phylogeny import phylogeny
+from mgyminer.gui2.components.scatter import scatter
+from mgyminer.gui2.components.statsbar import statsbar
 
 page = html.Div(
     id="page-content",

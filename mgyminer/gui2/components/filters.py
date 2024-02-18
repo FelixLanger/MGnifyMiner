@@ -110,9 +110,7 @@ filter_controls = html.Div(
                                         placeholder="output file name",
                                         type="text",
                                     ),
-                                    dbc.Button(
-                                        "Export results", id="export-results-button"
-                                    ),
+                                    dbc.Button("Export results", id="export-results-button"),
                                     dbc.Alert(
                                         id="export-alert",
                                         is_open=False,
