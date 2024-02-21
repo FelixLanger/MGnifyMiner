@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 
+from mgyminer.config import config_cli
 from mgyminer.filter import (
     domain_filter,
     feat_filter,
@@ -17,8 +18,7 @@ from mgyminer.phyltree import build_tree
 from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
-from mgyminer.config import config_cli
-
+from .sequencesearch import phmmer_cli
 
 def main():
     parser = create_parser()
@@ -31,33 +31,14 @@ def main():
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--version", "-v", action="version", version="0.0.1", help="show version"
-    )
+    parser.add_argument("--version", "-v", action="version", version="0.0.1", help="show version")
     subparsers = parser.add_subparsers(help="commands")
 
     # Arguments for sequence search
     phmmer_parser = subparsers.add_parser("phmmer", help="make phmmer search")
-    phmmer_parser.add_argument(
-        "--query", "-q", type=Path, help="fasta file with query sequence(s)"
-    )
-    phmmer_parser.add_argument(
-        "--target", "-t", type=Path, help="target sequence database to search against"
-    )
-    phmmer_parser.add_argument("--output", "-o", type=Path, help="output path")
-    phmmer_parser.add_argument(
-        "--keep",
-        "-k",
-        default=False,
-        action="store_true",
-        help="keep the original phmmer output files",
-    )
-    phmmer_parser.add_argument(
-        "--dashboard",
-        "-d",
-        action="store_true",
-        help="generate a dashboard with search result statistics",
-    )
+    phmmer_parser.add_argument("--query", "-q", type=Path, required=True, help="fasta file with query sequence(s)")
+    phmmer_parser.add_argument("--target", "-t", type=Path, required=True, help="target sequence database to search against")
+    phmmer_parser.add_argument("--output", "-o", type=Path, required=True, help="output path")
     phmmer_parser.add_argument(
         "--cpu",
         "-c",
@@ -65,7 +46,7 @@ def create_parser():
         default=4,
         help="number of cpu cores to use for hmmer search [default = 4]",
     )
-    phmmer_parser.set_defaults(func=phmmer)
+    phmmer_parser.set_defaults(func=phmmer_cli)
 
     # Arguments for sorting
     sort_parser = subparsers.add_parser("sort", help="sort search results by feature")
@@ -97,9 +78,7 @@ def create_parser():
         help="Path to the desired output file",
     )
     # Arguments for filter step
-    filter_parser = subparsers.add_parser(
-        "filter", help="filter sequence search results"
-    )
+    filter_parser = subparsers.add_parser("filter", help="filter sequence search results")
     filter_parser.add_argument(
         "--input",
         type=Path,
@@ -145,9 +124,7 @@ def create_parser():
     )
     filter_parser.set_defaults(func=feat_filter)
 
-    residue_parser = subparsers.add_parser(
-        "residue", help="filter target proteins by residue features"
-    )
+    residue_parser = subparsers.add_parser("residue", help="filter target proteins by residue features")
 
     residue_parser.add_argument(
         "--input",
@@ -211,9 +188,7 @@ def create_parser():
     )
     residue_checker_parser.set_defaults(func=plot_residue_histogram)
 
-    phylogenetic_tree_parser = subparsers.add_parser(
-        "tree", help="build a phylogenetic tree"
-    )
+    phylogenetic_tree_parser = subparsers.add_parser("tree", help="build a phylogenetic tree")
     phylogenetic_tree_parser.add_argument(
         "--input",
         type=Path,
@@ -221,9 +196,7 @@ def create_parser():
         help="Path to filter output with sequences for tree building",
     )
 
-    phylogenetic_tree_parser.add_argument(
-        "--query", type=Path, required=True, help="Path to query seq"
-    )
+    phylogenetic_tree_parser.add_argument("--query", type=Path, required=True, help="Path to query seq")
 
     phylogenetic_tree_parser.add_argument(
         "--alignment",
@@ -231,15 +204,11 @@ def create_parser():
         required=False,
         help="Path to alignment output if desired",
     )
-    phylogenetic_tree_parser.add_argument(
-        "--output", type=Path, required=False, help="Path/Filename of output tree"
-    )
+    phylogenetic_tree_parser.add_argument("--output", type=Path, required=False, help="Path/Filename of output tree")
 
     phylogenetic_tree_parser.set_defaults(func=build_tree)
 
-    tree_vis_parser = subparsers.add_parser(
-        "tree_vis", help="visualise phylogenetic tree"
-    )
+    tree_vis_parser = subparsers.add_parser("tree_vis", help="visualise phylogenetic tree")
     tree_vis_parser.add_argument(
         "--tree",
         type=Path,
@@ -273,9 +242,7 @@ def create_parser():
 
     tree_vis_parser.set_defaults(func=plot_tree)
 
-    export_parser = subparsers.add_parser(
-        "export", help="export Protein sequences from filter results to FASTA file"
-    )
+    export_parser = subparsers.add_parser("export", help="export Protein sequences from filter results to FASTA file")
     export_parser.add_argument(
         "--seqdb",
         type=Path,
@@ -296,9 +263,7 @@ def create_parser():
     )
     export_parser.set_defaults(func=export_sequences)
 
-    domain_parser = subparsers.add_parser(
-        "domain", help="filter target proteins by Pfam domains"
-    )
+    domain_parser = subparsers.add_parser("domain", help="filter target proteins by Pfam domains")
     domain_parser.add_argument(
         "--input",
         type=Path,
@@ -306,9 +271,7 @@ def create_parser():
         metavar="path/to/filter_output.csv",
         help="Path to sequence search output file",
     )
-    domain_parser.add_argument(
-        "--arch", "-a", nargs="+", help="Pfam domains that should be filtered for"
-    )
+    domain_parser.add_argument("--arch", "-a", nargs="+", help="Pfam domains that should be filtered for")
     domain_parser.add_argument(
         "--strict",
         "-s",
@@ -325,9 +288,7 @@ def create_parser():
 
     domain_parser.set_defaults(func=domain_filter)
 
-    matedata_parser = subparsers.add_parser(
-        "metadata", help="fetch metadata from ENA API"
-    )
+    matedata_parser = subparsers.add_parser("metadata", help="fetch metadata from ENA API")
     matedata_parser.add_argument(
         "--input",
         type=Path,
@@ -336,9 +297,7 @@ def create_parser():
     )
     matedata_parser.set_defaults(func=get_metadata)
 
-    structure_parser = subparsers.add_parser(
-        "structure", help="try to fetch structure information from PDB"
-    )
+    structure_parser = subparsers.add_parser("structure", help="try to fetch structure information from PDB")
     structure_parser.add_argument(
         "--input",
         type=Path,

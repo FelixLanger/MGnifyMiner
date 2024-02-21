@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, Union
 
 import pandas as pd
+import numpy as np
 from loguru import logger
 
 from mgyminer.config import load_config
@@ -44,6 +45,34 @@ class ProteinTable(pd.DataFrame):
     @property
     def n_unique_hits(self):
         return len(self.unique_hits)
+
+    def flatten(self, nested_column):
+        """
+        Return a flattened array of nested_column.
+        Will return an array containing all values contained in the nested_column
+        Args:
+            nested_column: column name of the nested column
+
+        Returns: array of all unique values of nested_column
+        """
+        return np.concatenate(self[nested_column].dropna().values)
+
+    def value_counts_nested(self, nested_column):
+        """
+        Count the number of unique values in the nested_column
+        Args:
+            nested_column: Column name of nested column
+
+        Returns: number of unique entries in nested column
+
+        """
+        # By far the most efficient way to count nested unique values
+        flattened_array = self.flatten(nested_column)
+        return pd.Series(flattened_array).nunique()
+
+    def unique_nested(self, nested_column):
+        flattened_array = self.flatten(nested_column)
+        return pd.Series(flattened_array).unique()
 
     def pick(self, filters: Dict[str, Any]):
         """
