@@ -28,9 +28,7 @@ def test_overlaps_at(alignmt):
     ]
 
     for case in cases:
-        match_entries = [
-            entry for entry, data in alignmt.overlaps_at(case["coordinate"])
-        ]
+        match_entries = [entry for entry, data in alignmt.overlaps_at(case["coordinate"])]
         assert match_entries == case["expected"]
 
 
@@ -141,7 +139,4 @@ def test_corresponding_aa(alignmt):
         {"coordinate": 140, "key": "MGYP001082675080-145-313", "expected": "N"},
     ]
     for case in cases:
-        assert (
-            alignmt.corresponding_aa(case["key"], case["coordinate"])
-            == case["expected"]
-        )
+        assert alignmt.corresponding_aa(case["key"], case["coordinate"]) == case["expected"]

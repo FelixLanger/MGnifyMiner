@@ -15,22 +15,18 @@ def test_extract_alignments():
 
 
 def test_calculate_identity_similarity():
-    for i in range(10):
+    for _ in range(10):
         similar_aas = random.randint(0, 200)
         identical_aas = random.randint(0, 200)
         different_aas = random.randint(0, 200)
         digits = random.randint(0, 5)
         length = similar_aas + identical_aas + different_aas
         consensus = (
-            random.choices(string.ascii_lowercase, k=identical_aas)
-            + ([" "] * different_aas)
-            + (["+"] * similar_aas)
+            random.choices(string.ascii_lowercase, k=identical_aas) + ([" "] * different_aas) + (["+"] * similar_aas)
         )
         random.shuffle(consensus)
         consensus = "".join(consensus)
-        similarity_expected = round(
-            ((similar_aas + identical_aas) / length) * 100, digits
-        )
+        similarity_expected = round(((similar_aas + identical_aas) / length) * 100, digits)
         identity_expected = round((identical_aas / length) * 100, digits)
         assert calculate_identity_similarity(consensus, digit=digits) == (
             identity_expected,

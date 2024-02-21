@@ -40,10 +40,8 @@ def test_esl_sfetch_index(tmp_path, seqdb):
 
 def test_sequence_fetch(tmp_path, seqdb):
     # Setup Keyfile
-    with open(seqdb, "rt") as sequence_file:
-        ids = [
-            line.split()[0].strip(">") for line in sequence_file if line.startswith(">")
-        ]
+    with open(seqdb) as sequence_file:
+        ids = [line.split()[0].strip(">") for line in sequence_file if line.startswith(">")]
     test_db = Path(shutil.copy(seqdb, tmp_path))
     sfetcher = esl_sfetch()
     out_file = tmp_path / "sfetch_out.fa"
@@ -51,19 +49,19 @@ def test_sequence_fetch(tmp_path, seqdb):
     assert get_file_hash(out_file) == get_file_hash(test_db)
 
 
-def test_Hmmbuild_run(sto_ali, tmp_path):
+def test_hmmbuild_run(sto_ali, tmp_path):
     hmmbuilder = Hmmbuild()
     hmm_out = tmp_path / "test.hmm"
     hmmbuilder.run(hmmfile=hmm_out, msafile=sto_ali, single_seq=False)
     checksum = md5()
-    with open(hmm_out, "rt") as fin:
+    with open(hmm_out) as fin:
         for line in fin.readlines()[11:]:
             if not line.startswith("#"):
                 checksum.update(line.encode("utf-8"))
     assert checksum.hexdigest() == "3e5547af52d2b234342c35f83a2d89cb"
 
 
-def test_Hmmsearch_run(test_hmm, seqdb, tmp_path):
+def test_hmmsearch_run(test_hmm, seqdb, tmp_path):
     hmmsearch = Hmmsearch()
     outfile = tmp_path / "hmmsearch.out"
     tlb_out = tmp_path / "hmmsearch.tbl"
@@ -87,10 +85,8 @@ def test_Hmmsearch_run(test_hmm, seqdb, tmp_path):
 def test_alimanip_run(sto_ali, tmp_path):
     manip = EslAlimanip()
     filtered_ali = tmp_path / "filtered.sto"
-    with open(tmp_path / "idfile", "wt") as fout:
+    with open(tmp_path / "idfile", "w") as fout:
         fout.write("MGYP001082675080/61-129 \n")
         fout.write("MGYP001583336646/30-318")
     manip.run(msafile=sto_ali, output_file=filtered_ali, exclude_ids="infile")
-    get_file_hash(
-        filtered_ali, ignore_comments=False
-    ) == "b7f2e241fe55c2d9012e6f1763196329"
+    get_file_hash(filtered_ali, ignore_comments=False) == "b7f2e241fe55c2d9012e6f1763196329"

@@ -16,9 +16,7 @@ def test_cli_phmmer_search(tmp_path, queryseq, seqdb):
         "alignment.json",
         outfile,
     ]:
-        assert (tmp_path / resultfile).is_file() and (
-            tmp_path / "query_alignment.sto"
-        ).stat().st_size > 0
+        assert (tmp_path / resultfile).is_file() and (tmp_path / "query_alignment.sto").stat().st_size > 0
 
 
 def test_cli_sort(tmp_path, phmmer_out):
@@ -28,9 +26,7 @@ def test_cli_sort(tmp_path, phmmer_out):
     results = pd.read_csv(outfile)
     assert results.iloc[6]["target_name"] == "MGYP000329524085"
 
-    command = (
-        f"MGnifyMiner sort --input {phmmer_out} --feature similarity --output {outfile}"
-    )
+    command = f"MGnifyMiner sort --input {phmmer_out} --feature similarity --output {outfile}"
     subprocess.run(command.split())
     results = pd.read_csv(outfile)
     assert results.iloc[8]["target_name"] == "MGYP000604501205"

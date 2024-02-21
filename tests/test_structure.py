@@ -77,9 +77,7 @@ def test_remove_entries():
         },
     ]
     for case in cases:
-        assert sorted(remove_entries(case["selection"], entries)) == sorted(
-            case["expected"]
-        )
+        assert sorted(remove_entries(case["selection"], entries)) == sorted(case["expected"])
 
 
 def test_filter_msa(sto_ali, tmp_path):
@@ -97,27 +95,18 @@ def test_filter_msa(sto_ali, tmp_path):
     ]
     outfile = tmp_path / "filtered.sto"
     filter_msa(sto_ali, entries, outfile)
-    assert (
-        get_file_hash(outfile, ignore_comments=False)
-        == "34c39399e55422be4778a3d36f4544c8"
-    )
+    assert get_file_hash(outfile, ignore_comments=False) == "34c39399e55422be4778a3d36f4544c8"
 
 
 def test_download_alphafold(tmp_path):
     sdl = StructureDownloader()
     outfile = tmp_path / "af.pdb"
     sdl.download_alphafold("AF-A0A452S449-F1", outfile)
-    assert (
-        get_file_hash(outfile, ignore_comments=True)
-        == "1f6d5f9b27428ebceb44df57b9a90709"
-    )
+    assert get_file_hash(outfile, ignore_comments=True) == "1f6d5f9b27428ebceb44df57b9a90709"
 
 
 def test_download_pdb(tmp_path):
     sdl = StructureDownloader()
     outfile = tmp_path / "pdb.pdb"
     sdl.download_pdb("100D", outfile)
-    assert (
-        get_file_hash(outfile, ignore_comments=True)
-        == "9395d751c49f340536d9f1fc47148981"
-    )
+    assert get_file_hash(outfile, ignore_comments=True) == "9395d751c49f340536d9f1fc47148981"
