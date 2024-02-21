@@ -38,15 +38,11 @@ def phmmer(args) -> None:
         json.dump(alignments, fout, indent=4, sort_keys=True)
 
     results["similarity"] = results.apply(
-        lambda x: alignments["-".join([x.target_name, str(x.ali_from), str(x.ali_to)])][
-            "perc_sim"
-        ],
+        lambda x: alignments["-".join([x.target_name, str(x.ali_from), str(x.ali_to)])]["perc_sim"],
         axis=1,
     )
     results["identity"] = results.apply(
-        lambda x: alignments["-".join([x.target_name, str(x.ali_from), str(x.ali_to)])][
-            "perc_ident"
-        ],
+        lambda x: alignments["-".join([x.target_name, str(x.ali_from), str(x.ali_to)])]["perc_ident"],
         axis=1,
     )
     results = proteinTable(results)

@@ -1,4 +1,4 @@
-from mgyminer.proteinTable import proteinTable
+from mgyminer.proteintable import ProteinTable
 
 
 class DataSingleton:
@@ -18,8 +18,8 @@ class DataSingleton:
     @property
     def data(self):
         if self._data is None and self._data_path is not None:
-            self._data = proteinTable(self._data_path)
-            self._data.df.rename(columns={"e-value": "e_value"}, inplace=True)
+            self._data = ProteinTable(self._data_path)
+            self._data.rename(columns={"e-value": "e_value"}, inplace=True)
         return self._data
 
     @property

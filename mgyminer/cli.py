@@ -12,13 +12,14 @@ from mgyminer.filter import (
     sort,
 )
 from mgyminer.metadata import get_metadata
-from mgyminer.phmmer import phmmer
 from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
 from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
+
 from .sequencesearch import phmmer_cli
+
 
 def main():
     parser = create_parser()
@@ -37,7 +38,9 @@ def create_parser():
     # Arguments for sequence search
     phmmer_parser = subparsers.add_parser("phmmer", help="make phmmer search")
     phmmer_parser.add_argument("--query", "-q", type=Path, required=True, help="fasta file with query sequence(s)")
-    phmmer_parser.add_argument("--target", "-t", type=Path, required=True, help="target sequence database to search against")
+    phmmer_parser.add_argument(
+        "--target", "-t", type=Path, required=True, help="target sequence database to search against"
+    )
     phmmer_parser.add_argument("--output", "-o", type=Path, required=True, help="output path")
     phmmer_parser.add_argument(
         "--cpu",

@@ -61,8 +61,7 @@ def update_alignment(click):
     if click == 0:
         raise PreventUpdate
     else:
-        with open(
-            "/home/flx/PycharmProjects/MGnifyMiner2/local_tests/ZMM4/aligmnent.out",
-        ) as fin:
+        # TODO Load alignment
+        with open() as fin:
             data = fin.read()
     return data, {"visibility": "visible"}

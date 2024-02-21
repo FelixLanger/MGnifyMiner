@@ -36,9 +36,7 @@ def extract_alignments(hmmer_out: Union[Path, str]) -> dict:
     return alignments_dict
 
 
-def calculate_identity_similarity(
-    consensus: str, digit: int = 1
-) -> Tuple[float, float]:
+def calculate_identity_similarity(consensus: str, digit: int = 1) -> Tuple[float, float]:
     """
     Calculate sequence similarity and identity values from a hmmer alignment consensus string
     :param consensus: hmmer consensus sequence
@@ -83,7 +81,7 @@ def alignments(file: Union[Path, str]):
         file = Path(file)
 
     if isinstance(file, Path):
-        file = open(file, "r")
+        file = open(file)
         closeit = True
 
     alignment_upcomming = False
@@ -181,16 +179,12 @@ def parse_hmmer_domtable(domtable: Union[Path, str]) -> pd.DataFrame:
 
     # Calculate coverages
     proteinTable["coverage_hit"] = round(
-        (proteinTable["ali_to"] - proteinTable["ali_from"])
-        / proteinTable["tlen"]
-        * 100,
+        (proteinTable["ali_to"] - proteinTable["ali_from"]) / proteinTable["tlen"] * 100,
         2,
     )
 
     proteinTable["coverage_query"] = round(
-        (proteinTable["ali_to"] - proteinTable["ali_from"])
-        / proteinTable["qlen"]
-        * 100,
+        (proteinTable["ali_to"] - proteinTable["ali_from"]) / proteinTable["qlen"] * 100,
         2,
     )
 

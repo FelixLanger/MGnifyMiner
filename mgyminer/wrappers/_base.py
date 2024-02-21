@@ -20,15 +20,11 @@ class Program(abc.ABC):
         program_path = shutil.which(program)
 
         if program_path is None:
-            logging.error(
-                'Program "%s" could not be found. Please install it and retry', program
-            )
+            logging.error('Program "%s" could not be found. Please install it and retry', program)
             raise ProgramNotFoundError()
         self._program = shutil.which(program)
 
-    def _run(
-        self, arguments: list, stdout_file: Optional[Path] = None, **kwargs
-    ) -> bool:
+    def _run(self, arguments: list, stdout_file: Optional[Path] = None, **kwargs) -> bool:
         """
         Help function to run program on the command line.
         Outputs stdout to stdout_file if it is defined. Otherwise stdout will be ignored.
@@ -46,7 +42,7 @@ class Program(abc.ABC):
         # TODO: Find a way to log stream of stdout and stderr and forward it to logging
         try:
             if stdout_file:
-                stdout = open(stdout_file, "wt")
+                stdout = open(stdout_file, "w")
             elif self.verbose is True:
                 stdout = subprocess.PIPE
             else:
