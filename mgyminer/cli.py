@@ -49,6 +49,13 @@ def create_parser():
         default=4,
         help="number of cpu cores to use for hmmer search [default = 4]",
     )
+    phmmer_parser.add_argument(
+        "--memory",
+        "-m",
+        type=int,
+        default=20000,
+        help="Amount of memory used in MB [default = 20000]",
+    )
     phmmer_parser.set_defaults(func=phmmer_cli)
 
     # Arguments for sorting

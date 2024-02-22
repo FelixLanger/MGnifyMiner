@@ -4,6 +4,7 @@ import pandas as pd
 import psutil
 import pyhmmer
 from pyhmmer.easel import Alphabet, SequenceFile
+
 from .proteintable import ProteinTable
 
 
@@ -13,11 +14,14 @@ def custom_round(number):
     else:
         return str(round(number, 1))
 
+
 def calculate_query_coverage(query_length, domain):
     return round(((domain.alignment.hmm_to - domain.alignment.hmm_from) / query_length) * 100)
 
+
 def calculate_target_coverage(target_length, domain):
     return round(((domain.alignment.hmm_to - domain.alignment.hmm_from) / target_length) * 100)
+
 
 def calculate_similarity(alignment, digit):
     similar = alignment.identity_sequence.count("+")
@@ -29,9 +33,9 @@ def calculate_similarity(alignment, digit):
     return percent_identity, percent_similarity
 
 
-def phmmer(db_file, query_file, cpus=4):
-    MAX_MEMORY_LOAD = 0.70
-    available_memory = psutil.virtual_memory().available
+def phmmer(db_file, query_file, cpus=4, memory=None):
+    MAX_MEMORY_LOAD = 0.80
+    available_memory = (memory * 1048576) if memory else psutil.virtual_memory().available
     database_size = os.stat(db_file).st_size
 
     results = []
@@ -99,6 +103,7 @@ def phmmer(db_file, query_file, cpus=4):
                             results.append(line)
     return ProteinTable(pd.DataFrame(results, columns=column_names))
 
+
 def phmmer_cli(args):
     output_file = args.output
     db_file = args.target
@@ -109,4 +114,3 @@ def phmmer_cli(args):
     hits.save("test_diff")
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
-
