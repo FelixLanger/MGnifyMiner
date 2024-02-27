@@ -34,7 +34,7 @@ def calculate_similarity(alignment, digit):
 
 
 def phmmer(db_file, query_file, cpus=4, memory=None):
-    MAX_MEMORY_LOAD = 0.80
+    max_memory_load = 0.80
     available_memory = (memory * 1048576) if memory else psutil.virtual_memory().available
     database_size = os.stat(db_file).st_size
 
@@ -65,7 +65,7 @@ def phmmer(db_file, query_file, cpus=4, memory=None):
 
     alphabet = Alphabet.amino()
     with SequenceFile(db_file, digital=True, alphabet=alphabet) as sequences:
-        if database_size < available_memory * MAX_MEMORY_LOAD:
+        if database_size < available_memory * max_memory_load:
             sequences = sequences.read_block()
         with SequenceFile(query_file, digital=True, alphabet=alphabet) as queries:
             hits_list = pyhmmer.hmmer.phmmer(queries, sequences, cpus=cpus)
@@ -111,6 +111,8 @@ def phmmer_cli(args):
     cpus = args.cpu
 
     hits = phmmer(db_file, query_file, cpus)
-    hits.save("test_diff")
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
+    if args.fetch_hits:
+        fasta_filename = output_file.with_suffix(".faa")
+        hits.fetch_and_export_sequences(fasta_filename, database="bigquery")

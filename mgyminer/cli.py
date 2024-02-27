@@ -56,6 +56,9 @@ def create_parser():
         default=20000,
         help="Amount of memory used in MB [default = 20000]",
     )
+    phmmer_parser.add_argument(
+        "--fetch-hits", action="store_true", default=False, help="If set, enables fetching and storing of hit sequences"
+    )
     phmmer_parser.set_defaults(func=phmmer_cli)
 
     # Arguments for sorting

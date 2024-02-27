@@ -2,13 +2,20 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Union
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 from mgyminer.config import load_config
-from mgyminer.utils import NumpyJSONEncoder, create_md5_hash, mgyp_to_id, biome_str_to_ids
 from mgyminer.constants import BIOMES
+from mgyminer.utils import (
+    NumpyJSONEncoder,
+    biome_str_to_ids,
+    create_md5_hash,
+    dataframe_to_fasta,
+    mgyp_to_id,
+    proteinID_to_mgyp,
+)
 
 
 class ProteinTable(pd.DataFrame):
@@ -203,11 +210,11 @@ class ProteinTable(pd.DataFrame):
                 if_exists="replace",
                 credentials=credentials,
             )
-            ## THIS JOIN WILL AUTOMATICALLY REMOVE THE PROTEINS WITHOUT METADATA
-            ## LEFT JOIN ON protein_metadata AND assembly TABLE WOULD BE NEEDED
-            ## TO KEEO THE LINES WHERE THESE TABLES DON'T HAVE DATA
+            # THIS JOIN WILL AUTOMATICALLY REMOVE THE PROTEINS WITHOUT METADATA
+            # LEFT JOIN ON protein_metadata AND assembly TABLE WOULD BE NEEDED
+            # TO KEEP THE LINES WHERE THESE TABLES DON'T HAVE DATA
             join_query = f"""
-            SELECT 
+            SELECT
                 t.mgyp AS mgyp,
                 ARRAY_AGG(DISTINCT m.complete) as complete,
                 ARRAY_AGG(DISTINCT COALESCE(m.truncation, '11')) as truncation,
@@ -235,6 +242,48 @@ class ProteinTable(pd.DataFrame):
 
         elif database.lower() == "mysql":
             # TODO: Implement fetching from MySQL
+            pass
+        else:
+            raise ValueError("Unsupported database type")
+
+    def fetch_and_export_sequences(self, output_path: Union[Path, str], database):
+        if database.lower() == "bigquery":
+            (
+                credentials,
+                BIGQUERY_DATASET,
+                BIGQUERY_PROJECT,
+            ) = self._setup_bigquery_connection()
+
+            temp_table_name = create_md5_hash(self["query_name"][0])[:16]
+
+            check_query = f"SELECT table_name FROM {BIGQUERY_DATASET}.INFORMATION_SCHEMA.TABLES WHERE table_name = '{temp_table_name}'"
+            check_result = pd.read_gbq(check_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
+
+            if check_result.empty:
+                logger.info(f"Creating temporary table {temp_table_name}")
+                self["mgyp"] = self["target_name"].apply(lambda x: mgyp_to_id(x))
+                mgyp_ids = self["mgyp"].to_frame()
+                mgyp_ids.to_gbq(
+                    f"{BIGQUERY_DATASET}.{temp_table_name}",
+                    project_id=BIGQUERY_PROJECT,
+                    if_exists="replace",
+                    credentials=credentials,
+                )
+
+            sequence_query = f"""SELECT p.id AS mgyp, p.sequence
+                                 FROM {BIGQUERY_DATASET}.protein p
+                                 JOIN {BIGQUERY_DATASET}.{temp_table_name} t ON p.id = t.mgyp"""
+            logger.debug(f"run query:\n {sequence_query}")
+            sequences = pd.read_gbq(sequence_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
+
+            if isinstance(output_path, str):
+                output_path = Path(output_path)
+            sequences["mgyp"] = sequences["mgyp"].apply(lambda x: proteinID_to_mgyp(x))
+            dataframe_to_fasta(sequences, output_path)
+            logger.info(f"Sequence data exported to {output_path}")
+
+        elif database.lower() == "mysql":
+            # TODO: Implement MySQL functionality
             pass
         else:
             raise ValueError("Unsupported database type")
