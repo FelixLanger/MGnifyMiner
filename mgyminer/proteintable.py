@@ -287,3 +287,31 @@ class ProteinTable(pd.DataFrame):
             pass
         else:
             raise ValueError("Unsupported database type")
+
+    def fetch_contigs(self):
+        """
+        Fetches contig information from BigQuery based on the mgyp values in the protein table.
+
+        Returns:
+            pandas.DataFrame: A DataFrame containing the contig information.
+        """
+        credentials, bigquery_dataset, bigquery_project = self._setup_bigquery_connection()
+
+        mgyps_list = self['target_name'].apply(mgyp_to_id).unique().tolist()
+        mgyps_str = ', '.join([str(mgyp) for mgyp in mgyps_list])
+
+        query = f"""
+        SELECT *
+        FROM `{bigquery_project}.{bigquery_dataset}.metadata`
+        WHERE mgyc IN (
+            SELECT mgyc
+            FROM `{bigquery_project}.{bigquery_dataset}.metadata`
+            WHERE mgyp IN ({mgyps_str})
+        )
+        """
+
+        client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+        query_job = client.query(query)
+        results_df = query_job.to_dataframe()
+
+        return results_df
