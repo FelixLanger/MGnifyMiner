@@ -1,3 +1,5 @@
+import pandas as pd
+
 # Mappings
 BIOMES = {
     492: "root:Mixed",
@@ -493,3 +495,98 @@ BIOMES = {
     1: "root:Engineered",
     0: "root",
 }
+
+BIOME_TO_ID = {value: key for key, value in BIOMES.items()}
+
+
+class BiomeMatrix:
+    """
+    A class to create a matrix which contains the child, parent information for each biome id.
+
+    Biomes are hierarchical and can have children and parents:
+    root:Engineered is the child of root
+    root:Engineered:Bioreactor is the parent of root:Engineered:Bioreactor:Continuous culture
+
+    This class contains methods to quickly fetch the children or parents for a single biome id,
+    or the unique children/parent ids for a list of biome ids.
+    """
+
+    def __init__(self, biome_mapping):
+        """
+        Initialize the BiomeMatrix with a biome mapping dictionary.
+
+        Args:
+            biome_mapping (dict): A dictionary mapping biome IDs to their corresponding levels.
+        """
+        keys = sorted(biome_mapping.keys())
+        adjacency_matrix = pd.DataFrame(None, index=keys, columns=keys)
+
+        def find_children(parent_key, parent_level):
+            for key, level in biome_mapping.items():
+                if level.startswith(parent_level) and level != parent_level:
+                    adjacency_matrix.at[parent_key, key] = 1
+                    find_children(key, level)
+
+        for key, level in biome_mapping.items():
+            find_children(key, level)
+
+        self.adjacency_matrix = adjacency_matrix
+
+    def get_children(self, biome_id):
+        """
+        Get the children of a given biome ID.
+
+        Args:
+            biome_id (int): The biome ID to retrieve children for.
+
+        Returns:
+            list: A list of biome IDs representing the children of the given biome ID.
+        """
+        return self.adjacency_matrix.loc[biome_id][self.adjacency_matrix.loc[biome_id] == 1].index.tolist()
+
+    def get_parents(self, biome_id):
+        """
+        Get the parents of a given biome ID.
+
+        Args:
+            biome_id (int): The biome ID to retrieve parents for.
+
+        Returns:
+            list: A list of biome IDs representing the parents of the given biome ID.
+        """
+        return self.adjacency_matrix[biome_id][self.adjacency_matrix[biome_id] == 1].index.tolist()
+
+    def get_unique_children(self, biome_ids):
+        """
+        Get the unique children of a list of biome IDs including the input biome IDs.
+
+        Args:
+            biome_ids (list): A list of biome IDs to retrieve unique children for.
+
+        Returns:
+            list: A list of unique biome IDs representing the children of the given biome IDs,
+                  including the input biome IDs themselves.
+        """
+        children = set()
+        for biome_id in biome_ids:
+            children.update(self.get_children(biome_id))
+        return children
+
+    def get_unique_parents(self, biome_ids):
+        """
+        Get the unique parents of a list of biome IDs including the input biome IDs.
+
+        Args:
+            biome_ids (list): A list of biome IDs to retrieve unique parents for.
+
+        Returns:
+            list: A list of unique biome IDs representing the parents of the given biome IDs,
+                  including the input biome IDs themselves.
+        """
+        parents = set()
+        for biome_id in biome_ids:
+            parents.update(self.get_parents(biome_id))
+        return parents
+
+
+BIOME_MATRIX = BiomeMatrix(BIOMES)
