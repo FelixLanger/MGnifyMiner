@@ -1,11 +1,12 @@
-from google.cloud import bigquery
 from datetime import datetime, timedelta
+
+from google.cloud import bigquery
 
 
 class BigQueryHelper:
     def __init__(self, credentials_path, dataset_id):
-        self._dataset_id = dataset_id
         self.client = bigquery.Client.from_service_account_json(credentials_path)
+        self._dataset_id = dataset_id
 
     @property
     def project(self):
@@ -13,27 +14,7 @@ class BigQueryHelper:
 
     @property
     def dataset(self):
-        try:
-            dataset_ref = self.client.dataset(self._dataset_id, project=self.project)
-            dataset = self.client.get_dataset(dataset_ref)
-            if dataset:
-                return dataset_ref
-            else:
-                raise ValueError(f"Dataset {self._dataset_id} does not exist in project {self.project}.")
-        except Exception as e:
-            raise ValueError(f"Failed to get dataset {self._dataset_id}.") from e
-
-    @dataset.setter
-    def dataset(self, dataset_id):
-        try:
-            dataset_ref = self.client.dataset(dataset_id, project=self.project)
-            dataset = self.client.get_dataset(dataset_ref)
-            if dataset:
-                self._dataset_id = dataset_id
-            else:
-                raise ValueError(f"Dataset {dataset_id} does not exist in project {self.project}.")
-        except Exception as e:
-            raise ValueError(f"Failed to set dataset to {dataset_id}.") from e
+        return bigquery.DatasetReference(self.project, self._dataset_id)
 
     def create_temp_table_from_dataframe(self, df, table_name, expiration_hours=1):
         """
@@ -42,7 +23,7 @@ class BigQueryHelper:
         """
         temp_table_reference = self.dataset.table(table_name)
         job = self.client.load_table_from_dataframe(df, temp_table_reference)
-        job.result()  # Wait for the load job to finish
+        job.result()
         expiration_time = datetime.now() + timedelta(hours=expiration_hours)
         table = self.client.get_table(temp_table_reference)
         table.expires = expiration_time

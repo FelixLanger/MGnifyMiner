@@ -6,11 +6,13 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from mgyminer.bigquery import BigQueryHelper
 from mgyminer.config import load_config
 from mgyminer.constants import BIOMES
 from mgyminer.utils import (
     NumpyJSONEncoder,
     biome_str_to_ids,
+    contigID_to_mgyc,
     create_md5_hash,
     dataframe_to_fasta,
     mgyp_to_id,
@@ -73,7 +75,7 @@ class ProteinTable(pd.DataFrame):
         Returns: number of unique entries in nested column
 
         """
-        # By far the most efficient way to count nested unique values
+        # most efficient way to count nested unique values
         flattened_array = self.flatten(nested_column)
         return pd.Series(flattened_array).nunique()
 
@@ -129,14 +131,14 @@ class ProteinTable(pd.DataFrame):
         Parameters:
         dataframe (DataFrame): The DataFrame to be filtered.
         column (str): The name of the column to apply the filter to. The column should contain list-like elements.
-        values (List[str]): A list of strings. Rows where the column contains any of these strings will be included in
+        values (List[str]): A list of values. Rows where the column contains any of these values will be included in
                             the output.
 
         Returns:
         DataFrame: A new DataFrame containing only the rows that meet the list-based filter condition.
 
         """
-        mask = dataframe[column].apply(lambda x: any(item in x for item in values))
+        mask = dataframe[column].isin(values)
         filtered_df = dataframe[mask]
         return ProteinTable(filtered_df)
 
@@ -162,54 +164,28 @@ class ProteinTable(pd.DataFrame):
 
     @staticmethod
     def _setup_bigquery_connection():
-        """
-        Set up the connection to Google BigQuery.
-        This method loads credentials and configuration settings.
-        """
         cfg = load_config()
-
-        try:
-            from google.oauth2 import service_account
-
-            credentials = service_account.Credentials.from_service_account_file(cfg["Google service account json"])
-            logger.info("Loaded Google service account credentials")
-        except Exception as e:
-            logger.error("Invalid Google service account JSON key file: " + str(e))
-            raise Exception("Invalid Google service account JSON key file") from e
-
-        bigquery_dataset = cfg.get("BigQuery Dataset")
-        bigquery_project = cfg.get("BigQuery project")
-        if not bigquery_dataset or not bigquery_project:
-            error_message = "BigQuery Dataset and/or BigQuery Project not set in the configuration."
-            logger.error(error_message)
-            raise ValueError(error_message)
-
-        return credentials, bigquery_dataset, bigquery_project
+        bigquery_data = {
+            "credentials_path": cfg.get("Google service account json"),
+            "dataset_id": cfg.get("BigQuery Dataset"),
+        }
+        return bigquery_data
 
     def fetch_metadata(self, database: str):
         if database.lower() == "bigquery":
-            (
-                credentials,
-                bigquery_dataset,
-                bigquery_project,
-            ) = self._setup_bigquery_connection()
+            bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
 
             columns_to_check = ["complete", "truncation", "assemblies", "biomes"]
             if all(column in self.columns for column in columns_to_check):
                 logger.info(
                     f"Skipping fetching of data from BigQuery because {columns_to_check} columns are already present"
                 )
-                return
+                return self
 
             self["mgyp"] = self["target_name"].apply(lambda x: mgyp_to_id(x))
             table_name = create_md5_hash(self["query_name"][0])[:16]
             mgyp_ids = self["mgyp"].to_frame()
-            mgyp_ids.to_gbq(
-                f"{bigquery_dataset}.{table_name}",
-                project_id=bigquery_project,
-                if_exists="replace",
-                credentials=credentials,
-            )
+            temp_table = bq_helper.create_temp_table_from_dataframe(mgyp_ids, table_name, expiration_hours=1)
             # THIS JOIN WILL AUTOMATICALLY REMOVE THE PROTEINS WITHOUT METADATA
             # LEFT JOIN ON protein_metadata AND assembly TABLE WOULD BE NEEDED
             # TO KEEP THE LINES WHERE THESE TABLES DON'T HAVE DATA
@@ -221,21 +197,21 @@ class ProteinTable(pd.DataFrame):
                 a.pfam_architecture as pfam_architecture,
                 ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
                 ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
-            FROM 
-                {bigquery_dataset}.{table_name} t
-            JOIN 
-                {bigquery_dataset}.protein p ON t.mgyp = p.id
-            LEFT JOIN 
-                {bigquery_dataset}.architecture a ON p.architecture = a.id
-            JOIN 
-                {bigquery_dataset}.protein_metadata m ON t.mgyp = m.mgyp
-            JOIN 
-                {bigquery_dataset}.assembly asmbly ON m.assembly = asmbly.id
-            GROUP BY 
+            FROM
+                {temp_table.project}.{temp_table.dataset_id}.{table_name} t
+            JOIN
+                {temp_table.project}.{temp_table.dataset_id}.protein p ON t.mgyp = p.id
+            LEFT JOIN
+                {temp_table.project}.{temp_table.dataset_id}.architecture a ON p.architecture = a.id
+            JOIN
+                {temp_table.project}.{temp_table.dataset_id}.protein_metadata m ON t.mgyp = m.mgyp
+            JOIN
+                {temp_table.project}.{temp_table.dataset_id}.assembly asmbly ON m.assembly = asmbly.id
+            GROUP BY
                 t.mgyp, a.pfam_architecture;
             """
             logger.debug(f"run query:\n {join_query}")
-            metadata = pd.read_gbq(join_query, project_id=bigquery_project, credentials=credentials)
+            metadata = bq_helper.query_to_dataframe(join_query)
             result = pd.merge(self, metadata, on="mgyp")
             result.drop("mgyp", axis=1, inplace=True)
             return ProteinTable(result)
@@ -244,37 +220,31 @@ class ProteinTable(pd.DataFrame):
             # TODO: Implement fetching from MySQL
             pass
         else:
-            raise ValueError("Unsupported database type")
+            raise ValueError("Unsupported database")
 
     def fetch_and_export_sequences(self, output_path: Union[Path, str], database):
         if database.lower() == "bigquery":
-            (
-                credentials,
-                BIGQUERY_DATASET,
-                BIGQUERY_PROJECT,
-            ) = self._setup_bigquery_connection()
+            bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
 
             temp_table_name = create_md5_hash(self["query_name"][0])[:16]
 
-            check_query = f"SELECT table_name FROM {BIGQUERY_DATASET}.INFORMATION_SCHEMA.TABLES WHERE table_name = '{temp_table_name}'"
-            check_result = pd.read_gbq(check_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
+            check_query = (
+                f"SELECT table_name FROM {bq_helper.dataset.dataset_id}.INFORMATION_SCHEMA.TABLES "
+                f"WHERE table_name = '{temp_table_name}'"
+            )
+            check_result = bq_helper.query_to_dataframe(check_query)
 
             if check_result.empty:
                 logger.info(f"Creating temporary table {temp_table_name}")
                 self["mgyp"] = self["target_name"].apply(lambda x: mgyp_to_id(x))
                 mgyp_ids = self["mgyp"].to_frame()
-                mgyp_ids.to_gbq(
-                    f"{BIGQUERY_DATASET}.{temp_table_name}",
-                    project_id=BIGQUERY_PROJECT,
-                    if_exists="replace",
-                    credentials=credentials,
-                )
+                bq_helper.create_temp_table_from_dataframe(mgyp_ids, temp_table_name, expiration_hours=1)
 
             sequence_query = f"""SELECT p.id AS mgyp, p.sequence
-                                 FROM {BIGQUERY_DATASET}.protein p
-                                 JOIN {BIGQUERY_DATASET}.{temp_table_name} t ON p.id = t.mgyp"""
+                                 FROM {bq_helper.dataset.dataset_id}.protein p
+                                 JOIN {bq_helper.dataset.dataset_id}.{temp_table_name} t ON p.id = t.mgyp"""
             logger.debug(f"run query:\n {sequence_query}")
-            sequences = pd.read_gbq(sequence_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
+            sequences = bq_helper.query_to_dataframe(sequence_query)
 
             if isinstance(output_path, str):
                 output_path = Path(output_path)
@@ -295,23 +265,44 @@ class ProteinTable(pd.DataFrame):
         Returns:
             pandas.DataFrame: A DataFrame containing the contig information.
         """
-        credentials, bigquery_dataset, bigquery_project = self._setup_bigquery_connection()
+        bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
 
-        mgyps_list = self['target_name'].apply(mgyp_to_id).unique().tolist()
-        mgyps_str = ', '.join([str(mgyp) for mgyp in mgyps_list])
+        mgyps_list = self["target_name"].apply(mgyp_to_id).unique().tolist()
+        mgyps_str = ", ".join([str(mgyp) for mgyp in mgyps_list])
+
+        # query = f"""
+        # SELECT *
+        # FROM `{bq_helper.dataset.dataset_id}.protein_metadata`
+        # WHERE mgyc IN (
+        #     SELECT mgyc
+        #     FROM `{bq_helper.dataset.dataset_id}.protein_metadata`
+        #     WHERE mgyp IN ({mgyps_str})
+        # )
+        # """
 
         query = f"""
-        SELECT *
-        FROM `{bigquery_project}.{bigquery_dataset}.metadata`
-        WHERE mgyc IN (
-            SELECT mgyc
-            FROM `{bigquery_project}.{bigquery_dataset}.metadata`
-            WHERE mgyp IN ({mgyps_str})
-        )
+            SELECT
+              md.mgyp AS mgyp,
+              md.mgyc AS mgyc,
+              md.complete AS protein_complete,
+              md.start AS start,
+              md.stop AS stop,
+              md.strand AS strand,
+              ct.length AS contig_length,
+              ass.accession AS assembly,
+              bm.id AS biome_id
+            FROM `{bq_helper.dataset.dataset_id}.protein_metadata` md
+            JOIN `{bq_helper.dataset.dataset_id}.contig` ct ON md.mgyc = ct.id
+            JOIN `{bq_helper.dataset.dataset_id}.assembly` ass ON ct.assembly = ass.id
+            JOIN `{bq_helper.dataset.dataset_id}.biome` bm ON ass.biome = bm.id
+            WHERE md.mgyc IN (
+              SELECT mgyc
+              FROM `{bq_helper.dataset.dataset_id}.protein_metadata`
+              WHERE mgyp IN ({mgyps_str})
+            );
         """
-
-        client = bigquery.Client(credentials=credentials, project=credentials.project_id)
-        query_job = client.query(query)
-        results_df = query_job.to_dataframe()
+        results_df = bq_helper.query_to_dataframe(query)
+        results_df["mgyc"] = results_df["mgyc"].apply(contigID_to_mgyc)
+        results_df["mgyp"] = results_df["mgyp"].apply(proteinID_to_mgyp)
 
         return results_df
