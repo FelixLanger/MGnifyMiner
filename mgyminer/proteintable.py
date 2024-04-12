@@ -191,6 +191,14 @@ class ProteinTable(pd.DataFrame):
         return ProteinTable(result_df)
 
     def save(self, path, index=False):
+        """
+        Save a ProteinTable to a csv file while preserving rounded floats and json columns
+        Args:
+            path: Path to the output csv
+            index: Flag to include the index in the csv
+
+        Returns: None
+        """
         def format_float(e):
             if isinstance(e, str):
                 return e
@@ -317,17 +325,6 @@ class ProteinTable(pd.DataFrame):
 
         mgyps_list = self["target_name"].apply(mgyp_to_id).unique().tolist()
         mgyps_str = ", ".join([str(mgyp) for mgyp in mgyps_list])
-
-        # query = f"""
-        # SELECT *
-        # FROM `{bq_helper.dataset.dataset_id}.protein_metadata`
-        # WHERE mgyc IN (
-        #     SELECT mgyc
-        #     FROM `{bq_helper.dataset.dataset_id}.protein_metadata`
-        #     WHERE mgyp IN ({mgyps_str})
-        # )
-        # """
-
         query = f"""
             SELECT
               md.mgyp AS mgyp,
