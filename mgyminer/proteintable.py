@@ -55,6 +55,50 @@ class ProteinTable(pd.DataFrame):
     def n_unique_hits(self):
         return len(self.unique_hits)
 
+    @property
+    def membership_matrix(self):
+        """
+        Property which creates the membership_matrix for the ProteinTable.
+        A membership matrix is a pivot table of the MGYP ids as index
+        and the query names as the column. The matrix gets a set_id column, which
+        has a unique identifier for the combinations of queries a target protein (MGYP)
+        is found in.
+        """
+        if self._membership_matrix is None:
+            self._membership_matrix = pd.crosstab(self["target_name"], [self["query_name"]])
+            self._membership_matrix = self._membership_matrix.where(self._membership_matrix == 0, 1)
+            self._membership_matrix["set_id"] = self._membership_matrix.apply(
+                lambda x: "".join([str(y) for y in x]), axis=1
+            )
+        return self._membership_matrix
+
+    @property
+    def membership_set_mapping(self):
+        combinations = self.membership_matrix["set_id"].unique()
+        names = self.membership_matrix.columns[:-1]
+
+        combinations_dict = {}
+        for combination in combinations:
+            string_list = [int(num) for num in combination]
+            matched_names = [names[i] for i, value in enumerate(string_list) if value == 1]
+            readable_name = "∩".join(matched_names)
+            combinations_dict[readable_name] = combination
+        return combinations_dict
+
+    def get_set(self, set_name):
+        """
+        Get all proteins which are part found in the set of queries.
+        Args:
+            set_name: Name of the query / set of queries
+        Returns:
+            ProteinTable with all the Proteins which have been hit by the queries in the set_name
+        """
+        # if the set_name string is given convert it to the set id
+        if set_name in self.membership_set_mapping:
+            set_name = self.membership_set_mapping[set_name]
+        target_names = self.membership_matrix[self.membership_matrix["set_id"] == set_name].index
+        return ProteinTable(self[self["target_name"].isin(target_names)])
+
     def flatten(self, nested_column):
         """
         Return a flattened array of nested_column.
@@ -85,9 +129,9 @@ class ProteinTable(pd.DataFrame):
 
     def pick(self, filters: Dict[str, Any]):
         """
-        Filters the DataFrame based on specified conditions.
+        Filters the ProteinTable based on specified conditions.
 
-        This method allows filtering of the DataFrame's rows based on specified conditions for each column.
+        This method allows filtering of the ProteinTable's rows based on specified conditions for each column.
         It supports two types of filters:
         1. Numeric range filters (using a dictionary with 'min' and/or 'max' keys).
         2. List-based filters (using a list of strings).
@@ -115,13 +159,13 @@ class ProteinTable(pd.DataFrame):
                         if all(isinstance(element, int) for element in condition):
                             condition = [BIOMES[biome_id] for biome_id in condition]
                         condition = biome_str_to_ids(condition, BIOMES)
-                    result_table = self._apply_list_filter(result_table, column, condition)
+                    result_table = self._vectorised_list_filter(result_table, column, condition)
 
         query_string = " and ".join(query_conditions)
         return ProteinTable(result_table.query(query_string) if query_conditions else result_table)
 
     @staticmethod
-    def _apply_list_filter(dataframe, column, values):
+    def _vectorised_list_filter(dataframe, column, values):
         """
         Applies a list-based filter to the DataFrame.
 
@@ -138,9 +182,13 @@ class ProteinTable(pd.DataFrame):
         DataFrame: A new DataFrame containing only the rows that meet the list-based filter condition.
 
         """
-        mask = dataframe[column].isin(values)
-        filtered_df = dataframe[mask]
-        return ProteinTable(filtered_df)
+        dataframe = dataframe.reset_index(drop=True)
+        exploded_df = dataframe.explode(column)
+        filtered_df = exploded_df[exploded_df[column].isin(values)]
+        filtered_df["temp_index"] = filtered_df.index
+        filtered_df = filtered_df.groupby("temp_index").agg({column: list})
+        result_df = dataframe.merge(filtered_df, left_index=True, right_index=True)
+        return ProteinTable(result_df)
 
     def save(self, path, index=False):
         def format_float(e):
