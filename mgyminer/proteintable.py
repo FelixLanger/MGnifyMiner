@@ -33,6 +33,7 @@ class ProteinTable(pd.DataFrame):
             raise ValueError("No valid result data")
 
         super().__init__(data)
+        self._membership_matrix = None
 
     def _convert_special_columns(self, data):
         for col in self.SPECIAL_COLUMNS:
