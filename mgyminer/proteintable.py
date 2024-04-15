@@ -40,6 +40,9 @@ class ProteinTable(pd.DataFrame):
             if col in data.columns:
                 data[col] = data[col].apply(self._string_to_json)
 
+    def convert_special_columns(self):
+        self._convert_special_columns(self)
+
     @staticmethod
     def _string_to_json(value):
         try:
@@ -200,6 +203,7 @@ class ProteinTable(pd.DataFrame):
 
         Returns: None
         """
+
         def format_float(e):
             if isinstance(e, str):
                 return e
