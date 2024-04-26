@@ -30,7 +30,6 @@ def create_sunburst_count_table(df, biome_column="biome", root_label="root"):
         pandas.DataFrame: A dataframe formatted for creating a sunburst chart, with columns
             "id", "parent", "value", and "label".
     """
-
     # Check if the column is a list of biomes or single biomes
     if isinstance(df[biome_column].iloc[0], list):
         biome_series = pd.Series(np.concatenate(df[biome_column].values))
@@ -62,22 +61,37 @@ def create_sunburst_count_table(df, biome_column="biome", root_label="root"):
 
     sunburst_df = pd.DataFrame(data_rows, columns=["id", "parent", "value", "label"])
     sunburst_df.loc[sunburst_df["id"] == root_label, "parent"] = ""
-
     return sunburst_df
 
 
-def create_biome_plot(df, biome_column="biome"):
+def create_biome_plot(df, biome_column="biome", biome_colors=None):
     """
     Creates a sunburst plot visualizing the biome distribution from a given dataframe.
     Args:
         df (pandas.DataFrame): The input dataframe containing biome data.
         biome_column (str, optional): The name of the column containing biome information.
             Defaults to "biome".
+        biome_colors (dict, optional): A dictionary mapping biome names to their corresponding colors.
+            Defaults to a predefined color scheme if not provided.
 
     Returns:
         plotly.graph_objects.Figure: A plotly figure object representing the biome sunburst plot.
     """
     sunburst_df = create_sunburst_count_table(df, biome_column)
+
+    default_biome_colors = {
+        "Mixed": "#ab63fa",
+        "Control": "#19d3f3",
+        "Host-associated": "#ef553b",
+        "Environmental": "#636efa",
+        "Engineered": "#00cc96",
+    }
+
+    if biome_colors is None:
+        biome_colors = default_biome_colors
+
+    colors = [biome_colors.get(label, None) for label in sunburst_df["label"]]
+
     fig = go.Figure(
         go.Sunburst(
             ids=sunburst_df["id"],
@@ -85,23 +99,12 @@ def create_biome_plot(df, biome_column="biome"):
             parents=sunburst_df["parent"],
             values=sunburst_df["value"],
             branchvalues="total",
+            marker=dict(colors=colors),
         )
     )
 
     fig.update_layout(
         margin=dict(t=0, l=0, r=0, b=0),
-        sunburstcolorway=[
-            "#636efa",
-            "#ef553b",
-            "#00cc96",
-            "#ab63fa",
-            "#19d3f3",
-            "#e763fa",
-            "#fecb52",
-            "#ffa15a",
-            "#ff6692",
-            "#b6e880",
-        ],
         extendsunburstcolors=True,
     )
     return fig
