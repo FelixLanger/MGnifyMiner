@@ -91,7 +91,7 @@ class ProteinTable(pd.DataFrame):
 
     def get_set(self, set_name):
         """
-        Get all proteins which are part found in the set of queries.
+        Get all proteins which are part of the set of query sequences.
         Args:
             set_name: Name of the query / set of queries
         Returns:
@@ -174,16 +174,16 @@ class ProteinTable(pd.DataFrame):
         Applies a list-based filter to the DataFrame.
 
         This method filters rows where the specified column contains any of the values in the provided list.
-        It's primarily used internally by the `filter_table` method for handling list-based filtering conditions.
+        It's primarily used internally by the `pick` method for handling list-based filtering conditions.
 
         Parameters:
-        dataframe (DataFrame): The DataFrame to be filtered.
+        ProteiTable (ProteiTable): The ProteiTable to be filtered.
         column (str): The name of the column to apply the filter to. The column should contain list-like elements.
         values (List[str]): A list of values. Rows where the column contains any of these values will be included in
                             the output.
 
         Returns:
-        DataFrame: A new DataFrame containing only the rows that meet the list-based filter condition.
+        ProteiTable: A new ProteiTable containing only the rows that meet the list-based filter condition.
 
         """
         dataframe = dataframe.reset_index(drop=True)
