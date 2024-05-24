@@ -48,6 +48,18 @@ def proteinID_to_mgyp(proteinid: Union[str, int]) -> str:
     return "MGYP%012d" % int(proteinid)
 
 
+def contigID_to_mgyc(conticid: Union[str, int]) -> str:
+    """
+    Convert a protein ID into MGnify protein accession
+
+    :param contigid: numeric protein ID
+    :return: MGnify MGYP accession
+    """
+    if isinstance(conticid, str):
+        conticid = int(conticid)
+    return "MGYC%012d" % int(conticid)
+
+
 def tryfloat(value: str) -> Union[str, float]:
     """
     Test if a string can be converted to a float and return that given float if possible
