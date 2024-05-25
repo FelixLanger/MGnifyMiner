@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import pandas as pd
 import psutil
@@ -7,62 +8,96 @@ from pyhmmer.easel import Alphabet, SequenceFile
 
 from .proteintable import ProteinTable
 
+COLUMN_NAMES = [
+    "target_name",
+    "tlen",
+    "query_name",
+    "qlen",
+    "e-value",
+    "score",
+    "bias",
+    "ndom",
+    "ndom_of",
+    "c-value",
+    "i-value",
+    "dom_score",
+    "dom_bias",
+    "hmm_from",
+    "hmm_to",
+    "env_from",
+    "env_to",
+    "coverage_query",
+    "coverage_hit",
+    "similarity",
+    "identity",
+]
 
-def custom_round(number):
-    if "e" in f"{number}":
-        return f"{number:.1e}"
-    else:
-        return str(round(number, 1))
+
+def format_number(number: float) -> str:
+    return f"{number:.1e}" if "e" in f"{number}" else str(round(number, 1))
 
 
-def calculate_query_coverage(query_length, domain):
-    return round(((domain.alignment.hmm_to - domain.alignment.hmm_from) / query_length) * 100)
+def calculate_domain_coverage(sequence_length: int, domain: pyhmmer.plan7.Domain, digit: int = 1):
+    return round(((domain.alignment.hmm_to - domain.alignment.hmm_from) / sequence_length) * 100, digit)
 
 
-def calculate_target_coverage(target_length, domain):
-    return round(((domain.alignment.hmm_to - domain.alignment.hmm_from) / target_length) * 100)
-
-
-def calculate_similarity(alignment, digit):
+def calculate_identity(alignment: pyhmmer.plan7.Alignment, digit: int = 1) -> float:
     similar = alignment.identity_sequence.count("+")
     mismatch = alignment.identity_sequence.count(" ")
     length = len(alignment.hmm_sequence)
     identical = length - mismatch - similar
     percent_identity = round(identical / length * 100, digit)
+    return percent_identity
+
+
+def calculate_similarity(alignment: pyhmmer.plan7.Alignment, digit: int = 1) -> float:
+    similar = alignment.identity_sequence.count("+")
+    mismatch = alignment.identity_sequence.count(" ")
+    length = len(alignment.hmm_sequence)
+    identical = length - mismatch - similar
     percent_similarity = round((identical + similar) / length * 100, digit)
-    return percent_identity, percent_similarity
+    return percent_similarity
 
 
-def phmmer(db_file, query_file, cpus=4, memory=None):
-    max_memory_load = 0.80
+def process_hit(hit: pyhmmer.plan7.Hit, hits: pyhmmer.plan7.TopHits) -> List[List[str]]:
+    hit_results = []
+    for domain_idx, domain in enumerate(hit.domains.included, start=1):
+        ident = calculate_identity(domain.alignment)
+        sim = calculate_similarity(domain.alignment)
+        line = [
+            hit.name.decode(),
+            hit.length,
+            hit.best_domain.alignment.hmm_name.decode(),
+            hits.query_length,
+            format_number(hit.evalue),
+            format_number(hit.score),
+            format_number(hit.bias),
+            domain_idx,
+            len(hit.domains.included),
+            format_number(domain.c_evalue),
+            format_number(domain.i_evalue),
+            format_number(domain.score),
+            format_number(domain.bias),
+            domain.alignment.hmm_from,
+            domain.alignment.hmm_to,
+            domain.env_from,
+            domain.env_to,
+            calculate_domain_coverage(hits.query_length, domain),
+            calculate_domain_coverage(hit.length, domain),
+            sim,
+            ident,
+        ]
+        hit_results.append(line)
+    return hit_results
+
+
+def phmmer(
+    db_file: str, query_file: str, cpus: int = 4, memory: float = None, max_memory_load: float = 0.8
+) -> ProteinTable:
     available_memory = (memory * 1048576) if memory else psutil.virtual_memory().available
     database_size = os.stat(db_file).st_size
 
     results = []
-    column_names = [
-        "target_name",
-        "tlen",
-        "query_name",
-        "qlen",
-        "e-value",
-        "score",
-        "bias",
-        "ndom",
-        "ndom_of",
-        "c-value",
-        "i-value",
-        "dom_score",
-        "dom_bias",
-        "hmm_from",
-        "hmm_to",
-        "env_from",
-        "env_to",
-        "coverage_query",
-        "coverage_hit",
-        "similarity",
-        "identity",
-    ]
-
     alphabet = Alphabet.amino()
     with SequenceFile(db_file, digital=True, alphabet=alphabet) as sequences:
         if database_size < available_memory * max_memory_load:
@@ -72,36 +107,8 @@ def phmmer(db_file, query_file, cpus=4, memory=None):
             for hits in hits_list:
                 for hit in hits:
                     if hit.reported:
-                        n_doms_of = len(hit.domains.included)
-                        n_dom = 0
-                        for domain in hit.domains.included:
-                            n_dom += 1
-                            ident, sim = calculate_similarity(domain.alignment, 1)
-                            line = [
-                                hit.name.decode(),
-                                hit.length,
-                                hit.best_domain.alignment.hmm_name.decode(),
-                                hits.query_length,
-                                custom_round(hit.evalue),
-                                custom_round(hit.score),
-                                custom_round(hit.bias),
-                                n_dom,
-                                n_doms_of,
-                                custom_round(domain.c_evalue),
-                                custom_round(domain.i_evalue),
-                                custom_round(domain.score),
-                                custom_round(domain.bias),
-                                domain.alignment.hmm_from,
-                                domain.alignment.hmm_to,
-                                domain.env_from,
-                                domain.env_to,
-                                calculate_query_coverage(hits.query_length, domain),
-                                calculate_target_coverage(hit.length, domain),
-                                sim,
-                                ident,
-                            ]
-                            results.append(line)
-    return ProteinTable(pd.DataFrame(results, columns=column_names))
+                        results.extend(process_hit(hit, hits))
+    return ProteinTable(pd.DataFrame(results, columns=COLUMN_NAMES))
 
 
 def phmmer_cli(args):
