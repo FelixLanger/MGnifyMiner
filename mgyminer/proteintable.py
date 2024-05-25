@@ -12,11 +12,8 @@ from mgyminer.constants import BIOMES
 from mgyminer.utils import (
     NumpyJSONEncoder,
     biome_str_to_ids,
-    contigID_to_mgyc,
     create_md5_hash,
     dataframe_to_fasta,
-    mgyp_to_id,
-    proteinID_to_mgyp,
 )
 
 
@@ -243,8 +240,8 @@ class ProteinTable(pd.DataFrame):
                 )
                 return self
 
-            self["mgyp"] = self["target_name"].apply(lambda x: mgyp_to_id(x))
-            table_name = create_md5_hash(self["query_name"][0])[:16]
+            self["mgyp"] = self["target_name"]  # .apply(lambda x: mgyp_to_id(x)) ##TODO Remove or rename target_name to mgyp /remove mgyp row and use target name in general
+            table_name = f"tmp_{create_md5_hash(self['query_name'][0])[:16]}"
             mgyp_ids = self["mgyp"].to_frame()
             temp_table = bq_helper.create_temp_table_from_dataframe(mgyp_ids, table_name, expiration_hours=1)
             # THIS JOIN WILL AUTOMATICALLY REMOVE THE PROTEINS WITHOUT METADATA
@@ -255,21 +252,21 @@ class ProteinTable(pd.DataFrame):
                 t.mgyp AS mgyp,
                 ARRAY_AGG(DISTINCT m.complete) as complete,
                 ARRAY_AGG(DISTINCT COALESCE(m.truncation, '11')) as truncation,
-                a.pfam_architecture as pfam_architecture,
+                a.architecture as pfam_architecture,
                 ARRAY_AGG(DISTINCT asmbly.accession) AS assemblies,
-                ARRAY_AGG(DISTINCT asmbly.biome) AS biomes
+                ARRAY_AGG(DISTINCT asmbly.biome_id) AS biomes
             FROM
                 {temp_table.project}.{temp_table.dataset_id}.{table_name} t
             JOIN
-                {temp_table.project}.{temp_table.dataset_id}.protein p ON t.mgyp = p.id
+                {temp_table.project}.{temp_table.dataset_id}.protein p ON t.mgyp = p.mgyp
             LEFT JOIN
-                {temp_table.project}.{temp_table.dataset_id}.architecture a ON p.architecture = a.id
+                {temp_table.project}.{temp_table.dataset_id}.architecture a ON p.architecture_hash = a.architecture_hash
             JOIN
-                {temp_table.project}.{temp_table.dataset_id}.protein_metadata m ON t.mgyp = m.mgyp
+                {temp_table.project}.{temp_table.dataset_id}.metadata m ON t.mgyp = m.mgyp
             JOIN
-                {temp_table.project}.{temp_table.dataset_id}.assembly asmbly ON m.assembly = asmbly.id
+                {temp_table.project}.{temp_table.dataset_id}.assembly asmbly ON m.assembly_id = asmbly.assembly_id
             GROUP BY
-                t.mgyp, a.pfam_architecture;
+                t.mgyp, a.architecture;
             """
             logger.debug(f"run query:\n {join_query}")
             metadata = bq_helper.query_to_dataframe(join_query)
@@ -287,7 +284,7 @@ class ProteinTable(pd.DataFrame):
         if database.lower() == "bigquery":
             bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
 
-            temp_table_name = create_md5_hash(self["query_name"][0])[:16]
+            temp_table_name = f"tmp_{create_md5_hash(self['query_name'][0])[:16]}"
 
             check_query = (
                 f"SELECT table_name FROM {bq_helper.dataset.dataset_id}.INFORMATION_SCHEMA.TABLES "
@@ -297,7 +294,7 @@ class ProteinTable(pd.DataFrame):
 
             if check_result.empty:
                 logger.info(f"Creating temporary table {temp_table_name}")
-                self["mgyp"] = self["target_name"].apply(lambda x: mgyp_to_id(x))
+                self["mgyp"] = self["target_name"]  # .apply(lambda x: mgyp_to_id(x)) ## TODO remove mgyp row and use target name in general
                 mgyp_ids = self["mgyp"].to_frame()
                 bq_helper.create_temp_table_from_dataframe(mgyp_ids, temp_table_name, expiration_hours=1)
 
@@ -309,7 +306,6 @@ class ProteinTable(pd.DataFrame):
 
             if isinstance(output_path, str):
                 output_path = Path(output_path)
-            sequences["mgyp"] = sequences["mgyp"].apply(lambda x: proteinID_to_mgyp(x))
             dataframe_to_fasta(sequences, output_path)
             logger.info(f"Sequence data exported to {output_path}")
 
@@ -328,7 +324,7 @@ class ProteinTable(pd.DataFrame):
         """
         bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
 
-        mgyps_list = self["target_name"].apply(mgyp_to_id).unique().tolist()
+        mgyps_list = self["target_name"]  # .apply(mgyp_to_id).unique().tolist()
         mgyps_str = ", ".join([str(mgyp) for mgyp in mgyps_list])
         query = f"""
             SELECT
@@ -341,18 +337,15 @@ class ProteinTable(pd.DataFrame):
               ct.length AS contig_length,
               ass.accession AS assembly,
               bm.id AS biome_id
-            FROM `{bq_helper.dataset.dataset_id}.protein_metadata` md
-            JOIN `{bq_helper.dataset.dataset_id}.contig` ct ON md.mgyc = ct.id
-            JOIN `{bq_helper.dataset.dataset_id}.assembly` ass ON ct.assembly = ass.id
-            JOIN `{bq_helper.dataset.dataset_id}.biome` bm ON ass.biome = bm.id
+            FROM `{bq_helper.dataset.dataset_id}.metadata` md
+            JOIN `{bq_helper.dataset.dataset_id}.contig` ct ON md.mgyc = ct.mgyc
+            JOIN `{bq_helper.dataset.dataset_id}.assembly` ass ON ct.assembly_id = ass.assembly_id
+            JOIN `{bq_helper.dataset.dataset_id}.biome` bm ON ass.biome_id = bm.biome_id
             WHERE md.mgyc IN (
               SELECT mgyc
-              FROM `{bq_helper.dataset.dataset_id}.protein_metadata`
+              FROM `{bq_helper.dataset.dataset_id}.metadata`
               WHERE mgyp IN ({mgyps_str})
             );
         """
         results_df = bq_helper.query_to_dataframe(query)
-        results_df["mgyc"] = results_df["mgyc"].apply(contigID_to_mgyc)
-        results_df["mgyp"] = results_df["mgyp"].apply(proteinID_to_mgyp)
-
         return results_df
