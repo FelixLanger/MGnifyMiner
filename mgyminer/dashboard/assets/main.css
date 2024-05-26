@@ -1,0 +1,75 @@
+.analysis-section {
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.separator {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 20px 0;
+}
+
+.analysis-container {
+    display: flex;
+    width: 100%;
+    height: 600px;
+}
+
+.settings-sidebar {
+    width: 330px;
+    height: 100%;
+    background-color: #f8f9fa;
+    padding-right: 20px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.analysis-content {
+    flex-grow: 1;
+    height: 100%;
+    padding-left: 20px;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.plots-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    min-width: max-content;
+}
+
+.context-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 60px); /* Adjust the height to fill the screen minus the banner height */
+}
+
+.context-content {
+    flex-grow: 1;
+    height: 100%;
+    padding-left: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.plot-card {
+    flex: 1;
+    min-width: 400px;
+}
+
+.banner {
+    background-color: #18974c;
+    padding: 10px;
+    width: 100%; /* Ensures the banner spans the full width of the viewport */
+}
+
+.banner h1 {
+    font-size: 2rem;
+    color: #ffffff;
+}
