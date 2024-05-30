@@ -42,3 +42,11 @@ def test_hmm():
 @pytest.fixture
 def results_metadata():
     return data_dir / "results_with_metadata.csv"
+
+
+@pytest.fixture
+def tree():
+    from Bio import Phylo
+
+    tree = Phylo.read(data_dir / "tree.nwk", format="newick")
+    return tree
