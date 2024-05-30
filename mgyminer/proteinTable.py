@@ -1,18 +1,20 @@
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Union
-import json
-from loguru import logger
+
 import numpy as np
 import pandas as pd
-import plotly.graph_objs as go
+import plotly.graph_objects as go
+from loguru import logger
+
+from mgyminer.config import load_config
 from mgyminer.utils import (
-    mgyp_to_id,
     create_md5_hash,
     dataframe_to_fasta,
+    mgyp_to_id,
     proteinID_to_mgyp,
 )
-from mgyminer.config import load_config
 
 
 class proteinTable:
@@ -33,21 +35,15 @@ class proteinTable:
             self.df = pd.read_csv(results)
             for col in self.json_columns:
                 if col in self.df.columns:
-                    self.df[col] = self.df[col].apply(
-                        json.loads
-                    )  # Use json.loads to convert string to list
+                    self.df[col] = self.df[col].apply(json.loads)  # Use json.loads to convert string to list
         else:
-            raise TypeError(
-                "proteinTable must be initialised with DataFrame or Path to csv file"
-            )
+            raise TypeError("proteinTable must be initialised with DataFrame or Path to csv file")
 
     def _nunique_nested(self, column):
         """
         Calculate the number of unique values in a column with lists
         """
-        flattened_values = [
-            item for sublist in self.df[column].tolist() for item in sublist
-        ]
+        flattened_values = [item for sublist in self.df[column].tolist() for item in sublist]
         return pd.Series(flattened_values).value_counts()
 
     def sort(self, by: Union[str, list], ascending: bool = False):
@@ -79,15 +75,11 @@ class proteinTable:
         :return: filtered Dataframe
         """
         if column not in self.df.columns:
-            raise ValueError(
-                f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
-            )
+            raise ValueError(f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}")
         elif not np.issubdtype(self.df[column].dtype, np.number):
             raise ValueError(f"{column} column is not numeric")
 
-        return proteinTable(
-            self.df[(self.df[column] >= greater) & (self.df[column] <= less)]
-        )
+        return proteinTable(self.df[(self.df[column] >= greater) & (self.df[column] <= less)])
 
     def match(self, column, value):
         """
@@ -97,9 +89,7 @@ class proteinTable:
         :return: filtered Dataframe
         """
         if column not in self.df.columns:
-            raise ValueError(
-                f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}"
-            )
+            raise ValueError(f"{column} not in Table columns. Choose one of: {' '.join(self.df.columns)}")
         # if column is non-numeric convert value to string
         if self.df[column].dtypes == "O":
             value = str(value)
@@ -128,9 +118,7 @@ class proteinTable:
         ]
         if biome not in biomes:
             raise ValueError(f"{biome} not in available biomes. Select one of {biomes}")
-        temp = pd.DataFrame(
-            self.df["biome"].apply(lambda x: list(x)).to_list(), columns=biomes
-        )
+        temp = pd.DataFrame(self.df["biome"].apply(lambda x: list(x)).to_list(), columns=biomes)
         index = temp[temp[biome] == "1"].index
         return proteinTable(self.df[self.df.index.isin(index)])
 
@@ -150,7 +138,7 @@ class proteinTable:
             if e > 0.0001:
                 return e
             else:
-                return "{0:.1e}".format(e)
+                return f"{e:.1e}"
 
         def convert_cell(cell):
             if isinstance(cell, np.ndarray):
@@ -183,9 +171,7 @@ class proteinTable:
         try:
             from google.oauth2 import service_account
 
-            credentials = service_account.Credentials.from_service_account_file(
-                cfg["Google service account json"]
-            )
+            credentials = service_account.Credentials.from_service_account_file(cfg["Google service account json"])
             logger.info("Loaded Google service account credentials")
         except Exception as e:
             logger.error("Invalid Google service account JSON key file: " + str(e))
@@ -195,9 +181,7 @@ class proteinTable:
         BIGQUERY_DATASET = cfg.get("BigQuery Dataset")
         BIGQUERY_PROJECT = cfg.get("BigQuery project")
         if not BIGQUERY_DATASET or not BIGQUERY_PROJECT:
-            error_message = (
-                "BigQuery Dataset and/or BigQuery Project not set in the configuration."
-            )
+            error_message = "BigQuery Dataset and/or BigQuery Project not set in the configuration."
             logger.error(error_message)
             raise ValueError(error_message)
 
@@ -251,9 +235,7 @@ class proteinTable:
                                 t.mgyp;
                             """
             logger.debug(f"run query:\n {join_query}")
-            metadata = pd.read_gbq(
-                join_query, project_id=BIGQUERY_PROJECT, credentials=credentials
-            )
+            metadata = pd.read_gbq(join_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
             result = pd.merge(self.df, metadata, on="mgyp")
             self.df = result
 
@@ -261,9 +243,7 @@ class proteinTable:
             # TODO: Implement fetching from MySQL
             pass
 
-    def fetch_and_export_sequences(
-        self, output_path: Union[Path, str], database="bigquery"
-    ):
+    def fetch_and_export_sequences(self, output_path: Union[Path, str], database="bigquery"):
         if database.lower() == "bigquery":
             # Set up BigQuery connection
             (
@@ -277,9 +257,7 @@ class proteinTable:
 
             # Check if the temporary table exists
             check_query = f"SELECT table_name FROM {BIGQUERY_DATASET}.INFORMATION_SCHEMA.TABLES WHERE table_name = '{temp_table_name}'"
-            check_result = pd.read_gbq(
-                check_query, project_id=BIGQUERY_PROJECT, credentials=credentials
-            )
+            check_result = pd.read_gbq(check_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
 
             if check_result.empty:
                 # Temporary table does not exist, create it
@@ -298,9 +276,7 @@ class proteinTable:
                                  FROM {BIGQUERY_DATASET}.protein p
                                  JOIN {BIGQUERY_DATASET}.{temp_table_name} t ON p.id = t.mgyp"""
             logger.debug(f"run query:\n {sequence_query}")
-            sequences = pd.read_gbq(
-                sequence_query, project_id=BIGQUERY_PROJECT, credentials=credentials
-            )
+            sequences = pd.read_gbq(sequence_query, project_id=BIGQUERY_PROJECT, credentials=credentials)
 
             # Exporting to file
             if isinstance(output_path, str):
@@ -338,14 +314,9 @@ class ProteinTableVisualiser:
             "root:Host-associated:Animal",
             "root:other",
         ]
-        biome_counts = (
-            pd.DataFrame(df["biome"].apply(lambda x: list(x)).to_list(), columns=biomes)
-            .astype(int)
-            .sum()
-        )
+        biome_counts = pd.DataFrame(df["biome"].apply(lambda x: list(x)).to_list(), columns=biomes).astype(int).sum()
         biome_counts.loc["root:Environmental"] = (
-            biome_counts.loc["root:Environmental:Aquatic"]
-            + biome_counts.loc["root:Environmental:Soil"]
+            biome_counts.loc["root:Environmental:Aquatic"] + biome_counts.loc["root:Environmental:Soil"]
         )
         biome_counts.loc["root:Host-associated:Human"] = (
             biome_counts.loc["root:Host-associated:Human:Digestive system"]
@@ -399,24 +370,16 @@ class ProteinTableVisualiser:
 
         # Prepare for each plot
         fragments_data = _value_dist(df["PL"])
-        fragments_data["labels"] = [
-            pretty_labels["PL"][i] for i in fragments_data["labels"]
-        ]
+        fragments_data["labels"] = [pretty_labels["PL"][i] for i in fragments_data["labels"]]
         fragments = go.Pie(**fragments_data, hole=hole, textinfo=textinfo, visible=True)
 
         uniprot_data = _value_dist(df["UP"])
-        uniprot_data["labels"] = [
-            pretty_labels["UP"][i] for i in uniprot_data["labels"]
-        ]
+        uniprot_data["labels"] = [pretty_labels["UP"][i] for i in uniprot_data["labels"]]
         uniprot = go.Pie(**uniprot_data, hole=hole, textinfo=textinfo, visible=False)
 
         representative_data = _value_dist(df["CR"])
-        representative_data["labels"] = [
-            pretty_labels["CR"][i] for i in representative_data["labels"]
-        ]
-        reps = go.Pie(
-            **representative_data, hole=hole, textinfo=textinfo, visible=False
-        )
+        representative_data["labels"] = [pretty_labels["CR"][i] for i in representative_data["labels"]]
+        reps = go.Pie(**representative_data, hole=hole, textinfo=textinfo, visible=False)
 
         # Create Figure
         fig = go.Figure()
@@ -464,12 +427,8 @@ class ProteinTableVisualiser:
         percentage_bins = {"end": 100, "start": 0, "size": 1}
 
         # Prepare for each plot
-        similarity = go.Histogram(
-            x=df["similarity"], name="Similarity", visible=True, xbins=percentage_bins
-        )
-        identity = go.Histogram(
-            x=df["identity"], name="Identity", visible=False, xbins=percentage_bins
-        )
+        similarity = go.Histogram(x=df["similarity"], name="Similarity", visible=True, xbins=percentage_bins)
+        identity = go.Histogram(x=df["identity"], name="Identity", visible=False, xbins=percentage_bins)
         q_coverage = go.Histogram(
             x=df["coverage_query"],
             name="Query coverage",

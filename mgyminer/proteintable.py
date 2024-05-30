@@ -187,8 +187,11 @@ class ProteinTable(pd.DataFrame):
         exploded_df = dataframe.explode(column)
         filtered_df = exploded_df[exploded_df[column].isin(values)]
         filtered_df["temp_index"] = filtered_df.index
-        filtered_df = filtered_df.groupby("temp_index").agg({column: list})
-        result_df = dataframe.merge(filtered_df, left_index=True, right_index=True)
+        filtered_df = filtered_df.groupby("temp_index")[column].agg(list)
+
+        result_df = dataframe.loc[filtered_df.index].copy()
+        result_df = result_df.assign(**{column: filtered_df})
+
         return ProteinTable(result_df)
 
     def save(self, path, index=False):
@@ -240,7 +243,9 @@ class ProteinTable(pd.DataFrame):
                 )
                 return self
 
-            self["mgyp"] = self["target_name"]  # .apply(lambda x: mgyp_to_id(x)) ##TODO Remove or rename target_name to mgyp /remove mgyp row and use target name in general
+            self["mgyp"] = self[
+                "target_name"
+            ]  # .apply(lambda x: mgyp_to_id(x)) ##TODO Remove or rename target_name to mgyp /remove mgyp row and use target name in general
             table_name = f"tmp_{create_md5_hash(self['query_name'][0])[:16]}"
             mgyp_ids = self["mgyp"].to_frame()
             temp_table = bq_helper.create_temp_table_from_dataframe(mgyp_ids, table_name, expiration_hours=1)
@@ -294,7 +299,9 @@ class ProteinTable(pd.DataFrame):
 
             if check_result.empty:
                 logger.info(f"Creating temporary table {temp_table_name}")
-                self["mgyp"] = self["target_name"]  # .apply(lambda x: mgyp_to_id(x)) ## TODO remove mgyp row and use target name in general
+                self["mgyp"] = self[
+                    "target_name"
+                ]  # .apply(lambda x: mgyp_to_id(x)) ## TODO remove mgyp row and use target name in general
                 mgyp_ids = self["mgyp"].to_frame()
                 bq_helper.create_temp_table_from_dataframe(mgyp_ids, temp_table_name, expiration_hours=1)
 
