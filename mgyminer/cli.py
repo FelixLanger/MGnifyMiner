@@ -12,7 +12,6 @@ from mgyminer.filter import (
     sort,
 )
 from mgyminer.metadata import get_metadata
-from mgyminer.phylplot import plot_tree
 from mgyminer.phyltree import build_tree
 from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
@@ -55,6 +54,13 @@ def create_parser():
         type=int,
         default=20000,
         help="Amount of memory used in MB [default = 20000]",
+    )
+    phmmer_parser.add_argument(
+        "--evalue",
+        "-e",
+        type=float,
+        default=1e-2,
+        help="E-value cutoff for phmmer search [default = 1e-2]",
     )
     phmmer_parser.add_argument(
         "--fetch-hits", action="store_true", default=False, help="If set, enables fetching and storing of hit sequences"

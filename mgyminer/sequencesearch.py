@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Any, Dict, List
 
 import pandas as pd
 import psutil
@@ -92,7 +92,12 @@ def process_hit(hit: pyhmmer.plan7.Hit, hits: pyhmmer.plan7.TopHits) -> List[Lis
 
 
 def phmmer(
-    db_file: str, query_file: str, cpus: int = 4, memory: float = None, max_memory_load: float = 0.8
+    db_file: str,
+    query_file: str,
+    cpus: int = 4,
+    memory: float = None,
+    max_memory_load: float = 0.8,
+    **kwargs: Dict[str, Any],
 ) -> ProteinTable:
     available_memory = (memory * 1048576) if memory else psutil.virtual_memory().available
     database_size = os.stat(db_file).st_size
@@ -103,7 +108,7 @@ def phmmer(
         if database_size < available_memory * max_memory_load:
             sequences = sequences.read_block()
         with SequenceFile(query_file, digital=True, alphabet=alphabet) as queries:
-            hits_list = pyhmmer.hmmer.phmmer(queries, sequences, cpus=cpus)
+            hits_list = pyhmmer.hmmer.phmmer(queries, sequences, cpus=cpus, **kwargs)
             for hits in hits_list:
                 for hit in hits:
                     if hit.reported:
@@ -116,8 +121,9 @@ def phmmer_cli(args):
     db_file = args.target
     query_file = args.query
     cpus = args.cpu
+    evalue = args.evalue
 
-    hits = phmmer(db_file, query_file, cpus)
+    hits = phmmer(db_file, query_file, cpus, evalue=evalue)
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:
