@@ -1,5 +1,5 @@
 import pandas as pd
-from helpers import get_file_hash
+from helpers import calculate_text_md5
 
 from mgyminer.proteintable import ProteinTable
 
@@ -135,10 +135,10 @@ def test_filter_combination(results_metadata):
 
 def test_save(results_metadata, tmp_path):
     outfile = tmp_path / "results.csv"
-    in_hash = get_file_hash(results_metadata)
+    in_hash = calculate_text_md5(results_metadata)
     protein_table = ProteinTable(results_metadata)
     protein_table.save(outfile)
-    out_hash = get_file_hash(outfile)
+    out_hash = calculate_text_md5(outfile)
     assert in_hash == out_hash
 
 

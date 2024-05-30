@@ -58,3 +58,10 @@ def test_phmmer(seqdb, queryseq):
     assert result.iloc[2]["e-value"] == "1.1e-78"
     assert result.iloc[5]["ndom"] == 2
     assert len(result) == 12
+
+
+def test_phmmer_eval(seqdb, queryseq):
+    result = phmmer(seqdb, queryseq, E=1e-60)
+    assert result.iloc[1]["target_name"] == "MGYP000406905322"
+    assert result.iloc[2]["e-value"] == "1.1e-78"
+    assert len(result) == 4
