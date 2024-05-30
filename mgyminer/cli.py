@@ -227,40 +227,6 @@ def create_parser():
 
     phylogenetic_tree_parser.set_defaults(func=build_tree)
 
-    tree_vis_parser = subparsers.add_parser("tree_vis", help="visualise phylogenetic tree")
-    tree_vis_parser.add_argument(
-        "--tree",
-        type=Path,
-        required=True,
-        help="Path to filter output with sequences for tree building",
-    )
-    tree_vis_parser.add_argument(
-        "--filter",
-        type=Path,
-        required=True,
-        help="Path to filter output with sequences for tree building",
-    )
-    tree_vis_parser.add_argument(
-        "--min",
-        type=float,
-        required=False,
-        help="Path to filter output with sequences for tree building",
-    )
-    tree_vis_parser.add_argument(
-        "--max",
-        type=float,
-        required=False,
-        help="Path to filter output with sequences for tree building",
-    )
-    tree_vis_parser.add_argument(
-        "--param",
-        type=str,
-        required=False,
-        help="Path to filter output with sequences for tree building",
-    )
-
-    tree_vis_parser.set_defaults(func=plot_tree)
-
     export_parser = subparsers.add_parser("export", help="export Protein sequences from filter results to FASTA file")
     export_parser.add_argument(
         "--seqdb",
