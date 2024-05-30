@@ -2,7 +2,7 @@ import shutil
 
 from mgyminer.cli import create_parser
 from mgyminer.utils import biome_str_to_ids, export_sequences, mgyp_to_id, proteinID_to_mgyp, tryfloat
-from tests.helpers import get_file_hash
+from tests.helpers import calculate_text_md5
 
 
 def test_mgyp_to_id():
@@ -42,7 +42,7 @@ def test_export_sequences(tmp_path, seqdb, phmmer_out):
     command = f"export --seqdb {infile} --filter {phmmer_out} --output {outfile}"
     args = parser.parse_args(command.split())
     export_sequences(args)
-    assert get_file_hash(outfile) == "f04c426fbbfbcf3dfac5ec5d8480e74f"
+    assert calculate_text_md5(outfile) == "f04c426fbbfbcf3dfac5ec5d8480e74f"
 
 
 def test_biome_str_to_ids():
