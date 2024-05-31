@@ -123,7 +123,7 @@ def phmmer_cli(args):
     cpus = args.cpu
     evalue = args.evalue
 
-    hits = phmmer(db_file, query_file, cpus, evalue=evalue)
+    hits = phmmer(db_file, query_file, cpus, E=evalue)
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:
