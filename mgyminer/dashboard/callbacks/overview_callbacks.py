@@ -1,28 +1,44 @@
-from dash import Input, Output, State, callback, callback_context
-from mgyminer.dashboard.utils.data_store import protein_store
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from dash import Input, Output, State, callback, callback_context
+
+from mgyminer.dashboard.utils.data_store import protein_store
+from mgyminer.plotting import create_biome_plot
+
+
+@callback(
+    Output("scatter-xaxis-dropdown", "options"),
+    Output("scatter-yaxis-dropdown", "options"),
+    Input("apply-filter-btn", "n_clicks"),
+)
+def update_axis_dropdowns(nklicks):
+    pt = protein_store.get_dataframe()
+
+    column_mapping = {
+        "tlen": "Target Length",
+        "e-value": "e-Value",
+        "coverage_query": "Query Coverage",
+        "coverage_hit": "Hit Coverage",
+        "similarity": "Similarity",
+        "identity": "Identity",
+    }
+
+    available_columns = [col for col in column_mapping if col in pt.columns]
+
+    xaxis_options = [{"label": column_mapping[col], "value": col} for col in available_columns]
+    yaxis_options = [{"label": column_mapping[col], "value": col} for col in available_columns]
+
+    return xaxis_options, yaxis_options
 
 
 @callback(
     Output("results-scatter", "figure"),
-    Output("scatter-xaxis-dropdown", "options"),
-    Output("scatter-xaxis-dropdown", "value"),
-    Output("scatter-yaxis-dropdown", "options"),
-    Output("scatter-yaxis-dropdown", "value"),
     Input("filtered-data-store", "data"),
     Input("scatter-xaxis-dropdown", "value"),
     Input("scatter-yaxis-dropdown", "value"),
-    State("scatter-xaxis-dropdown", "options"),
-    State("scatter-yaxis-dropdown", "options"),
 )
-def update_scatter(
-    filtered_data,
-    xaxis_column_name,
-    yaxis_column_name,
-    current_xaxis_options,
-    current_yaxis_options,
-):
+def update_scatter(filtered_data, xaxis_column_name, yaxis_column_name):
     pt = pd.DataFrame(filtered_data)
 
     column_mapping = {
@@ -34,19 +50,9 @@ def update_scatter(
         "identity": "Identity",
     }
 
-
-    available_columns = [col for col in column_mapping if col in pt.columns]
-
-    xaxis_options = [{"label": column_mapping[col], "value": col} for col in available_columns]
-    yaxis_options = [{"label": column_mapping[col], "value": col} for col in available_columns]
-
-    if not current_xaxis_options:
-        xaxis_column_name = available_columns[0] if available_columns else None
-    if not current_yaxis_options:
-        yaxis_column_name = available_columns[1] if len(available_columns) > 1 else None
-
-    if xaxis_column_name is None or yaxis_column_name is None or pt.empty:
+    if pt.empty:
         fig = px.scatter()
+        fig.update_layout(xaxis_title="", yaxis_title="")
     else:
         log_x = xaxis_column_name == "e-value"
         log_y = yaxis_column_name == "e-value"
@@ -61,10 +67,11 @@ def update_scatter(
             log_x=log_x,
             log_y=log_y,
         )
+        fig.update_xaxes(title_text=column_mapping[xaxis_column_name], overwrite=True, row=1, col=1)
+        fig.update_yaxes(title_text=column_mapping[yaxis_column_name], overwrite=True, row=1, col=1)
+
     fig.update_layout(clickmode="event+select")
-    fig.update_xaxes(title_text=column_mapping[xaxis_column_name], overwrite=True, row=1, col=1)
-    fig.update_yaxes(title_text=column_mapping[yaxis_column_name], overwrite=True, row=1, col=1)
-    return fig, xaxis_options, xaxis_column_name, yaxis_options, yaxis_column_name
+    return fig
 
 
 @callback(
@@ -81,6 +88,7 @@ def update_scatter(
     State("query-coverage-max", "value"),
     State("target-coverage-min", "value"),
     State("target-coverage-max", "value"),
+    State("completeness-checklist", "value"),
 )
 def update_filtered_data(
     apply_clicks,
@@ -95,7 +103,16 @@ def update_filtered_data(
     query_coverage_max,
     target_coverage_min,
     target_coverage_max,
+    truncation,
 ):
+    def create_filter(min_value, max_value):
+        filter_dict = {}
+        if min_value is not None:
+            filter_dict["min"] = min_value
+        if max_value is not None:
+            filter_dict["max"] = max_value
+        return filter_dict if filter_dict else None
+
     if not callback_context.triggered:
         button_id = None
     else:
@@ -106,18 +123,121 @@ def update_filtered_data(
         return pt.to_dict("records")
     else:
         pt = protein_store.get_dataframe()
-        filters = {}
+        filter_mapping = {
+            "e-value": (e_value_min, e_value_max),
+            "identity": (identity_min, identity_max),
+            "similarity": (similarity_min, similarity_max),
+            "coverage_query": (query_coverage_min, query_coverage_max),
+            "coverage_hit": (target_coverage_min, target_coverage_max),
+        }
 
-        if e_value_min is not None or e_value_max is not None:
-            filters["e-value"] = {"min": e_value_min, "max": e_value_max}
-        if identity_min is not None or identity_max is not None:
-            filters["identity"] = {"min": identity_min, "max": identity_max}
-        if similarity_min is not None or similarity_max is not None:
-            filters["similarity"] = {"min": similarity_min, "max": similarity_max}
-        if query_coverage_min is not None or query_coverage_max is not None:
-            filters["coverage_query"] = {"min": query_coverage_min, "max": query_coverage_max}
-        if target_coverage_min is not None or target_coverage_max is not None:
-            filters["coverage_hit"] = {"min": target_coverage_min, "max": target_coverage_max}
+        filters = {
+            key: create_filter(min_val, max_val)
+            for key, (min_val, max_val) in filter_mapping.items()
+            if create_filter(min_val, max_val) is not None
+        }
+        if 1 <= len(truncation) <= 3:
+            # don't filter when all proteins are selected or none are selected
+            # all proteins are then returned
+            filters["truncation"] = truncation
 
         filtered_pt = pt.pick(filters)
         return filtered_pt.to_dict("records")
+
+
+@callback(
+    Output("e-value-min", "value"),
+    Output("e-value-max", "value"),
+    Output("identity-min", "value"),
+    Output("identity-max", "value"),
+    Output("similarity-min", "value"),
+    Output("similarity-max", "value"),
+    Output("query-coverage-min", "value"),
+    Output("query-coverage-max", "value"),
+    Output("target-coverage-min", "value"),
+    Output("target-coverage-max", "value"),
+    Output("completeness-checklist", "value"),
+    Input("reset-filter-btn", "n_clicks"),
+    prevent_initial_call=True,
+)
+def reset_input_fields(reset_clicks):
+    return None, None, None, None, None, None, None, None, None, None, ["00", "01", "10", "11"]
+
+
+@callback(
+    Output("biome-plot", "figure"),
+    Input("filtered-data-store", "data"),
+    Input("results-scatter", "selectedData"),
+)
+def update_biome_graph(filtered_data, selected_data):
+    if filtered_data:
+        df = pd.DataFrame(filtered_data)
+
+        if selected_data:
+            selected_points = selected_data["points"]
+            selected_indices = [point["pointIndex"] for point in selected_points]
+            df = df.loc[selected_indices]
+
+        fig = create_biome_plot(df, biome_column="biomes")
+        return fig
+    else:
+        return {}
+
+
+@callback(
+    Output("completeness-plot", "figure"),
+    Input("filtered-data-store", "data"),
+    Input("results-scatter", "selectedData"),
+)
+def update_completeness_barchart(filtered_data, selected_data):
+    if filtered_data is None:
+        return {}
+    df = pd.DataFrame(filtered_data)
+    truncation_series = df["truncation"]
+
+    if selected_data:
+        selected_points = selected_data["points"]
+        selected_indices = [point["pointIndex"] for point in selected_points]
+        truncation_series = truncation_series.iloc[selected_indices]
+
+    flattened_list = pd.Series(truncation_series.sum())
+    value_counts = flattened_list.value_counts(dropna=False)
+
+    labels = {
+        "00": "Complete",
+        "01": "C-terminal-truncated",
+        "11": "Fragment",
+        "10": "N-terminal truncated",
+    }
+
+    fig = go.Figure()
+
+    complete_count = value_counts.get("00", 0)
+    fig.add_trace(go.Bar(x=["Complete"], y=[complete_count], name="Complete"))
+
+    fragment_counts = {label: value_counts.get(key, 0) for key, label in labels.items() if key != "00"}
+    for label, count in fragment_counts.items():
+        fig.add_trace(go.Bar(x=["Fragments"], y=[count], name=label))
+
+    fig.update_layout(
+        barmode="stack",
+        xaxis_title="Completeness",
+        yaxis_title="Count",
+        legend_title="Fragment Type",
+    )
+
+    return fig
+
+
+@callback(
+    Output("selected-proteins-table", "data"),
+    Output("selected-proteins-table", "columns"),
+    Input("filtered-data-store", "data"),
+)
+def update_contig_table(contig_summary_data):
+    if contig_summary_data:
+        df = pd.DataFrame.from_records(contig_summary_data)
+        columns = [{"name": col, "id": col} for col in df.columns]
+        data = df.to_dict("records")
+        return data, columns
+    return [], []

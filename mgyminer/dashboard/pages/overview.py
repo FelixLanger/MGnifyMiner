@@ -1,9 +1,8 @@
 import dash
-from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash import dcc, html, dash_table
 
-
-dash.register_page(__name__, path='/')
+dash.register_page(__name__, path="/")
 
 plot_axes = [
     {"label": "Target Length", "value": "tlen"},
@@ -228,14 +227,83 @@ filter_tab = dbc.Tab(
     ),
 )
 
+completeness_tab = dbc.Tab(
+    label="Completeness",
+    children=dbc.Container(
+        fluid=True,
+        children=[
+            html.H4("Completeness", className="mb-4"),
+            dbc.Checklist(
+                options=[
+                    {"label": "Full length / complete", "value": "00"},
+                    {"label": "N-terminal truncated", "value": "10"},
+                    {"label": "C-terminal truncated", "value": "01"},
+                    {"label": "Fragments", "value": "11"},
+                ],
+                value=["00", "10", "01", "11"],
+                id="completeness-checklist",
+                inline=True,
+                className="mb-3",
+            ),
+        ],
+    ),
+)
+
+
 setting_bar = html.Div(
     className="settings-sidebar",
     children=[
         dbc.Tabs(
             children=[
                 dbc.Tab(filter_tab, label="Filters"),
+                dbc.Tab(completeness_tab, label="Completeness"),
             ]
-        )
+        ),
+        html.Div(
+            className="filter-buttons",
+            children=[
+                dbc.Button("Apply Filter", id="apply-filter-btn", color="primary", className="filter-button"),
+                dbc.Button("Reset Filter", id="reset-filter-btn", color="secondary", className="filter-button"),
+            ],
+        ),
+    ],
+)
+
+
+
+data_table = dbc.Container(
+    fluid=True,
+    style={"padding": "10px"},
+    children=[
+        dash_table.DataTable(
+            id="selected-proteins-table",
+            data=[],
+            style_table={"width": "100%", "margin": "0 auto"},
+            style_cell={
+                "textAlign": "center",
+                "padding": "8px",
+                "whiteSpace": "normal",
+                "height": "auto",
+            },
+            style_header={
+                "backgroundColor": "rgb(230, 230, 230)",
+                "fontWeight": "bold",
+                "textAlign": "center",
+                "padding": "8px",
+            },
+            style_data_conditional=[
+                {
+                    "if": {"row_index": "odd"},
+                    "backgroundColor": "rgb(248, 248, 248)",
+                }
+            ],
+            page_size=10,
+            filter_action="native",
+            sort_action="native",
+            sort_mode="multi",
+            export_format="csv",
+            row_selectable="single",
+        ),
     ],
 )
 
@@ -249,7 +317,10 @@ analysis_container = dbc.Container(
                 dbc.Col(
                     className="histogram-container",
                     children=[
-                        dbc.Container(className="plot-card", children=[dcc.Graph(id="results-scatter")]),
+                        dbc.Container(
+                            className="plot-card",
+                            children=[dcc.Graph(id="results-scatter", config={"displaylogo": False})],
+                        ),
                         dbc.Row(
                             [
                                 dbc.Col(
@@ -260,6 +331,7 @@ analysis_container = dbc.Container(
                                                 options=plot_axes,
                                                 value="e-value",
                                                 id="scatter-xaxis-dropdown",
+                                                clearable=False,
                                             ),
                                         ]
                                     )
@@ -271,6 +343,7 @@ analysis_container = dbc.Container(
                                             options=plot_axes,
                                             value="similarity",
                                             id="scatter-yaxis-dropdown",
+                                            clearable=False,
                                         ),
                                     ]
                                 ),
@@ -279,20 +352,35 @@ analysis_container = dbc.Container(
                     ],
                 ),
                 dbc.Col(
-                    dbc.Container(className="plot-card", children=[dcc.Graph(id="upset")]),
+                    dbc.Container(
+                        className="plot-card",
+                        children=[
+                            dcc.Tabs(
+                                id="plot-tabs",
+                                value="biome-plot",
+                                children=[
+                                    dcc.Tab(
+                                        label="Biome",
+                                        value="biome-plot",
+                                        children=[dcc.Graph(id="biome-plot", config={"displaylogo": False})],
+                                    ),
+                                    dcc.Tab(
+                                        label="Completeness",
+                                        value="completeness-plot",
+                                        children=[dcc.Graph(id="completeness-plot", config={"displaylogo": False})],
+                                    ),
+                                ],
+                            )
+                        ],
+                    ),
                 ),
             ],
         ),
+        # dbc.Row(
+        #     className="plots-container",
+        #     children=data_table
+        # )
     ],
-
 )
 
-
-layout = html.Div(dbc.Container(
-    fluid=True,
-    className="analysis-container",
-    children=[
-        setting_bar,
-        analysis_container
-    ]
-))
+layout = html.Div(dbc.Container(fluid=True, className="analysis-container", children=[setting_bar, analysis_container]))

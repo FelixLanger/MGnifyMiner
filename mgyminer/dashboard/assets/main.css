@@ -73,3 +73,18 @@
     font-size: 2rem;
     color: #ffffff;
 }
+
+.filter-buttons {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.filter-button {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.settings-sidebar {
+    padding: 20px;
+}
