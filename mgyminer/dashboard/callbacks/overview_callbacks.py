@@ -3,6 +3,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash import Input, Output, State, callback, callback_context
 
+from mgyminer.constants import BIOME_MATRIX, BIOMES
 from mgyminer.dashboard.utils.data_store import protein_store
 from mgyminer.plotting import create_biome_plot
 
@@ -89,6 +90,7 @@ def update_scatter(filtered_data, xaxis_column_name, yaxis_column_name):
     State("target-coverage-min", "value"),
     State("target-coverage-max", "value"),
     State("completeness-checklist", "value"),
+    State("biome-dropdown", "value"),
 )
 def update_filtered_data(
     apply_clicks,
@@ -104,6 +106,7 @@ def update_filtered_data(
     target_coverage_min,
     target_coverage_max,
     truncation,
+    biomes,
 ):
     def create_filter(min_value, max_value):
         filter_dict = {}
@@ -140,6 +143,8 @@ def update_filtered_data(
             # don't filter when all proteins are selected or none are selected
             # all proteins are then returned
             filters["truncation"] = truncation
+        if biomes:
+            filters["biomes"] = biomes
 
         filtered_pt = pt.pick(filters)
         return filtered_pt.to_dict("records")
@@ -233,11 +238,62 @@ def update_completeness_barchart(filtered_data, selected_data):
     Output("selected-proteins-table", "data"),
     Output("selected-proteins-table", "columns"),
     Input("filtered-data-store", "data"),
+    Input("results-scatter", "selectedData"),
 )
-def update_contig_table(contig_summary_data):
-    if contig_summary_data:
-        df = pd.DataFrame.from_records(contig_summary_data)
-        columns = [{"name": col, "id": col} for col in df.columns]
-        data = df.to_dict("records")
-        return data, columns
-    return [], []
+def update_results_table(filtered_data, selected_proteins):
+    if filtered_data is None:
+        pt = protein_store.get_dataframe()
+    else:
+        pt = pd.DataFrame.from_records(filtered_data)
+
+    if selected_proteins:
+        selected_points = selected_proteins["points"]
+        selected_indices = [point["pointIndex"] for point in selected_points]
+        pt = pt.iloc[selected_indices]
+
+    display_columns = [
+        col
+        for col in pt.columns
+        if col
+        in [
+            "target_name",
+            "tlen",
+            "e-value",
+            "coverage_hit",
+            "coverage_query",
+            "similarity",
+            "identity",
+            "pfam_architecture",
+        ]
+    ]
+    df = pt[display_columns]
+    df.rename(
+        {
+            "target_name": "Target",
+            "tlen": "Length",
+            "coverage_hit": "Target Coverage",
+            "coverage_query": "Query Coverage",
+            "similarity": "Similarity",
+            "identity": "Identity",
+            "pfam_architecture": "Pfam Architecture",
+        },
+        inplace=True,
+        axis=1,
+    )
+    columns = [{"name": col, "id": col} for col in df.columns]
+    data = df.to_dict("records")
+    return data, columns
+
+
+@callback(
+    Output("biome-dropdown", "options"),
+    Input("selected-proteins-table", "page_size"),
+)
+def update_biome_filter_dropdown(n_clicks):
+    protein_data = protein_store.get_dataframe()
+    dropdown_biome_ids = BIOME_MATRIX.get_unique_parents(protein_data.unique_nested("biomes"))
+    dropdown_biome_strings = [BIOMES[biomeid] for biomeid in dropdown_biome_ids]
+    biome_levels = sorted(dropdown_biome_strings, key=len)
+    biome_options = [{"label": level, "value": level} for level in biome_levels]
+
+    return biome_options

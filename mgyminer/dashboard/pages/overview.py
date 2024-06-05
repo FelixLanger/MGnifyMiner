@@ -1,6 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import dcc, html, dash_table
+from dash import dash_table, dcc, html
 
 dash.register_page(__name__, path="/")
 
@@ -232,18 +232,41 @@ completeness_tab = dbc.Tab(
     children=dbc.Container(
         fluid=True,
         children=[
-            html.H4("Completeness", className="mb-4"),
-            dbc.Checklist(
-                options=[
-                    {"label": "Full length / complete", "value": "00"},
-                    {"label": "N-terminal truncated", "value": "10"},
-                    {"label": "C-terminal truncated", "value": "01"},
-                    {"label": "Fragments", "value": "11"},
+            html.Div(
+                children=[
+                    html.H4("Completeness", className="mb-4"),
+                    dbc.Checklist(
+                        options=[
+                            {"label": "Full length / complete", "value": "00"},
+                            {"label": "N-terminal truncated", "value": "10"},
+                            {"label": "C-terminal truncated", "value": "01"},
+                            {"label": "Fragments", "value": "11"},
+                        ],
+                        value=["00", "10", "01", "11"],
+                        id="completeness-checklist",
+                        inline=True,
+                        className="mb-3",
+                    ),
+                ]
+            ),
+            html.Div(
+                [
+                    html.H6("Biome Filter"),
+                    dbc.Tooltip(
+                        "Select the biome(s) to filter the data.",
+                        target="biome-filter",
+                    ),
                 ],
-                value=["00", "10", "01", "11"],
-                id="completeness-checklist",
-                inline=True,
-                className="mb-3",
+                id="biome-filter",
+                className="mt-3",
+            ),
+            dcc.Dropdown(
+                id="biome-dropdown",
+                options=[],
+                value=None,
+                multi=True,
+                searchable=True,
+                clearable=True,
             ),
         ],
     ),
@@ -270,42 +293,44 @@ setting_bar = html.Div(
 )
 
 
-
-data_table = dbc.Container(
-    fluid=True,
-    style={"padding": "10px"},
-    children=[
-        dash_table.DataTable(
-            id="selected-proteins-table",
-            data=[],
-            style_table={"width": "100%", "margin": "0 auto"},
-            style_cell={
-                "textAlign": "center",
-                "padding": "8px",
+data_table = html.Div(
+    className="dtss",
+    children=dash_table.DataTable(
+        id="selected-proteins-table",
+        data=[],
+        style_table={"width": "100%", "margin": "0 auto"},
+        style_cell={
+            "textAlign": "center",
+            "padding": "2px",
+            "whiteSpace": "normal",
+            "height": "auto",
+        },
+        style_header={
+            "backgroundColor": "rgb(230, 230, 230)",
+            "fontWeight": "bold",
+            "textAlign": "center",
+            "padding": "2px",
+        },
+        style_data_conditional=[
+            {
+                "if": {"row_index": "odd"},
+                "backgroundColor": "rgb(248, 248, 248)",
+            },
+            {
+                "if": {"column_id": "column_name"},  # Replace "column_name" with the actual column ID
                 "whiteSpace": "normal",
-                "height": "auto",
+                "width": "auto",  # Set the width to auto to fit the content
             },
-            style_header={
-                "backgroundColor": "rgb(230, 230, 230)",
-                "fontWeight": "bold",
-                "textAlign": "center",
-                "padding": "8px",
-            },
-            style_data_conditional=[
-                {
-                    "if": {"row_index": "odd"},
-                    "backgroundColor": "rgb(248, 248, 248)",
-                }
-            ],
-            page_size=10,
-            filter_action="native",
-            sort_action="native",
-            sort_mode="multi",
-            export_format="csv",
-            row_selectable="single",
-        ),
-    ],
+        ],
+        page_size=10,
+        filter_action="native",
+        sort_action="native",
+        sort_mode="multi",
+        export_format="csv",
+        # row_selectable="single",
+    ),
 )
+
 
 analysis_container = dbc.Container(
     fluid=True,
@@ -376,11 +401,12 @@ analysis_container = dbc.Container(
                 ),
             ],
         ),
-        # dbc.Row(
-        #     className="plots-container",
-        #     children=data_table
-        # )
+        dbc.Row(className="plots-container", children=data_table),
     ],
 )
 
-layout = html.Div(dbc.Container(fluid=True, className="analysis-container", children=[setting_bar, analysis_container]))
+layout = html.Div(  # dbc.Container(fluid=True,
+    className="analysis-container",
+    children=[setting_bar, analysis_container],
+    #             )
+)
