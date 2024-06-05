@@ -5,6 +5,7 @@ import pandas as pd
 import psutil
 import pyhmmer
 from pyhmmer.easel import Alphabet, SequenceFile
+from pyhmmer.plan7 import HMMFile
 
 from .proteintable import ProteinTable
 
@@ -124,6 +125,47 @@ def phmmer_cli(args):
     evalue = args.evalue
 
     hits = phmmer(db_file, query_file, cpus, E=evalue)
+    hits = hits.fetch_metadata("bigquery")
+    hits.save(output_file)
+    if args.fetch_hits:
+        fasta_filename = output_file.with_suffix(".faa")
+        hits.fetch_and_export_sequences(fasta_filename, database="bigquery")
+
+
+def hmmsearch(
+    seqdb: str,
+    hmm: str,
+    cpus: int = 4,
+    memory: float = None,
+    max_memory_load: float = 0.8,
+    **kwargs: Dict[str, Any],
+) -> ProteinTable:
+    available_memory = (memory * 1048576) if memory else psutil.virtual_memory().available
+    database_size = os.stat(seqdb).st_size
+
+    results = []
+    with SequenceFile(seqdb, digital=True) as sequences:
+        if database_size < available_memory * max_memory_load:
+            sequences = sequences.read_block()
+        with HMMFile(hmm) as hmms:
+            if hmms.is_pressed():
+                hmms = hmms.optimized_profiles()
+            hits_list = pyhmmer.hmmer.hmmsearch(hmms, sequences, cpus=cpus, **kwargs)
+            for hits in hits_list:
+                for hit in hits:
+                    if hit.reported:
+                        results.extend(process_hit(hit, hits))
+    return ProteinTable(pd.DataFrame(results, columns=COLUMN_NAMES))
+
+
+def hmmsearch_cli(args):
+    output_file = args.output
+    db_file = args.target
+    query_file = args.query
+    cpus = args.cpu
+    evalue = args.evalue
+
+    hits = hmmsearch(db_file, query_file, cpus, E=evalue)
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:

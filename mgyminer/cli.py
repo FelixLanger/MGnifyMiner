@@ -17,7 +17,7 @@ from mgyminer.setup import setup_cli
 from mgyminer.structure import fetch_structure_cli
 from mgyminer.utils import export_sequences
 
-from .sequencesearch import phmmer_cli
+from .sequencesearch import hmmsearch_cli, phmmer_cli
 
 
 def main():
@@ -66,6 +66,39 @@ def create_parser():
         "--fetch-hits", action="store_true", default=False, help="If set, enables fetching and storing of hit sequences"
     )
     phmmer_parser.set_defaults(func=phmmer_cli)
+
+    # Arguments for Hmmsearch
+    hmmsearch_parser = subparsers.add_parser("hmmsearch", help="run hmmsearch")
+    hmmsearch_parser.add_argument("--query", "-q", type=Path, required=True, help="query HMM file")
+    hmmsearch_parser.add_argument(
+        "--target", "-t", type=Path, required=True, help="target sequence database to search against"
+    )
+    hmmsearch_parser.add_argument("--output", "-o", type=Path, required=True, help="output path")
+    hmmsearch_parser.add_argument(
+        "--cpu",
+        "-c",
+        type=int,
+        default=4,
+        help="number of cpu cores to use for hmmer search [default = 4]",
+    )
+    hmmsearch_parser.add_argument(
+        "--memory",
+        "-m",
+        type=int,
+        default=20000,
+        help="Amount of memory used in MB [default = 20000]",
+    )
+    hmmsearch_parser.add_argument(
+        "--evalue",
+        "-e",
+        type=float,
+        default=1e-2,
+        help="E-value cutoff for phmmer search [default = 1e-2]",
+    )
+    hmmsearch_parser.add_argument(
+        "--fetch-hits", action="store_true", default=False, help="If set, enables fetching and storing of hit sequences"
+    )
+    hmmsearch_parser.set_defaults(func=hmmsearch_cli)
 
     # Arguments for sorting
     sort_parser = subparsers.add_parser("sort", help="sort search results by feature")
