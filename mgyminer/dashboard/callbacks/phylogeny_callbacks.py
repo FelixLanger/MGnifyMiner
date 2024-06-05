@@ -9,7 +9,8 @@ from pyfastx import Fasta
 from mgyminer.dashboard.utils.data_store import protein_store
 from mgyminer.plots.tree import plot_tree
 
-path = "/home/flx/PycharmProjects/multiminer/MultiMiner/prototyping/PA/mgnifyminer_results/hits.fa"
+# path = "/home/flx/PycharmProjects/multiminer/MultiMiner/prototyping/PA/mgnifyminer_results/hits.fa"
+path = "/home/flx/PycharmProjects/MGnifyMiner2/results/roxp_hits.fa"
 fasta = Fasta(path)
 
 
@@ -55,8 +56,8 @@ def update_phylogenetic_tree(n_clicks, show_domains, selected_data):
     constructor = DistanceTreeConstructor()
     tree = constructor.nj(dist_matrix)
 
-    # Prepare the domain architecture data if show_domains is True
-    if show_domains:
+    # Prepare the domain architecture data if show_domains is True and at least one protein has a domain architecture
+    if show_domains and not selected_dataframe["pfam_architecture"].isnull().all():
         domain_architecture = selected_dataframe.drop_duplicates(subset="target_name", keep="first")
     else:
         domain_architecture = None

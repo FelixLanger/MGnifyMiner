@@ -11,7 +11,9 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True
 
 from mgyminer.proteintable import ProteinTable
 
-data = "/home/flx/PycharmProjects/multiminer/MultiMiner/prototyping/PA/mgnifyminer_results/WBR49958_mgy70sim_70qcov.csv"
+# data = "/home/flx/PycharmProjects/multiminer/MultiMiner/prototyping/PA/mgnifyminer_results/WBR49958_mgy70sim_70qcov.csv"
+data = "/home/flx/PycharmProjects/MGnifyMiner2/results/I6PHU9_mgy.csv"
+
 protein_store.set_dataframe(ProteinTable(data))
 
 navbar = dbc.NavbarSimple(
@@ -37,4 +39,4 @@ app.layout = html.Div(
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
