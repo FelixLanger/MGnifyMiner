@@ -1,5 +1,6 @@
 import pandas as pd
 from helpers import calculate_text_md5
+from pandas.testing import assert_series_equal
 
 from mgyminer.proteintable import ProteinTable
 
@@ -110,6 +111,7 @@ def test_filter_list(results_metadata):
     filtered = protein_table.pick({"biomes": ["root"]})
     assert filtered.shape == (35, 30)
     assert filtered.columns.to_list() == protein_table.columns.to_list()
+    assert_series_equal(filtered["biomes"], protein_table["biomes"])
 
     filtered = protein_table.pick({"truncation": ["11"]})
     assert filtered.shape == (9, 30)

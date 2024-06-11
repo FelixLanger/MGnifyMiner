@@ -186,12 +186,7 @@ class ProteinTable(pd.DataFrame):
         dataframe = dataframe.reset_index(drop=True)
         exploded_df = dataframe.explode(column)
         filtered_df = exploded_df[exploded_df[column].isin(values)]
-        filtered_df["temp_index"] = filtered_df.index
-        filtered_df = filtered_df.groupby("temp_index")[column].agg(list)
-
-        result_df = dataframe.loc[filtered_df.index].copy()
-        result_df = result_df.assign(**{column: filtered_df})
-
+        result_df = dataframe.iloc[filtered_df.index.drop_duplicates()]
         return ProteinTable(result_df)
 
     def save(self, path, index=False):
