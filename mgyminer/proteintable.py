@@ -32,6 +32,12 @@ class ProteinTable(pd.DataFrame):
         super().__init__(data)
         self._membership_matrix = None
 
+    def __getitem__(self, key):
+        result = super().__getitem__(key)
+        if isinstance(result, pd.DataFrame):
+            return ProteinTable(result)
+        return result
+
     def _convert_special_columns(self, data):
         for col in self.SPECIAL_COLUMNS:
             if col in data.columns:
