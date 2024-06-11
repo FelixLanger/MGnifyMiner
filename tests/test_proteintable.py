@@ -50,6 +50,8 @@ def test_pick_min_max(results_metadata):
         "MGYP000574657128",
         "MGYP000238484700",
     ]
+    expected_df = protein_table.iloc[0:7]
+    pd.testing.assert_frame_equal(filtered, expected_df, check_like=True)
 
     filtered = protein_table.pick({"tlen": {"min": 1000}})
     assert len(filtered) == 9
@@ -85,11 +87,13 @@ def test_filter_list(results_metadata):
     assert filtered.shape == (5, 30)
     assert filtered.columns.to_list() == protein_table.columns.to_list()
     assert filtered.unique_hits.tolist() == ["MGYP000574657128", "MGYP000238484700"]
+    assert isinstance(filtered, ProteinTable)
 
     filtered = protein_table.pick({"assemblies": ["ERZ650666", "ERZ795000"]})
     assert filtered.shape == (6, 30)
     assert filtered.columns.to_list() == protein_table.columns.to_list()
     assert filtered.unique_hits.tolist() == ["MGYP000574657128", "MGYP000238484700", "MGYP001204071612"]
+    assert isinstance(filtered, ProteinTable)
 
     filtered = protein_table.pick({"biomes": [133, 106, 4, 62]})
     assert filtered.shape == (13, 30)
@@ -106,6 +110,7 @@ def test_filter_list(results_metadata):
         "MGYP000849755858",
         "MGYP000983906205",
     }
+    assert isinstance(filtered, ProteinTable)
 
     # # All proteins should have at least "root:" as biome
     filtered = protein_table.pick({"biomes": ["root"]})
@@ -135,6 +140,14 @@ def test_filter_combination(results_metadata):
     assert len(filtered) == 10
 
 
+def test_domain_filter(results_metadata):
+    protein_table = ProteinTable(results_metadata)
+    filtered = protein_table.pick({"pfam_architecture": ["PF00001", "PF00002"]})
+    assert isinstance(filtered, ProteinTable)
+    expected_df = protein_table.iloc[[19, 34]]
+    pd.testing.assert_frame_equal(filtered, expected_df, check_like=True)
+
+
 def test_save(results_metadata, tmp_path):
     outfile = tmp_path / "results.csv"
     in_hash = calculate_text_md5(results_metadata)
@@ -153,3 +166,23 @@ def test_value_counts_nested():
 
     df = ProteinTable(pd.DataFrame({"lists_column": [[1, 2, 3], None, [], [4]]}))
     assert df.value_counts_nested("lists_column") == 4
+
+
+def test__string_filter():
+    test_data = {"id": [1, 2, 3, 4, 5], "column": ["a-b-c", "b-d", "a-e", "c-f", "b"]}
+    test_df = pd.DataFrame(test_data).set_index("id")
+    test_df = ProteinTable(test_df)
+
+    # Test case 1: Filter with a single string value
+    filtered_df = test_df._string_filter("column", "a")
+    expected_result = pd.DataFrame({"id": [1, 3], "column": ["a-b-c", "a-e"]}).set_index("id")
+    pd.testing.assert_frame_equal(filtered_df, expected_result)
+
+    # Test case 2: Filter with a list of string values
+    filtered_df = test_df._string_filter("column", ["a", "c"])
+    expected_result = pd.DataFrame({"id": [1, 3, 4], "column": ["a-b-c", "a-e", "c-f"]}).set_index("id")
+    pd.testing.assert_frame_equal(filtered_df, expected_result)
+
+    # Test case 3: Filter with no matches
+    filtered_df = test_df._string_filter("column", "x")
+    assert filtered_df.empty

@@ -138,38 +138,65 @@ class ProteinTable(pd.DataFrame):
         """
         Filters the ProteinTable based on specified conditions.
 
-        This method allows filtering of the ProteinTable's rows based on specified conditions for each column.
-        It supports two types of filters:
+        This method filters the rows of the ProteinTable based on the specified conditions for each column.
+        It supports three types of filters:
         1. Numeric range filters (using a dictionary with 'min' and/or 'max' keys).
         2. List-based filters (using a list of strings).
+        3. String-based filters (for the "pfam_architecture" column, using a list of strings).
+
+        The filtering is performed in the following order:
+        1. Numeric range filters are applied first using the `query` method.
+        2. List-based filters are then applied using the `_vectorised_list_filter` method.
+        3. If a filter for the "pfam_architecture" column is provided, it is applied last using the `_string_filter` method.
+
+        This order ensures that the most efficient operations are performed first, reducing the size of the DataFrame
+        as early as possible for better performance.
 
         Parameters:
-        filters (Dict[str, Any]): A dictionary where each key is a column name and each value is the condition for
-                                  filtering. The condition can be a dictionary (for numeric ranges) or a list of
-                                  strings (for list-based filtering).
+        filters (Dict[str, Any]): A dictionary where each key is a column name, and the value is the condition for
+                                  filtering. The condition can be a dictionary (for numeric ranges), a list of
+                                  strings (for list-based filtering), or a list of strings (for "pfam_architecture" filtering).
 
         Returns:
-        ProteinTable: A new ProteinTable that is filtered based on the specified conditions.
+        ProteinTable: A new ProteinTable instance that is filtered based on the specified conditions.
+
+        Example:
+        >>> subset_pt = protein_table.pick({
+        ...     "tlen": {"min": 200, "max": 300},
+        ...     "pfam_architecture": ["PF00155"],
+        ...     "biome": [353]
+        ... })
         """
+
         result_table = self
         query_conditions = []
 
-        for column, condition in filters.items():
-            if column in result_table.columns:
-                if isinstance(condition, dict):
-                    if "min" in condition:
-                        query_conditions.append(f'`{column}` >= {condition["min"]}')
-                    if "max" in condition:
-                        query_conditions.append(f'`{column}` <= {condition["max"]}')
-                elif isinstance(condition, list):
-                    if column in ["biome", "biomes"]:
-                        if all(isinstance(element, int) for element in condition):
-                            condition = [BIOMES[biome_id] for biome_id in condition]
-                        condition = biome_str_to_ids(condition, BIOMES)
-                    result_table = self._vectorised_list_filter(result_table, column, condition)
+        pfam_filter = filters.pop("pfam_architecture", None)
+        numeric_filters = {col: condition for col, condition in filters.items() if isinstance(condition, dict)}
+        list_filters = {col: condition for col, condition in filters.items() if isinstance(condition, list)}
 
-        query_string = " and ".join(query_conditions)
-        return ProteinTable(result_table.query(query_string) if query_conditions else result_table)
+        if numeric_filters:
+            range_conditions = []
+            for column, condition in numeric_filters.items():
+                if "min" in condition:
+                    range_conditions.append(f'`{column}` >= {condition["min"]}')
+                if "max" in condition:
+                    range_conditions.append(f'`{column}` <= {condition["max"]}')
+                query_conditions.extend(range_conditions)
+            query_string = " and ".join(query_conditions)
+            result_table = ProteinTable(result_table.query(query_string))
+
+        if list_filters:
+            for column, condition in list_filters.items():
+                if column == "biomes":
+                    if all(isinstance(element, int) for element in condition):
+                        condition = [BIOMES[biome_id] for biome_id in condition]
+                    condition = biome_str_to_ids(condition, BIOMES)
+                result_table = self._vectorised_list_filter(result_table, column, condition)
+
+        if pfam_filter:
+            result_table = result_table._string_filter("pfam_architecture", pfam_filter)
+        return ProteinTable(result_table)
 
     @staticmethod
     def _vectorised_list_filter(dataframe, column, values):
@@ -194,6 +221,12 @@ class ProteinTable(pd.DataFrame):
         filtered_df = exploded_df[exploded_df[column].isin(values)]
         result_df = dataframe.iloc[filtered_df.index.drop_duplicates()]
         return ProteinTable(result_df)
+
+    def _string_filter(self, column, values):
+        if isinstance(values, str):
+            values = [values]
+        mask = self[column].str.contains("|".join(values), na=False, case=False)
+        return self[mask]
 
     def save(self, path, index=False):
         """
