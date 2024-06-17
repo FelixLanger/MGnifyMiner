@@ -364,7 +364,7 @@ class ProteinTable(pd.DataFrame):
             pandas.DataFrame: A DataFrame containing the contig information.
         """
         bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
-        temp_table_name = f"tmp_contigs_{create_md5_hash(self['query_name'][0])[:16]}"
+        temp_table_name = f"tmp_contigs_{create_md5_hash(self['query_name'].iloc[0])[:16]}"
         mgyp_list = self.unique_hits
         bq_helper.create_temp_table_from_dataframe(pd.DataFrame({"mgyp": mgyp_list}), temp_table_name)
 
