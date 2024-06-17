@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from google.api_core import exceptions
 from google.cloud import bigquery
 
 
@@ -36,3 +37,14 @@ class BigQueryHelper:
         query_job = self.client.query(query)  # Start the query job
         results = query_job.result()  # Wait for the query to finish
         return results.to_dataframe()
+
+    def delete_table(self, table_name):
+        """
+        Deletes the specified table from the dataset.
+        """
+        table_reference = self.dataset.table(table_name)
+        try:
+            self.client.delete_table(table_reference)
+            print(f"Table '{table_name}' deleted successfully.")
+        except exceptions.NotFound:
+            print(f"Table '{table_name}' not found.")

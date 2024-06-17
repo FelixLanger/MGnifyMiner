@@ -364,29 +364,28 @@ class ProteinTable(pd.DataFrame):
             pandas.DataFrame: A DataFrame containing the contig information.
         """
         bq_helper = BigQueryHelper(**self._setup_bigquery_connection())
+        temp_table_name = f"tmp_contigs_{create_md5_hash(self['query_name'][0])[:16]}"
+        mgyp_list = self.unique_hits
+        bq_helper.create_temp_table_from_dataframe(pd.DataFrame({"mgyp": mgyp_list}), temp_table_name)
 
-        mgyps_list = self["target_name"]  # .apply(mgyp_to_id).unique().tolist()
-        mgyps_str = ", ".join([str(mgyp) for mgyp in mgyps_list])
         query = f"""
             SELECT
               md.mgyp AS mgyp,
               md.mgyc AS mgyc,
               md.complete AS protein_complete,
-              md.start AS start,
-              md.stop AS stop,
+              md.start_position AS start,
+              md.end_position AS stop,
               md.strand AS strand,
-              ct.length AS contig_length,
+              ct.contig_length AS contig_length,
               ass.accession AS assembly,
-              bm.id AS biome_id
+              bm.biome_id AS biome_id
             FROM `{bq_helper.dataset.dataset_id}.metadata` md
+            JOIN `{bq_helper.dataset.dataset_id}.{temp_table_name}` temp ON md.mgyp = temp.mgyp
             JOIN `{bq_helper.dataset.dataset_id}.contig` ct ON md.mgyc = ct.mgyc
             JOIN `{bq_helper.dataset.dataset_id}.assembly` ass ON ct.assembly_id = ass.assembly_id
-            JOIN `{bq_helper.dataset.dataset_id}.biome` bm ON ass.biome_id = bm.biome_id
-            WHERE md.mgyc IN (
-              SELECT mgyc
-              FROM `{bq_helper.dataset.dataset_id}.metadata`
-              WHERE mgyp IN ({mgyps_str})
-            );
+            JOIN `{bq_helper.dataset.dataset_id}.biome` bm ON ass.biome_id = bm.biome_id;
         """
+
         results_df = bq_helper.query_to_dataframe(query)
+        bq_helper.delete_table(temp_table_name)
         return results_df
