@@ -35,7 +35,12 @@ COLUMN_NAMES = [
 
 
 def format_number(number: float) -> str:
-    return f"{number:.1e}" if "e" in f"{number}" else str(round(number, 1))
+    if "e" in f"{number}":
+        return f"{number:.1e}"
+    elif number < 1:
+        return str(round(number, 4))
+    else:
+        return str(round(number, 1))
 
 
 def calculate_domain_coverage(sequence_length: int, domain: pyhmmer.plan7.Domain, digit: int = 1):

@@ -11,6 +11,11 @@ def test_format_number():
     assert format_number(9.000) == "9.0"
     assert format_number(1.2345) == "1.2"
     assert format_number(1.2345e-10) == "1.2e-10"
+    assert format_number(0.001) == "0.001"
+    assert format_number(0.0001) == "0.0001"
+    assert format_number(0.00001) == "1.0e-05"
+    assert format_number(0.05) == "0.05"
+    assert format_number(0.2349824) == "0.235"
 
 
 def test_calculate_domain_coverage():
