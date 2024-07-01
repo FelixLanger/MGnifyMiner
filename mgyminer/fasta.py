@@ -44,7 +44,7 @@ def fetch_sequences_cli(args):
     protein_table = ProteinTable(args.filter)
     seq_ids = protein_table.unique_hits
     if args.seqdb:
-        sequences = fetch_sequences(args.seqdb, seq_ids)
+        sequences = fetch_sequences(str(args.seqdb), seq_ids)
     else:
         raise ValueError("Sequence database (--seqdb) is required for exporting sequences.")
     sequences_to_fasta(sequences, args.output)
