@@ -3,7 +3,7 @@ import pyfastx
 from mgyminer.proteintable import ProteinTable
 
 
-def fetch_sequences(fasta_file, seq_ids):
+def fetch_sequences_from_fasta(fasta_file, seq_ids):
     """
     Fetch sequences from a FASTA file given a list of sequence IDs.
 
@@ -14,7 +14,7 @@ def fetch_sequences(fasta_file, seq_ids):
     Returns:
     A dictionary where keys are sequence IDs and values are sequences.
     """
-    fasta = pyfastx.Fasta(fasta_file, build_index=True)
+    fasta = pyfastx.Fasta(str(fasta_file), build_index=True)
     sequences = {}
 
     for seq_id in seq_ids:
@@ -27,12 +27,12 @@ def fetch_sequences(fasta_file, seq_ids):
     return sequences
 
 
-def sequences_to_fasta(sequences, output_file):
+def write_fasta(sequences, output_file):
     """
-    Export sequences to a new FASTA file.
+    Write sequences to a FASTA file.
 
     Parameters:
-    - sequences: A dictionary of sequences to export, where keys are sequence IDs and values are sequences.
+    - sequences: A dictionary of sequences to write, where keys are sequence IDs and values are sequences.
     - output_file: Path to the output FASTA file.
     """
     with open(output_file, "w") as f:
@@ -40,11 +40,29 @@ def sequences_to_fasta(sequences, output_file):
             f.write(f">{seq_id}\n{sequence}\n")
 
 
-def fetch_sequences_cli(args):
+def export_sequences(seqdb, seq_ids, output):
+    """
+    Fetch sequences from a FASTA file and export them to a new FASTA file.
+
+    Parameters:
+    - seqdb: Path to the input FASTA file.
+    - seq_ids: A list of sequence IDs to fetch.
+    - output: Path to the output FASTA file.
+    """
+    sequences = fetch_sequences_from_fasta(str(seqdb), seq_ids)
+    write_fasta(sequences, output)
+
+
+def export_sequences_cli(args):
+    """
+    CLI function to export sequences based on a protein table filter.
+
+    Parameters:
+    - args: Command-line arguments containing filter, seqdb, and output information.
+    """
+    if not args.seqdb:
+        raise ValueError("Sequence database (--seqdb) is required for exporting sequences.")
+
     protein_table = ProteinTable(args.filter)
     seq_ids = protein_table.unique_hits
-    if args.seqdb:
-        sequences = fetch_sequences(str(args.seqdb), seq_ids)
-    else:
-        raise ValueError("Sequence database (--seqdb) is required for exporting sequences.")
-    sequences_to_fasta(sequences, args.output)
+    export_sequences(args.seqdb, seq_ids, args.output)

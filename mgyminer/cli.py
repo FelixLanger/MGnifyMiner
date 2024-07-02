@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from mgyminer.config import config_cli
-from mgyminer.fasta import fetch_sequences_cli
+from mgyminer.fasta import export_sequences_cli
 from mgyminer.filter import (
     domain_filter,
     feat_filter,
@@ -279,7 +279,7 @@ def create_parser():
         required=True,
         help="Output location for protein sequences FASTA",
     )
-    export_parser.set_defaults(func=fetch_sequences_cli)
+    export_parser.set_defaults(func=export_sequences_cli)
 
     domain_parser = subparsers.add_parser("domain", help="filter target proteins by Pfam domains")
     domain_parser.add_argument(
