@@ -65,6 +65,7 @@ def create_parser():
     phmmer_parser.add_argument(
         "--fetch-hits", action="store_true", default=False, help="If set, enables fetching and storing of hit sequences"
     )
+    phmmer_parser.add_argument("--no-metadata", action="store_true", help="If set, suppresses fetching of metadata")
     phmmer_parser.set_defaults(func=phmmer_cli)
 
     # Arguments for Hmmsearch
@@ -98,6 +99,7 @@ def create_parser():
     hmmsearch_parser.add_argument(
         "--fetch-hits", action="store_true", default=False, help="If set, enables fetching and storing of hit sequences"
     )
+    hmmsearch_parser.add_argument("--no-metadata", action="store_true", help="If set, suppresses fetching of metadata")
     hmmsearch_parser.set_defaults(func=hmmsearch_cli)
 
     # Arguments for sorting

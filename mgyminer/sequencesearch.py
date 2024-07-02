@@ -131,7 +131,8 @@ def phmmer_cli(args):
     evalue = args.evalue
 
     hits = phmmer(db_file, query_file, cpus, E=evalue)
-    hits = hits.fetch_metadata("bigquery")
+    if not args.no_metadata:
+        hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:
         export_sequences(db_file, hits.unique_hits, output_file.with_suffix(".faa"))
@@ -171,8 +172,8 @@ def hmmsearch_cli(args):
     evalue = args.evalue
 
     hits = hmmsearch(db_file, query_file, cpus, E=evalue)
-    hits = hits.fetch_metadata("bigquery")
+    if not args.no_metadata:
+        hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:
         export_sequences(db_file, hits.unique_hits, output_file.with_suffix(".faa"))
-
