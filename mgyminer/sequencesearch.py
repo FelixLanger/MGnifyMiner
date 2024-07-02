@@ -7,6 +7,7 @@ import pyhmmer
 from pyhmmer.easel import Alphabet, SequenceFile
 from pyhmmer.plan7 import HMMFile
 
+from .fasta import export_sequences
 from .proteintable import ProteinTable
 
 COLUMN_NAMES = [
@@ -133,8 +134,7 @@ def phmmer_cli(args):
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:
-        fasta_filename = output_file.with_suffix(".faa")
-        hits.fetch_and_export_sequences(fasta_filename, database="bigquery")
+        export_sequences(db_file, hits.unique_hits, output_file.with_suffix(".faa"))
 
 
 def hmmsearch(
@@ -174,5 +174,5 @@ def hmmsearch_cli(args):
     hits = hits.fetch_metadata("bigquery")
     hits.save(output_file)
     if args.fetch_hits:
-        fasta_filename = output_file.with_suffix(".faa")
-        hits.fetch_and_export_sequences(fasta_filename, database="bigquery")
+        export_sequences(db_file, hits.unique_hits, output_file.with_suffix(".faa"))
+
