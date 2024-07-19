@@ -21,10 +21,11 @@ def create_genome_plot(
 
     data["start"] = data["start"].astype(int)
     data["stop"] = data["stop"].astype(int)
+    if data["strand"].dtypes == "object":
+        data["strand"] = data["strand"].map({"+": 1, "-": -1}).astype(int)
 
-    data["strand"] = data["strand"].map({"+": 1, "-": -1}).astype(int)
-
-    data = assign_levels(data)
+    # assign level based on how often the exact start stop combination is found
+    data["level"] = data.groupby(["start", "stop"]).cumcount()
 
     if not sequence_length:
         sequence_length = max(data["stop"])
@@ -151,12 +152,3 @@ def create_trace_data(
     ]
     xs = [x1, x1, head_base, x2, head_base, x1]
     return xs, ys
-
-
-def assign_levels(data):
-    start_events = pd.DataFrame({"position": data["start"], "change": 1, "index": data.index})
-    stop_events = pd.DataFrame({"position": data["stop"] + 1, "change": -1, "index": data.index})
-    events = pd.concat([start_events, stop_events]).sort_values(by=["position", "change"], ascending=[True, False])
-    events["active_intervals"] = events["change"].cumsum()
-    data["level"] = events.loc[events["change"] == 1, "active_intervals"] - 1
-    return data
