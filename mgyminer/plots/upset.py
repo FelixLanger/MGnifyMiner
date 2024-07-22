@@ -3,44 +3,49 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def upset_plot(df, sorted_x=False, sorted_y=False):
+def upset_plot(
+    df,
+    sorted_x=False,
+    sorted_y=True,
+    bar_color="#636EFA",
+    scatter_color="#000000",
+    background_color="white",
+    grid_color="#E0E0E0",
+    font_color="black",
+    font_size=12,
+    title=None,
+):
     combination_dict = calculate_intersection_set_counts(df)
     targets_per_query = calculate_targets_per_query(df)
 
-    if sorted_x:
-        sorted_combinations = sorted(combination_dict.items(), key=lambda x: x[1], reverse=True)
-    else:
-        sorted_combinations = list(combination_dict.items())
+    sorted_combinations = (
+        sorted(combination_dict.items(), key=lambda x: x[1], reverse=True)
+        if sorted_x
+        else list(combination_dict.items())
+    )
     sorted_combo_names = [item[0] for item in sorted_combinations]
 
-    if sorted_y:
-        sorted_queries = sorted(targets_per_query.items(), key=lambda x: x[1], reverse=True)
-    else:
-        sorted_queries = list(targets_per_query.items())
+    sorted_queries = (
+        sorted(targets_per_query.items(), key=lambda x: x[1], reverse=True)
+        if sorted_y
+        else list(targets_per_query.items())
+    )
     sorted_query_names = [item[0] for item in sorted_queries]
 
-    x = []
-    y = []
+    x = [combo for query in sorted_query_names for combo in sorted_combo_names if query in combo.split(", ")]
+    y = [query for query in sorted_query_names for combo in sorted_combo_names if query in combo.split(", ")]
 
-    for query in sorted_query_names:
-        for combo in sorted_combo_names:
-            if query in combo.split(", "):
-                x.append(combo)
-                y.append(query)
-
-    # Create a figure with two subplots
     fig = make_subplots(
         rows=2,
         cols=2,
         specs=[[{}, {}], [{}, {}]],
         shared_xaxes=True,
         shared_yaxes=True,
-        column_widths=[0.35, 0.65],
-        row_heights=[0.65, 0.35],
+        column_widths=[0.4, 0.6],
+        row_heights=[0.7, 0.3],
         vertical_spacing=0.02,
     )
 
-    # Add intersecting counts bar chart (upper right)
     fig.add_trace(
         go.Bar(
             x=sorted_combo_names,
@@ -48,9 +53,10 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
             text=[combination_dict[combo] for combo in sorted_combo_names],
             texttemplate="%{text:}",
             textposition="outside",
-            textfont_size=12,
+            textfont_size=font_size,
             textangle=-90,
             cliponaxis=False,
+            marker_color=bar_color,
             marker_line=dict(width=0.0),
             showlegend=False,
         ),
@@ -58,7 +64,6 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
         col=2,
     )
 
-    # Add absolute number of target_names bar chart (left)
     fig.add_trace(
         go.Bar(
             y=sorted_query_names,
@@ -66,10 +71,11 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
             text=[targets_per_query[query] for query in sorted_query_names],
             texttemplate="%{text:}",
             textposition="inside",
-            textfont_size=12,
+            textfont_size=font_size,
             textangle=0,
             cliponaxis=False,
             orientation="h",
+            marker_color=bar_color,
             marker_line=dict(width=0.0),
             showlegend=False,
         ),
@@ -86,8 +92,8 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
             name="Query Combinations",
             marker=dict(
                 line_width=0,
-                color="#000000",
-                line_color="#000000",
+                color=scatter_color,
+                line_color=scatter_color,
                 symbol="circle",
                 size=8,
             ),
@@ -101,10 +107,16 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
     for combo in sorted_combo_names:
         queries = [y[i] for i in range(len(x)) if x[i] == combo]
         if len(queries) > 1:
-            y_min = min(queries)
-            y_max = max(queries)
+            y_min, y_max = min(queries), max(queries)
             fig.add_shape(
-                type="line", x0=combo, x1=combo, y0=y_min, y1=y_max, line=dict(color="black", width=2), row=2, col=2
+                type="line",
+                x0=combo,
+                x1=combo,
+                y0=y_min,
+                y1=y_max,
+                line=dict(color=scatter_color, width=2),
+                row=2,
+                col=2,
             )
 
     # Add grey rows
@@ -147,8 +159,8 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
             mode="markers",
             marker=dict(
                 line_width=0,
-                color="#000000",
-                line_color="#000000",
+                color=scatter_color,
+                line_color=scatter_color,
                 symbol="circle",
                 size=15,
             ),
@@ -159,27 +171,26 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
     )
 
     fig.update_layout(
-        # height=800, width=1000,
-        uniformtext_minsize=12,
+        uniformtext_minsize=font_size,
         uniformtext_mode="show",
         barmode="group",
         bargap=0.2,
         bargroupgap=0.0,
         margin=dict(l=40, r=40, t=40, b=40),
         showlegend=False,
-        paper_bgcolor="white",
+        paper_bgcolor=background_color,
         plot_bgcolor="rgba(0, 0, 0, 0)",
         hovermode="closest",
-        font_color="black",
+        font_color=font_color,
+        title=title,
     )
 
-    # Update axes
     fig.update_xaxes(
         showticklabels=False,
         side="bottom",
         showline=True,
-        linecolor="#000000",
-        tickcolor="#000000",
+        linecolor=font_color,
+        tickcolor=font_color,
         zeroline=False,
         automargin=True,
         row=1,
@@ -193,11 +204,11 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
         showline=True,
         title="Intersection Size",
         title_standoff=5,
-        title_font_color="#000000",
-        linecolor="#000000",
-        gridcolor="#E0E0E0",
+        title_font_color=font_color,
+        linecolor=font_color,
+        gridcolor=grid_color,
         ticks="outside",
-        tickcolor="#000000",
+        tickcolor=font_color,
         zeroline=False,
         automargin=True,
         row=1,
@@ -209,15 +220,28 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
         side="top",
         showgrid=True,
         showline=True,
-        showticklabels=False,
+        showticklabels=True,
         title="Set Size",
         title_standoff=5,
-        title_font_color="#000000",
-        gridcolor="#E0E0E0",
-        linecolor="#000000",
+        title_font_color=font_color,
+        gridcolor=grid_color,
+        linecolor=font_color,
         ticks="outside",
-        tickcolor="#000000",
+        tickcolor=font_color,
         tickangle=-90,
+        zeroline=False,
+        automargin=True,
+        row=2,
+        col=1,
+        tickfont=dict(size=font_size),
+    )
+
+    fig.update_yaxes(
+        showticklabels=False,
+        side="right",
+        showline=True,
+        linecolor=font_color,
+        tickcolor=font_color,
         zeroline=False,
         automargin=True,
         row=2,
@@ -248,12 +272,12 @@ def upset_plot(df, sorted_x=False, sorted_y=False):
         showline=True,
         showgrid=False,
         showticklabels=True,
-        linecolor="#000000",
+        linecolor=font_color,
         ticks="outside",
         tickvals=np.arange(0, len(sorted_query_names)),
-        ticktext=[label[:15] for label in sorted_query_names],  # Limit label length
-        tickfont=dict(size=10),
-        tickcolor="#000000",
+        ticktext=[label[:15] for label in sorted_query_names],
+        tickfont=dict(size=font_size),
+        tickcolor=font_color,
         zeroline=False,
         automargin=True,
         row=2,
