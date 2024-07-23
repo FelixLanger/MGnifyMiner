@@ -369,18 +369,23 @@ class ProteinTable(pd.DataFrame):
         bq_helper.create_temp_table_from_dataframe(pd.DataFrame({"mgyp": mgyp_list}), temp_table_name)
 
         query = f"""
+            WITH temp_metadata AS (
+                SELECT DISTINCT md.mgyc
+                FROM `{bq_helper.dataset.dataset_id}.metadata` md
+                JOIN `{bq_helper.dataset.dataset_id}.{temp_table_name}` temp ON md.mgyp = temp.mgyp
+            )
             SELECT
-              md.mgyp AS mgyp,
-              md.mgyc AS mgyc,
-              md.complete AS protein_complete,
-              md.start_position AS start,
-              md.end_position AS stop,
-              md.strand AS strand,
-              ct.contig_length AS contig_length,
-              ass.accession AS assembly,
-              bm.biome_id AS biome_id
-            FROM `{bq_helper.dataset.dataset_id}.metadata` md
-            JOIN `{bq_helper.dataset.dataset_id}.{temp_table_name}` temp ON md.mgyp = temp.mgyp
+                md.mgyp AS mgyp,
+                md.mgyc AS mgyc,
+                md.complete AS protein_complete,
+                md.start_position AS start,
+                md.end_position AS stop,
+                md.strand AS strand,
+                ct.contig_length AS contig_length,
+                ass.accession AS assembly,
+                bm.biome_id AS biome
+            FROM temp_metadata tm
+            JOIN `{bq_helper.dataset.dataset_id}.metadata` md ON tm.mgyc = md.mgyc
             JOIN `{bq_helper.dataset.dataset_id}.contig` ct ON md.mgyc = ct.mgyc
             JOIN `{bq_helper.dataset.dataset_id}.assembly` ass ON ct.assembly_id = ass.assembly_id
             JOIN `{bq_helper.dataset.dataset_id}.biome` bm ON ass.biome_id = bm.biome_id;
